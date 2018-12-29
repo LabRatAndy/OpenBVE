@@ -71,6 +71,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EBO.cs" />
     <Compile Include="formOptions.cs">
       <SubType>Form</SubType>
     </Compile>
