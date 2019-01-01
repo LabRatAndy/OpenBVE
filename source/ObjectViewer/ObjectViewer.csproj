@@ -112,6 +112,7 @@
     <Compile Include="TextureManager.cs" />
     <Compile Include="Timers.cs" />
     <Compile Include="TrainManagerS.cs" />
+    <Compile Include="VAO.cs" />
     <Compile Include="VBO.cs" />
     <Compile Include="WorldS.cs" />
   </ItemGroup>
