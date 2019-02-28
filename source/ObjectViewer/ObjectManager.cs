@@ -12,9 +12,12 @@ namespace OpenBve
     {
 
         // unified objects
-	    internal abstract class UnifiedObject
+	    internal abstract class UnifiedObject : IDisposable
 	    {
 		    internal abstract void OptimizeObject(bool PreserveVerticies);
+            // generates the VAO, VBO and EBOs from the mesh
+            internal abstract void GenerateArrays();
+            public abstract void Dispose();
 	    }
 
         // static objects
