@@ -1,5 +1,5 @@
 ﻿using System;
-
+using OpenTK;
 
 namespace OpenBve
 {
@@ -25,5 +25,12 @@ namespace OpenBve
         }
 
     }
+    internal struct AssemblerVertex
+    {
+        internal OpenBveApi.Math.Vector3 coordinate;
+        internal OpenBveApi.Math.Vector3 Normal;
+        internal OpenBveApi.Math.Vector2 texture;
+    }
+
 
 }
