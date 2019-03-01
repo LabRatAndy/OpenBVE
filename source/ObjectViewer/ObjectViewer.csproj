@@ -81,6 +81,7 @@
     </Compile>
     <Compile Include="FunctionScripts.cs" />
     <Compile Include="Hosts.cs" />
+    <Compile Include="MeshArrays.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Parsers\AssimpObjParser.cs" />
     <Compile Include="Parsers\Generic\AssimpXParser.cs" />
