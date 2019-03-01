@@ -34,8 +34,52 @@ namespace OpenBve
             internal short GroupIndex;
             /// <summary>Whether the object is dynamic, i.e. not static.</summary>
             internal bool Dynamic;
+            // the VAO,VBO and EBOs
+            internal MeshArrays arrays;
 
-	        internal override void OptimizeObject(bool PreserveVertices)
+            internal override void GenerateArrays()
+            {
+                
+            }
+            private float[] AssembleVertex()
+            {
+                AssemblerVertex[] vertices = new AssemblerVertex[Mesh.Vertices.Length];
+                int n = 0;
+                while (n < Mesh.Vertices.Length)
+                {
+                    vertices[n].coordinate = Mesh.Vertices[n].Coordinates;
+                    vertices[n].texture = Mesh.Vertices[n].TextureCoordinates;
+                    n++;
+                }
+                n = 0;
+                while (n < Mesh.Faces.Length)
+                {
+                    int x = 0;
+                    while (x < Mesh.Faces[n].Vertices.Length)
+                    {
+                        vertices[Mesh.Faces[n].Vertices[x].Index].Normal = Mesh.Faces[n].Vertices[x].Normal;
+                        x++;
+                    }
+                    n++;                    
+                }
+                int sizeofarray = vertices.Length * 8;// 8 is number of float in a vertex
+                float[] vertexData = new float[sizeofarray];
+                n = 0;
+                while (n < vertices.Length)
+                {
+                    vertexData[n * 8] = (float)vertices[n].coordinate.X;
+                    vertexData[n * 8 + 1] = (float)vertices[n].coordinate.Y;
+                    vertexData[n * 8 + 2] = (float)vertices[n].coordinate.Z;
+                    vertexData[n * 8 + 3] = (float)vertices[n].Normal.X;
+                    vertexData[n * 8 + 4] = (float)vertices[n].Normal.Y;
+                    vertexData[n * 8 + 5] = (float)vertices[n].Normal.Z;
+                    vertexData[n * 8 + 6] = (float)vertices[n].texture.X;
+                    vertexData[n * 8 + 7] = (float)vertices[n].texture.Y;
+                    n++;
+                }
+                return vertexData;
+            }
+            internal override void OptimizeObject(bool PreserveVertices)
 	        {
 		        int v = Mesh.Vertices.Length;
 		        int m = Mesh.Materials.Length;
