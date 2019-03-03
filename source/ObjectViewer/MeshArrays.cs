@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenTK;
+using System.Collections.Generic;
 
 namespace OpenBve
 {
@@ -7,7 +8,7 @@ namespace OpenBve
     {
         VertexArrayObject vao;
         VertexBufferObject vertices;
-        ElementBufferObject ibo;
+        List<ElementBufferObject> ibo;
         internal VertexArrayObject VAO
         {
             get { return vao; }
@@ -18,10 +19,30 @@ namespace OpenBve
             get { return vertices; }
             set { vertices = value; }
         }
-        internal ElementBufferObject EBO
+        internal List<ElementBufferObject> EBOS
         {
             get { return ibo; }
             set { ibo = value; }
+        }
+        /// <summary>
+        /// Adds an ebo to the ebo list(face)
+        /// </summary>
+        /// <param name="ebo"> the EBO object to add</param>
+        /// <returns>the index in the list</returns>
+        internal int AddEbo(ElementBufferObject ebo)
+        {
+            if (ibo == null) ibo = new List<ElementBufferObject>();
+            ibo.Add(ebo);
+            return ibo.IndexOf(ebo);
+        }
+        /// <summary>
+        /// returns the ebo at the given index
+        /// </summary>
+        /// <param name="index">index of ebo to retrieve</param>
+        /// <returns>The EBO object</returns>
+        internal ElementBufferObject GetEBO(int index)
+        {
+            return ibo[index];
         }
 
     }
