@@ -83,6 +83,12 @@ namespace OpenBve
                 }
                 return vertexData;
             }
+            private void GetEBOData()
+            {
+                
+
+                
+            }
             internal override void OptimizeObject(bool PreserveVertices)
 	        {
 		        int v = Mesh.Vertices.Length;
