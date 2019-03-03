@@ -41,6 +41,10 @@ namespace OpenBve
             {
                 
             }
+            /// <summary>
+            /// extracts the data to build a VBO for the mesh
+            /// </summary>
+            /// <returns>float array with data for vbo</returns>
             private float[] AssembleVertex()
             {
                 AssemblerVertex[] vertices = new AssemblerVertex[Mesh.Vertices.Length];
