@@ -85,9 +85,23 @@ namespace OpenBve
             }
             private void GetEBOData()
             {
-                
-
-                
+                ushort[] materials = new ushort[Mesh.Faces.Length];
+                int n = 0;
+                while (n < Mesh.Faces.Length)
+                {
+                    // save the material index to materials array in the place of the meshface index
+                    materials[n] = Mesh.Faces[n].Material;
+                    int[] vertices = new int[Mesh.Faces[n].Vertices.Length];
+                    int m = 0;
+                    while(m < Mesh.Faces[n].Vertices.Length)
+                    {
+                        vertices[m] = Mesh.Faces[n].Vertices[m].Index;
+                        m++;
+                    }
+                    arrays.AddEbo(new ElementBufferObject(vertices));
+                    n++;
+                }
+                arrays.Materials = materials;
             }
             internal override void OptimizeObject(bool PreserveVertices)
 	        {
