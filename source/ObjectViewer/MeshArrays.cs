@@ -9,6 +9,7 @@ namespace OpenBve
         VertexArrayObject vao;
         VertexBufferObject vertices;
         List<ElementBufferObject> ibo;
+        ushort[] materials;
         internal VertexArrayObject VAO
         {
             get { return vao; }
@@ -23,6 +24,11 @@ namespace OpenBve
         {
             get { return ibo; }
             set { ibo = value; }
+        }
+        internal ushort[] Materials
+        {
+            get { return materials; }
+            set { materials = value; }
         }
         /// <summary>
         /// Adds an ebo to the ebo list(face)
