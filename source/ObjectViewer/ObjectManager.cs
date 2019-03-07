@@ -83,6 +83,10 @@ namespace OpenBve
                 }
                 return vertexData;
             }
+            /// <summary>
+            /// creates EBO objecs and adds them to arrays struct and gets materials and saves in materials array
+            /// the index of the materials array is the index of the face
+            /// </summary>
             private void GetEBOData()
             {
                 ushort[] materials = new ushort[Mesh.Faces.Length];
