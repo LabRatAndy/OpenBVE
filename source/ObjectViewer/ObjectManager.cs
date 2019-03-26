@@ -39,7 +39,36 @@ namespace OpenBve
 
             internal override void GenerateArrays()
             {
-                
+                VertexBufferObject vbo = new VertexBufferObject(AssembleVertex());
+                vbo.Bind();
+                if(Dynamic == true)
+                {
+                    //dynamic draw hint used
+                    vbo.BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.DynamicDraw);
+                }
+                else
+                {
+                    //static draw hint used as object is static
+                    vbo.BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.StaticDraw);
+                }
+                vbo.UnBind();
+                arrays.VBO = vbo;
+                vbo = null;
+                //create the EBOs
+                GetEBOData();
+                //buffer the EBO data
+                int n = 0;
+                while (n < arrays.EBOS.Count)
+                {
+                    if (Dynamic == true)
+                    {
+                        arrays.EBOS[n].BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.DynamicDraw);
+                    }
+                    else
+                    {
+                        arrays.EBOS[n].BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.StaticCopy);
+                    }
+                }
             }
             /// <summary>
             /// extracts the data to build a VBO for the mesh
@@ -106,6 +135,14 @@ namespace OpenBve
                     n++;
                 }
                 arrays.Materials = materials;
+            }
+            /// <summary>
+            /// constructs the VAO from the VBO and EBOs
+            /// </summary>
+            private void ConstructVAO()
+            {
+                arrays.VAO = new VertexArrayObject();
+                arrays.VAO.
             }
             internal override void OptimizeObject(bool PreserveVertices)
 	        {
