@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
 
 namespace OpenBve
@@ -12,6 +13,7 @@ namespace OpenBve
         private Attribute[] attributelist;
         private VertexBufferObject vbo = null;
         private ElementBufferObject ibo = null;
+        private List<ElementBufferObject> ibolist = null;
         private int attributecount = 0;
 
         /// <summary>
@@ -83,6 +85,14 @@ namespace OpenBve
             ibo.Bind();
         }
         /// <summary>
+        /// Adds EBO/IBO list to the VAO
+        /// </summary>
+        /// <param name="IBO">The list of EBOs/IBOs</param>
+        internal void SetIBO(List<ElementBufferObject>IBO)
+        {
+            ibolist = IBO;
+        }
+        /// <summary>
         /// Binds the VAO, activating it for use
         /// </summary>
         internal void Bind()
@@ -123,6 +133,10 @@ namespace OpenBve
         {
             vbo.Draw(first, count);
         }
+        internal void Draw(ushort ibotodraw)
+        {
+            ibolist[ibotodraw].Draw();
+        }
         /// <summary>
         /// Dispose method to clean up the VAO releasing the openGL VAO 
         /// </summary>
@@ -131,6 +145,13 @@ namespace OpenBve
             if (ibo != null)
             {
                 ibo.Dispose();
+            }
+            if (ibolist != null)
+            {
+                foreach(ElementBufferObject ibo in ibolist)
+                {
+                    ibo.Dispose();
+                }
             }
             if (vbo != null)
             {
@@ -148,6 +169,13 @@ namespace OpenBve
             if (ibo != null)
             {
                 ibo.Dispose();
+            }
+            if (ibolist != null)
+            {
+                foreach(ElementBufferObject ibo in ibolist)
+                {
+                    ibo.Dispose();
+                }
             }
             if (vbo != null)
             {
