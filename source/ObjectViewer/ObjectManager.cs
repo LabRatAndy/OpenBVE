@@ -36,7 +36,15 @@ namespace OpenBve
             internal bool Dynamic;
             // the VAO,VBO and EBOs
             internal MeshArrays arrays;
-
+            public override void Dispose()
+            {
+                arrays.VAO.Dispose();
+                GC.SuppressFinalize(this);
+            }
+            ~StaticObject()
+            {
+                arrays.VAO.Dispose();
+            }
             internal override void GenerateArrays()
             {
                 VertexBufferObject vbo = new VertexBufferObject(AssembleVertex());
@@ -69,6 +77,7 @@ namespace OpenBve
                         arrays.EBOS[n].BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.StaticCopy);
                     }
                 }
+                ConstructVAO();
             }
             /// <summary>
             /// extracts the data to build a VBO for the mesh
@@ -142,7 +151,25 @@ namespace OpenBve
             private void ConstructVAO()
             {
                 arrays.VAO = new VertexArrayObject();
-                arrays.VAO.
+                arrays.VAO.Bind();
+                // bind and add vbo
+                arrays.VBO.Bind();
+                arrays.VAO.SetVBO(arrays.VBO);
+                //create, add and set the attributes
+                Attribute coordinates = new Attribute("Coordinates", 3 * sizeof(float), 0, 8 * sizeof(float), 0, OpenTK.Graphics.OpenGL.VertexAttribPointerType.Float, false);
+                Attribute normal = new Attribute("Normal", 3 * sizeof(float), 3 * sizeof(float), 8 * sizeof(float), 1, OpenTK.Graphics.OpenGL.VertexAttribPointerType.Float, false);
+                Attribute textcoords = new Attribute("TexCoords", 3 * sizeof(float), 6 * sizeof(float), 8 * sizeof(float), 2, OpenTK.Graphics.OpenGL.VertexAttribPointerType.Float, false);
+                arrays.VAO.AddAttribute(0, coordinates);
+                arrays.VAO.AddAttribute(1, normal);
+                arrays.VAO.AddAttribute(2, textcoords);
+                arrays.VAO.SetAttributes();
+                // bind ebo and add the list
+                foreach(ElementBufferObject ibo in arrays.EBOS)
+                {
+                    ibo.Bind();
+                }
+                arrays.VAO.SetIBO(arrays.EBOS);
+                arrays.VAO.UnBind();
             }
             internal override void OptimizeObject(bool PreserveVertices)
 	        {
