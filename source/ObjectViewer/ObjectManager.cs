@@ -2147,6 +2147,7 @@ namespace OpenBve
             {
                 if (Objects[i] != null && !Objects[i].Dynamic)
                 {
+                    Objects[i].GenerateArrays();
                     ObjectsSortedByStart[n] = i;
                     ObjectsSortedByEnd[n] = i;
                     a[n] = Objects[i].StartingDistance;
