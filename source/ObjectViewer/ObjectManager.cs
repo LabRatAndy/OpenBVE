@@ -852,7 +852,15 @@ namespace OpenBve
         internal class AnimatedObjectCollection : UnifiedObject
         {
             internal AnimatedObject[] Objects;
-	        internal override void OptimizeObject(bool PreserveVerticies)
+            public override void Dispose()
+            {
+                throw new NotImplementedException();
+            }
+            internal override void GenerateArrays()
+            {
+                throw new NotImplementedException();
+            }
+            internal override void OptimizeObject(bool PreserveVerticies)
 	        {
 		        for (int i = 0; i < Objects.Length; i++)
 		        {
