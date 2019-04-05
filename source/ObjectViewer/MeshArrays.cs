@@ -50,7 +50,6 @@ namespace OpenBve
         {
             return ibo[index];
         }
-
     }
     internal struct AssemblerVertex
     {
