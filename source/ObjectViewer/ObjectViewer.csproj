@@ -93,6 +93,7 @@
     <Compile Include="Parsers\WavefrontObjParser.cs" />
     <Compile Include="Plugins.cs" />
     <Compile Include="Renderer.Strings.cs" />
+    <Compile Include="ShaderManager.cs" />
     <Compile Include="ShaderS.cs" />
     <Compile Include="System\GameWindow.cs" />
     <Compile Include="ObjectManager.cs" />
