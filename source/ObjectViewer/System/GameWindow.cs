@@ -11,6 +11,7 @@ namespace OpenBve
         public ObjectViewer(int width, int height, GraphicsMode currentGraphicsMode, string openbve,
             GameWindowFlags @default) : base(width, height, currentGraphicsMode, openbve, @default)
         {
+            shaderMGR = ShaderManager.Instance;
             try
             {
                 System.Drawing.Icon ico = new System.Drawing.Icon("data\\icon.ico");
@@ -20,7 +21,7 @@ namespace OpenBve
             {
             }
         }
-        
+        private ShaderManager shaderMGR;
         private static double ReducedModeEnteringTime = 0;
         
         private static double RotateXSpeed = 0.0;
@@ -292,6 +293,7 @@ namespace OpenBve
 
         protected override void OnLoad(EventArgs e)
         {
+            LoadShaders();
             KeyDown += Program.KeyDown;
             KeyUp += Program.KeyUp;
             MouseDown += Program.MouseEvent;
@@ -332,6 +334,20 @@ namespace OpenBve
             ObjectManager.FinishCreatingObjects();
             ObjectManager.UpdateVisibility(0.0, true);
             ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
+        }
+        private void LoadShaders()
+        {
+            if(!System.IO.File.Exists("@/assets/shaders/default.vert"))
+            {
+                // just exit for the minute shader is not found need better way of handleing this
+                Exit();
+            }
+            if(! System.IO.File.Exists("@/assets/shaders/default.frag"))
+            {
+                Exit();
+            }
+            Shader loadedShader = new Shader("@/assets/shaders/default.vert", "@/assets/shaders/default.frag");
+            shaderMGR.AddShader(loadedShader, "default");
         }
     }
 }
