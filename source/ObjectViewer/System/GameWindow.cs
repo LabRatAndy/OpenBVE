@@ -30,12 +30,18 @@ namespace OpenBve
         private static double MoveXSpeed = 0.0;
         private static double MoveYSpeed = 0.0;
         private static double MoveZSpeed = 0.0;
-        protected override void OnRenderFrame(FrameEventArgs e)
+        //transform matrix for shaders
+        private Matrix4 model;
+        private Matrix4 view;
+        private Matrix4 projection;
+
+        //moving what looks like non rendering code to here from RenderFrame
+        protected override void OnUpdateFrame(FrameEventArgs e)
         {
             Program.MouseMovement();
             double timeElapsed = CPreciseTimer.GetElapsedTime();
             DateTime time = DateTime.Now;
-            Game.SecondsSinceMidnight = (double)(3600 * time.Hour + 60 * time.Minute + time.Second) + 0.001 * (double)time.Millisecond;
+            Game.SecondsSinceMidnight = (3600 * time.Hour + 60 * time.Minute + time.Second) + 0.001 * time.Millisecond;
             ObjectManager.UpdateAnimatedWorldObjects(timeElapsed, false);
             if (Program.ReducedMode)
             {
@@ -78,9 +84,9 @@ namespace OpenBve
             {
                 double cosa = Math.Cos(RotateXSpeed * timeElapsed);
                 double sina = Math.Sin(RotateXSpeed * timeElapsed);
-				World.AbsoluteCameraDirection.Rotate(Vector3.Down, cosa, sina);
-	            World.AbsoluteCameraUp.Rotate(Vector3.Down, cosa, sina);
-	            World.AbsoluteCameraSide.Rotate(Vector3.Down, cosa, sina);
+                World.AbsoluteCameraDirection.Rotate(Vector3.Down, cosa, sina);
+                World.AbsoluteCameraUp.Rotate(Vector3.Down, cosa, sina);
+                World.AbsoluteCameraSide.Rotate(Vector3.Down, cosa, sina);
                 keep = true;
             }
             // rotate y
@@ -114,8 +120,8 @@ namespace OpenBve
             {
                 double cosa = Math.Cos(RotateYSpeed * timeElapsed);
                 double sina = Math.Sin(RotateYSpeed * timeElapsed);
-				World.AbsoluteCameraDirection.Rotate(World.AbsoluteCameraSide, cosa, sina);
-	            World.AbsoluteCameraUp.Rotate(World.AbsoluteCameraSide, cosa, sina);
+                World.AbsoluteCameraDirection.Rotate(World.AbsoluteCameraSide, cosa, sina);
+                World.AbsoluteCameraUp.Rotate(World.AbsoluteCameraSide, cosa, sina);
                 keep = true;
             }
             // move x
@@ -255,7 +261,7 @@ namespace OpenBve
             {
                 if (keep)
                 {
-                    ReducedModeEnteringTime =3.0;
+                    ReducedModeEnteringTime = 3.0;
                 }
                 else if (ReducedModeEnteringTime <= 0)
                 {
@@ -272,14 +278,17 @@ namespace OpenBve
             }
             if (updatelight)
             {
-               Renderer.OptionAmbientColor.R = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative * (2.0 - Program.LightingRelative));
-               Renderer.OptionAmbientColor.G = (byte)Math.Round(32.0 + 128.0 * 0.5 * (Program.LightingRelative + Program.LightingRelative * (2.0 - Program.LightingRelative)));
+                Renderer.OptionAmbientColor.R = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative * (2.0 - Program.LightingRelative));
+                Renderer.OptionAmbientColor.G = (byte)Math.Round(32.0 + 128.0 * 0.5 * (Program.LightingRelative + Program.LightingRelative * (2.0 - Program.LightingRelative)));
                 Renderer.OptionAmbientColor.B = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative);
                 Renderer.OptionDiffuseColor.R = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative);
                 Renderer.OptionDiffuseColor.G = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative);
                 Renderer.OptionDiffuseColor.B = (byte)Math.Round(32.0 + 128.0 * Math.Sqrt(Program.LightingRelative));
                 Renderer.InitializeLighting();
             }
+        }
+        protected override void OnRenderFrame(FrameEventArgs e)
+        {
             Renderer.RenderScene();
             SwapBuffers();
         }
