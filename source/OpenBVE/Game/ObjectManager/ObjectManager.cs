@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenBveApi.Interface;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
 using OpenBveApi.World;
@@ -37,9 +38,21 @@ namespace OpenBve
 
 		internal static int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition)
 		{
-			return CreateStaticObject(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, BlockLength, TrackPosition, 1.0, false);
+			return CreateStaticObject(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, BlockLength, TrackPosition, 1.0);
 		}
-		internal static int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness, bool DuplicateMaterials)
+
+		internal static int CreateStaticObject(UnifiedObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
+		{
+			StaticObject obj = (StaticObject) Prototype;
+			if (obj == null)
+			{
+				Interface.AddMessage(MessageType.Error, false, "Attempted to use an animated object where only static objects are allowed.");
+				return -1;
+			}
+			return CreateStaticObject(obj, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
+		}
+
+		internal static int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
 		{
 			if (Prototype == null)
 			{
@@ -51,24 +64,24 @@ namespace OpenBve
 				Array.Resize<StaticObject>(ref Objects, Objects.Length << 1);
 			}
 			Objects[a] = new StaticObject();
-			Objects[a].ApplyData(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness, DuplicateMaterials);
+			Objects[a].ApplyData(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
 			for (int i = 0; i < Prototype.Mesh.Faces.Length; i++)
 			{
-				switch (Prototype.Mesh.Faces[i].Flags & World.MeshFace.FaceTypeMask)
+				switch (Prototype.Mesh.Faces[i].Flags & MeshFace.FaceTypeMask)
 				{
-					case World.MeshFace.FaceTypeTriangles:
+					case MeshFace.FaceTypeTriangles:
 						Game.InfoTotalTriangles++;
 						break;
-					case World.MeshFace.FaceTypeTriangleStrip:
+					case MeshFace.FaceTypeTriangleStrip:
 						Game.InfoTotalTriangleStrip++;
 						break;
-					case World.MeshFace.FaceTypeQuads:
+					case MeshFace.FaceTypeQuads:
 						Game.InfoTotalQuads++;
 						break;
-					case World.MeshFace.FaceTypeQuadStrip:
+					case MeshFace.FaceTypeQuadStrip:
 						Game.InfoTotalQuadStrip++;
 						break;
-					case World.MeshFace.FaceTypePolygon:
+					case MeshFace.FaceTypePolygon:
 						Game.InfoTotalPolygon++;
 						break;
 				}
@@ -84,16 +97,8 @@ namespace OpenBve
 			{
 				Array.Resize<StaticObject>(ref Objects, Objects.Length << 1);
 			}
-			Objects[a] = new StaticObject
-			{
-				Mesh =
-				{
-					Faces = new World.MeshFace[] {},
-					Materials = new World.MeshMaterial[] {},
-					Vertices = new VertexTemplate[] {}
-				},
-				Dynamic = true
-			};
+
+			Objects[a] = new StaticObject { Dynamic = true };
 			ObjectsUsed++;
 			return a;
 		}

@@ -1,4 +1,4 @@
-﻿// ╔═════════════════════════════════════════════════════════════╗
+// ╔═════════════════════════════════════════════════════════════╗
 // ║ Program.cs for the Route Viewer                             ║
 // ╠═════════════════════════════════════════════════════════════╣
 // ║ This file cannot be used in the openBVE main program.       ║
@@ -11,6 +11,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.Windows.Forms;
 using OpenBveApi.FileSystem;
+using OpenBveApi.Textures;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -22,7 +23,7 @@ namespace OpenBve {
 	internal static class Program {
 
 		// system
-		internal static bool CurrentlyRunOnMono = false;
+		private static bool CurrentlyRunOnMono = false;
 		internal static FileSystem FileSystem = null;
 
 		internal static bool CpuReducedMode = false;
@@ -48,7 +49,7 @@ namespace OpenBve {
 		internal static GraphicsMode currentGraphicsMode;
 
 		// mouse
-		internal static int MouseButton;
+		private static int MouseButton;
 
 		/// <summary>The host API used by this program.</summary>
 		internal static Host CurrentHost = null;
@@ -96,6 +97,9 @@ namespace OpenBve {
 				}
 			}
 			Options.LoadOptions();
+			var options = new ToolkitOptions();
+			options.Backend = PlatformBackend.PreferX11;
+			Toolkit.Init(options);
 			Interface.CurrentOptions.UseSound = true;
 			Interface.CurrentOptions.ObjectOptimizationBasicThreshold = 1000;
 			Interface.CurrentOptions.ObjectOptimizationFullThreshold = 250;
@@ -110,7 +114,6 @@ namespace OpenBve {
 			processCommandLineArgs = true;
 			currentGameWindow.Run();
 			//Unload
-			TextureManager.UnuseAllTextures();
 			Sounds.Deinitialize();
 		}
 
@@ -142,10 +145,10 @@ namespace OpenBve {
 
 		// load route
 		internal static bool LoadRoute() {
+			
 			CurrentStation = -1;
 			Game.Reset();
 			Renderer.Initialize();
-			Fonts.SmallFont = new Fonts.OpenGlFont(FontFamily.GenericSansSerif, 12.0f);
 			UpdateViewport();
 			bool result;
 			try {
@@ -159,6 +162,7 @@ namespace OpenBve {
 			}
 			Renderer.InitializeLighting();
 			ObjectManager.InitializeVisibility();
+			Textures.UnloadAllTextures();
 			return result;
 		}
 
@@ -199,8 +203,7 @@ namespace OpenBve {
 				Renderer.RenderScene(0.0);
 				Program.currentGameWindow.SwapBuffers();
 				World.CameraAlignment a = World.CameraCurrentAlignment;
-				TextureManager.ClearTextures();
-				Fonts.SmallFont = new Fonts.OpenGlFont(FontFamily.GenericSansSerif, 12.0f);
+				Textures.UnloadAllTextures();
 				if (Program.LoadRoute())
 				{
 					World.CameraCurrentAlignment = a;
@@ -299,19 +302,20 @@ namespace OpenBve {
 				case Key.F5:
 					if (CurrentRoute != null && CurrentlyLoading == false)
 					{
+						Bitmap bitmap = null;
 						CurrentlyLoading = true;
 						Renderer.OptionInterface = false;
 						if (!Interface.CurrentOptions.LoadingBackground)
 						{
 							Renderer.RenderScene(0.0);
 							currentGameWindow.SwapBuffers();
-							Bitmap bitmap = new Bitmap(Renderer.ScreenWidth, Renderer.ScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+							bitmap = new Bitmap(Renderer.ScreenWidth, Renderer.ScreenHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 							BitmapData bData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
 							GL.ReadPixels(0, 0, Renderer.ScreenWidth, Renderer.ScreenHeight, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bData.Scan0);
 							bitmap.UnlockBits(bData);
 							bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
-							Renderer.TextureLoadingBkg = TextureManager.RegisterTexture(bitmap, false);
-							bitmap.Dispose();
+							Renderer.TextureLoadingBkg = Textures.RegisterTexture(bitmap, new TextureParameters(null, null));
+							
 						}
 						World.CameraAlignment a = World.CameraCurrentAlignment;
 						if (LoadRoute())
@@ -327,7 +331,12 @@ namespace OpenBve {
 						
 						CurrentlyLoading = false;
 						Renderer.OptionInterface = true;
-						TextureManager.UnregisterTexture(ref Renderer.TextureLoadingBkg);
+						Textures.UnloadTexture(Renderer.TextureLoadingBkg);
+						if (bitmap != null)
+						{
+							bitmap.Dispose();
+						}
+						
 					}
 					break;
 				case Key.F7:

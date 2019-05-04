@@ -41,13 +41,32 @@ namespace OpenBve
 			/// <summary>The origin vector for the arrival and departure sounds </summary>
 			internal Vector3 SoundOrigin;
 			/// <summary>The sound buffer to be played when the train arrives at this station</summary>
-			internal Sounds.SoundBuffer ArrivalSoundBuffer;
+			internal OpenBveApi.Sounds.SoundHandle ArrivalSoundBuffer;
 			/// <summary>The sound buffer to be played before the doors close pre-departure</summary>
-			internal Sounds.SoundBuffer DepartureSoundBuffer;
+			internal OpenBveApi.Sounds.SoundHandle DepartureSoundBuffer;
 			/// <summary>The safety system in use from this station onwards</summary>
 			internal SafetySystem SafetySystem;
 			/// <summary>The available stop points for this station</summary>
 			internal StationStop[] Stops;
+
+			/// <summary>Gets the index of the stop corresponding to the train's number of cars</summary>
+			/// <param name="Cars">The number of cars the train has</param>
+			internal int GetStopIndex(int Cars)
+			{
+				int j = -1;
+				for (int i = Stops.Length - 1; i >= 0; i--)
+				{
+					if (Cars <= Stops[i].Cars | Stops[i].Cars == 0)
+					{
+						j = i;
+					}
+				}
+				if (j == -1)
+				{
+					return Stops.Length - 1;
+				}
+				return j;
+			}
 		}
 		internal static Station[] Stations = new Station[] { };
 
@@ -56,25 +75,6 @@ namespace OpenBve
 		/// <summary>The start time at the initial station, if set via command-line arguments</summary>
 		internal static double InitialStationTime = -1;
 
-		/// <summary>Gets the index of the stop corresponding to the train's number of cars</summary>
-		/// <param name="StationIndex">The index of the station in the stations array</param>
-		/// <param name="Cars">The number of cars the train has</param>
-		internal static int GetStopIndex(int StationIndex, int Cars)
-		{
-			int j = -1;
-			for (int i = Stations[StationIndex].Stops.Length - 1; i >= 0; i--)
-			{
-				if (Cars <= Stations[StationIndex].Stops[i].Cars | Stations[StationIndex].Stops[i].Cars == 0)
-				{
-					j = i;
-				}
-			}
-			if (j == -1)
-			{
-				return Stations[StationIndex].Stops.Length - 1;
-			}
-			return j;
-		}
 		/// <summary>Indicates whether the player's train stops at a station.</summary>
 		internal static bool PlayerStopsAtStation(int StationIndex)
 		{

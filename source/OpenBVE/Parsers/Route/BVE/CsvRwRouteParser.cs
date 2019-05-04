@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Path = OpenBveApi.Path;
@@ -8,6 +8,7 @@ using OpenBveApi.Runtime;
 using OpenBveApi.Objects;
 using OpenBveApi.Interface;
 using OpenBveApi.Trains;
+using OpenBve.SignalManager;
 
 namespace OpenBve {
 	internal partial class CsvRwRouteParser {
@@ -61,7 +62,7 @@ namespace OpenBve {
 				Data.Blocks[0].BrightnessChanges = new Brightness[] {};
 				Data.Blocks[0].Fog.Start = Game.NoFogStart;
 				Data.Blocks[0].Fog.End = Game.NoFogEnd;
-				Data.Blocks[0].Fog.Color = new Color24(128, 128, 128);
+				Data.Blocks[0].Fog.Color = Color24.Grey;
 				Data.Blocks[0].Cycle = new int[] {-1};
 				Data.Blocks[0].RailCycles = new RailCycle[1];
 				Data.Blocks[0].RailCycles[0].RailCycleIndex = -1;
@@ -82,27 +83,23 @@ namespace OpenBve {
 				Data.Markers = new Marker[] {};
 				Data.RequestStops = new StopRequest[] { };
 				string PoleFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Poles");
-				Data.Structure.Poles = new ObjectManager.UnifiedObject[][]
+				Data.Structure.Poles = new UnifiedObject[][]
 				{
-					new ObjectManager.UnifiedObject[]
+					new UnifiedObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_1.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_1.csv"), System.Text.Encoding.UTF8, false)
 					},
-					new ObjectManager.UnifiedObject[]
+					new UnifiedObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_2.csv"), System.Text.Encoding.UTF8, false)
 					},
-					new ObjectManager.UnifiedObject[]
+					new UnifiedObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_3.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_3.csv"), System.Text.Encoding.UTF8, false)
 					},
-					new ObjectManager.UnifiedObject[]
+					new UnifiedObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_4.csv"), System.Text.Encoding.UTF8, false)
 					}
 				};
 				Data.Structure.RailObjects = new ObjectDictionary();
@@ -136,162 +133,119 @@ namespace OpenBve {
 				Data.Signals = new SignalData[7];
 				Data.Signals[3] = new CompatibilitySignalData(new int[] {0, 2, 4}, new ObjectManager.StaticObject[]
 				{
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false)
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8, false)
 				});
 				Data.Signals[4] = new CompatibilitySignalData(new int[] {0, 1, 2, 4}, new ObjectManager.StaticObject[]
 				{
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false)
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8, false)
 				});
 				Data.Signals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4}, new ObjectManager.StaticObject[]
 				{
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false),
-					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8,
-						ObjectLoadMode.Normal, false, false, false)
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8, false),
+					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false)
 				});
 				Data.Signals[6] = new CompatibilitySignalData(new int[] {0, 3, 4}, new ObjectManager.StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"),
-						Encoding, ObjectLoadMode.Normal, false, false, false),
+						System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_3.csv"),
-						Encoding, ObjectLoadMode.Normal, false, false, false),
+						System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_4.csv"),
-						Encoding, ObjectLoadMode.Normal, false, false, false)
+						System.Text.Encoding.UTF8, false)
 				});
 				// compatibility signals
 				Data.CompatibilitySignals = new CompatibilitySignalData[9];
 				Data.CompatibilitySignals[0] = new CompatibilitySignalData(new int[] {0, 2},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2a_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2a_2.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[1] = new CompatibilitySignalData(new int[] {0, 4},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2b_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2b_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[2] = new CompatibilitySignalData(new int[] {0, 2, 4},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[3] = new CompatibilitySignalData(new int[] {0, 1, 2, 4},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[4] = new CompatibilitySignalData(new int[] {0, 2, 3, 4},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_3.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_3.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[6] = new CompatibilitySignalData(new int[] {0, 2, 3, 4, 5},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5b_5.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5b_5.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[7] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4, 5},
 					new ObjectManager.StaticObject[]
 					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_0.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_1.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_2.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_3.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_4.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false),
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_5.csv"), System.Text.Encoding.UTF8,
-							ObjectLoadMode.Normal, false, false, false)
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_0.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_1.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_2.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_3.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_4.csv"), System.Text.Encoding.UTF8, false),
+						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_5.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[8] = new CompatibilitySignalData(new int[] {0, 3, 4},
 					new ObjectManager.StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"),
-							Encoding, ObjectLoadMode.Normal, false, false, false),
+							System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_3.csv"),
-							Encoding, ObjectLoadMode.Normal, false, false, false),
+							System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_4.csv"),
-							Encoding, ObjectLoadMode.Normal, false, false, false)
+							System.Text.Encoding.UTF8, false)
 					});
 				// game data
-				Game.Sections = new Game.Section[1];
-				Game.Sections[0].Aspects = new Game.SectionAspect[]
-				{new Game.SectionAspect(0, 0.0), new Game.SectionAspect(4, double.PositiveInfinity)};
+				Game.Sections = new SignalManager.Section[1];
+				Game.Sections[0].Aspects = new SectionAspect[]
+				{new SectionAspect(0, 0.0), new SectionAspect(4, double.PositiveInfinity)};
 				Game.Sections[0].CurrentAspect = 0;
 				Game.Sections[0].NextSection = -1;
 				Game.Sections[0].PreviousSection = -1;
 				Game.Sections[0].StationIndex = -1;
 				Game.Sections[0].TrackPosition = 0;
-				Game.Sections[0].Trains = new TrainManager.Train[] {};
+				Game.Sections[0].Trains = new AbstractTrain[] {};
 
 				/*
 				 * These are the speed limits for the default Japanese signal aspects, and in most cases will be overwritten
@@ -329,677 +283,11 @@ namespace OpenBve {
 			Game.RouteUnitOfLength = UnitOfLength;
 		}
 
-		// preprocess split into expressions
-		private static void PreprocessSplitIntoExpressions(string FileName, bool IsRW, string[] Lines, out Expression[] Expressions, bool AllowRwRouteDescription, double trackPositionOffset) {
-			Expressions = new Expression[4096];
-			int e = 0;
-			// full-line rw comments
-			if (IsRW) {
-				for (int i = 0; i < Lines.Length; i++) {
-					int Level = 0;
-					for (int j = 0; j < Lines[i].Length; j++) {
-						switch (Lines[i][j]) {
-							case '(':
-								Level++;
-								break;
-							case ')':
-								Level--;
-								break;
-							case ';':
-								if (Level == 0) {
-									Lines[i] = Lines[i].Substring(0, j).TrimEnd();
-									j = Lines[i].Length;
-								}
-								break;
-							case '=':
-								if (Level == 0) {
-									j = Lines[i].Length;
-								}
-								break;
-						}
-					}
-				}
-			}
-			// parse
-			for (int i = 0; i < Lines.Length; i++) {
-				//Remove empty null characters
-				//Found these in a couple of older routes, harmless but generate errors
-				//Possibly caused by BVE-RR (DOS version)
-				Lines[i] = Lines[i].Replace("\0", "");
-				if (IsRW & AllowRwRouteDescription) {
-					// ignore rw route description
-					if (
-						Lines[i].StartsWith("[", StringComparison.Ordinal) & Lines[i].IndexOf("]", StringComparison.Ordinal) > 0 |
-						Lines[i].StartsWith("$")
-					) {
-						AllowRwRouteDescription = false;
-						Game.RouteComment = Game.RouteComment.Trim();
-					} else {
-						if (Game.RouteComment.Length != 0) {
-							Game.RouteComment += "\n";
-						}
-						Game.RouteComment += Lines[i];
-						continue;
-					}
-				}
-				{
-					// count expressions
-					int n = 0; int Level = 0;
-					for (int j = 0; j < Lines[i].Length; j++) {
-						switch (Lines[i][j]) {
-							case '(':
-								Level++;
-								break;
-							case ')':
-								Level--;
-								break;
-							case ',':
-								if (!IsRW & Level == 0) n++;
-								break;
-							case '@':
-								if (IsRW & Level == 0) n++;
-								break;
-						}
-					}
-					// create expressions
-					int m = e + n + 1;
-					while (m >= Expressions.Length) {
-						Array.Resize<Expression>(ref Expressions, Expressions.Length << 1);
-					}
-					Level = 0;
-					int a = 0, c = 0;
-					for (int j = 0; j < Lines[i].Length; j++) {
-						switch (Lines[i][j]) {
-							case '(':
-								Level++;
-								break;
-							case ')':
-								if (Interface.CurrentOptions.EnableBveTsHacks)
-								{
-
-									if (Level > 0)
-									{
-										//Don't decrease the level below zero, as this messes up when extra closing brackets are encountered
-										Level--;
-									}
-									else
-									{
-										Interface.AddMessage(MessageType.Warning, false, "Invalid additional closing parenthesis encountered at line " + i + " character " + j + " in file " + FileName);
-									}
-								}
-								else
-								{
-									Level--;
-								}
-								break;
-							case ',':
-								if (Level == 0 & !IsRW) {
-									string t = Lines[i].Substring(a, j - a).Trim();
-									if (t.Length > 0 && !t.StartsWith(";")) {
-										Expressions[e] = new Expression
-										{
-											File = FileName,
-											Text = t,
-											Line = i + 1,
-											Column = c + 1,
-											TrackPositionOffset = trackPositionOffset
-										};
-										e++;
-									}
-									a = j + 1;
-									c++;
-								}
-								break;
-							case '@':
-								if (Level == 1 & IsRW & Interface.CurrentOptions.EnableBveTsHacks)
-								{
-									//BVE2 doesn't care if a bracket is unclosed, fixes various routefiles
-									Level--;
-								}
-								else if (Level == 2 && IsRW & Interface.CurrentOptions.EnableBveTsHacks)
-								{
-									int k = j;
-									while (k > 0)
-									{
-										k--;
-										if (Lines[i][k] == '(')
-										{
-											//Opening bracket has been used instead of closing bracket, again BVE2 ignores this
-											Level -= 2;
-											break;
-										}
-										if (!char.IsWhiteSpace(Lines[i][k]))
-										{
-											//Bracket not found, and this isn't whitespace either, so break out
-											break;
-										}
-									}
-								}
-								if (Level == 0 & IsRW) {
-									string t = Lines[i].Substring(a, j - a).Trim();
-									if (t.Length > 0 && !t.StartsWith(";")) {
-										Expressions[e] = new Expression
-										{
-											File = FileName,
-											Text = t,
-											Line = i + 1,
-											Column = c + 1,
-											TrackPositionOffset = trackPositionOffset
-										};
-										e++;
-									}
-									a = j + 1;
-									c++;
-								}
-								break;
-						}
-					}
-					if (Lines[i].Length - a > 0) {
-						string t = Lines[i].Substring(a).Trim();
-						if (t.Length > 0 && !t.StartsWith(";")) {
-							Expressions[e] = new Expression
-							{
-								File = FileName,
-								Text = t,
-								Line = i + 1,
-								Column = c + 1,
-								TrackPositionOffset = trackPositionOffset
-							};
-							e++;
-						}
-					}
-				}
-			}
-			Array.Resize<Expression>(ref Expressions, e);
-		}
-
-		/// <summary>This function processes the list of expressions for $Char, $Rnd, $If and $Sub directives, and evaluates them into the final expressions dataset</summary>
-		private static void PreprocessChrRndSub(string FileName, bool IsRW, System.Text.Encoding Encoding, ref Expression[] Expressions) {
-			System.Globalization.CultureInfo Culture = System.Globalization.CultureInfo.InvariantCulture;
-			string[] Subs = new string[16];
-			int openIfs = 0;
-			for (int i = 0; i < Expressions.Length; i++) {
-				string Epilog = " at line " + Expressions[i].Line.ToString(Culture) + ", column " + Expressions[i].Column.ToString(Culture) + " in file " + Expressions[i].File;
-				bool continueWithNextExpression = false;
-				for (int j = Expressions[i].Text.Length - 1; j >= 0; j--) {
-					if (Expressions[i].Text[j] == '$') {
-						int k;
-						for (k = j + 1; k < Expressions[i].Text.Length; k++) {
-							if (Expressions[i].Text[k] == '(') {
-								break;
-							} else if (Expressions[i].Text[k] == '/' | Expressions[i].Text[k] == '\\') {
-								k = Expressions[i].Text.Length + 1;
-								break;
-							}
-						}
-						if (k <= Expressions[i].Text.Length) {
-							string t = Expressions[i].Text.Substring(j, k - j).TrimEnd();
-							int l = 1, h;
-							for (h = k + 1; h < Expressions[i].Text.Length; h++) {
-								switch (Expressions[i].Text[h]) {
-									case '(':
-										l++;
-										break;
-									case ')':
-										l--;
-										if (l < 0) {
-											continueWithNextExpression = true;
-											Interface.AddMessage(MessageType.Error, false, "Invalid parenthesis structure in " + t + Epilog);
-										}
-										break;
-								}
-								if (l <= 0) {
-									break;
-								}
-							}
-							if (continueWithNextExpression) {
-								break;
-							}
-							if (l != 0) {
-								Interface.AddMessage(MessageType.Error, false, "Invalid parenthesis structure in " + t + Epilog);
-								continueWithNextExpression = true;
-								break;
-							}
-							string s = Expressions[i].Text.Substring(k + 1, h - k - 1).Trim();
-							switch (t.ToLowerInvariant()) {
-								case "$if":
-									if (j != 0) {
-										Interface.AddMessage(MessageType.Error, false, "The $If directive must not appear within another statement" + Epilog);
-									} else {
-										double num;
-										if (double.TryParse(s, System.Globalization.NumberStyles.Float, Culture, out num)) {
-											openIfs++;
-											Expressions[i].Text = string.Empty;
-											if (num == 0.0) {
-												/*
-												 * Blank every expression until the matching $Else or $EndIf
-												 * */
-												i++;
-												int level = 1;
-												while (i < Expressions.Length) {
-													if (Expressions[i].Text.StartsWith("$if", StringComparison.OrdinalIgnoreCase)) {
-														Expressions[i].Text = string.Empty;
-														level++;
-													} else if (Expressions[i].Text.StartsWith("$else", StringComparison.OrdinalIgnoreCase)) {
-														Expressions[i].Text = string.Empty;
-														if (level == 1) {
-															level--;
-															break;
-														}
-													} else if (Expressions[i].Text.StartsWith("$endif", StringComparison.OrdinalIgnoreCase)) {
-														Expressions[i].Text = string.Empty;
-														level--;
-														if (level == 0) {
-															openIfs--;
-															break;
-														}
-													} else {
-														Expressions[i].Text = string.Empty;
-													}
-													i++;
-												}
-												if (level != 0) {
-													Interface.AddMessage(MessageType.Error, false, "$EndIf missing at the end of the file" + Epilog);
-												}
-											}
-											continueWithNextExpression = true;
-											break;
-										} else {
-											Interface.AddMessage(MessageType.Error, false, "The $If condition does not evaluate to a number" + Epilog);
-										}
-									}
-									continueWithNextExpression = true;
-									break;
-								case "$else":
-									/*
-									 * Blank every expression until the matching $EndIf
-									 * */
-									Expressions[i].Text = string.Empty;
-									if (openIfs != 0) {
-										i++;
-										int level = 1;
-										while (i < Expressions.Length) {
-											if (Expressions[i].Text.StartsWith("$if", StringComparison.OrdinalIgnoreCase)) {
-												Expressions[i].Text = string.Empty;
-												level++;
-											} else if (Expressions[i].Text.StartsWith("$else", StringComparison.OrdinalIgnoreCase)) {
-												Expressions[i].Text = string.Empty;
-												if (level == 1) {
-													Interface.AddMessage(MessageType.Error, false, "Duplicate $Else encountered" + Epilog);
-												}
-											} else if (Expressions[i].Text.StartsWith("$endif", StringComparison.OrdinalIgnoreCase)) {
-												Expressions[i].Text = string.Empty;
-												level--;
-												if (level == 0) {
-													openIfs--;
-													break;
-												}
-											} else {
-												Expressions[i].Text = string.Empty;
-											}
-											i++;
-										}
-										if (level != 0) {
-											Interface.AddMessage(MessageType.Error, false, "$EndIf missing at the end of the file" + Epilog);
-										}
-									} else {
-										Interface.AddMessage(MessageType.Error, false, "$Else without matching $If encountered" + Epilog);
-									}
-									continueWithNextExpression = true;
-									break;
-								case "$endif":
-									Expressions[i].Text = string.Empty;
-									if (openIfs != 0) {
-										openIfs--;
-									} else {
-										Interface.AddMessage(MessageType.Error, false, "$EndIf without matching $If encountered" + Epilog);
-									}
-									continueWithNextExpression = true;
-									break;
-								case "$include":
-									if (j != 0) {
-										Interface.AddMessage(MessageType.Error, false, "The $Include directive must not appear within another statement" + Epilog);
-										continueWithNextExpression = true;
-										break;
-									}
-									string[] args = s.Split(';');
-									for (int ia = 0; ia < args.Length; ia++) {
-										args[ia] = args[ia].Trim();
-									}
-									int count = (args.Length + 1) / 2;
-									string[] files = new string[count];
-									double[] weights = new double[count];
-									double[] offsets = new double[count];
-									double weightsTotal = 0.0;
-									for (int ia = 0; ia < count; ia++) {
-										string file;
-										double offset;
-										int colon = args[2 * ia].IndexOf(':');
-										if (colon >= 0) {
-											file = args[2 * ia].Substring(0, colon).TrimEnd();
-											string value = args[2 * ia].Substring(colon + 1).TrimStart();
-											if (!double.TryParse(value, NumberStyles.Float, Culture, out offset)) {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "The track position offset " + value + " is invalid in " + t + Epilog);
-												break;
-											}
-										} else {
-											file = args[2 * ia];
-											offset = 0.0;
-										}
-										files[ia] = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), file);
-										offsets[ia] = offset;
-										if (!System.IO.File.Exists(files[ia])) {
-											continueWithNextExpression = true;
-											Interface.AddMessage(MessageType.Error, false, "The file " + file + " could not be found in " + t + Epilog);
-											for (int ta = i; ta < Expressions.Length - 1; ta++)
-											{
-												Expressions[ta] = Expressions[ta + 1];
-											}
-											Array.Resize<Expression>(ref Expressions, Expressions.Length - 1);
-											i--;
-											break;
-										}
-										if (2 * ia + 1 < args.Length)
-										{
-											if (!NumberFormats.TryParseDoubleVb6(args[2 * ia + 1], out weights[ia])) {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "A weight is invalid in " + t + Epilog);
-												break;
-											}
-											if (weights[ia] <= 0.0) {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "A weight is not positive in " + t + Epilog);
-												break;
-											}
-											weightsTotal += weights[ia];
-										}
-										else {
-											weights[ia] = 1.0;
-											weightsTotal += 1.0;
-										}
-									}
-									if (count == 0) {
-										continueWithNextExpression = true;
-										Interface.AddMessage(MessageType.Error, false, "No file was specified in " + t + Epilog);
-										break;
-									}
-									if (!continueWithNextExpression) {
-										double number = Program.RandomNumberGenerator.NextDouble() * weightsTotal;
-										double value = 0.0;
-										int chosenIndex = 0;
-										for (int ia = 0; ia < count; ia++) {
-											value += weights[ia];
-											if (value > number) {
-												chosenIndex = ia;
-												break;
-											}
-										}
-										Expression[] expr;
-										//Get the text encoding of our $Include file
-										System.Text.Encoding includeEncoding = TextEncoding.GetSystemEncodingFromFile(files[chosenIndex]);
-										if (!includeEncoding.Equals(Encoding) && includeEncoding.WindowsCodePage != Encoding.WindowsCodePage)
-										{
-											//If the encodings do not match, add a warning
-											//This is not critical, but it's a bad idea to mix and match character encodings within a routefile, as the auto-detection may sometimes be wrong
-											Interface.AddMessage(MessageType.Warning, false, "The text encoding of the $Include file " + files[chosenIndex] + " does not match that of the base routefile.");
-										}
-										string[] lines = System.IO.File.ReadAllLines(files[chosenIndex], includeEncoding);
-										PreprocessSplitIntoExpressions(files[chosenIndex], IsRW, lines, out expr, false, offsets[chosenIndex] + Expressions[i].TrackPositionOffset);
-										int length = Expressions.Length;
-										if (expr.Length == 0) {
-											for (int ia = i; ia < Expressions.Length - 1; ia++) {
-												Expressions[ia] = Expressions[ia + 1];
-											}
-											Array.Resize<Expression>(ref Expressions, length - 1);
-										} else {
-											Array.Resize<Expression>(ref Expressions, length + expr.Length - 1);
-											for (int ia = Expressions.Length - 1; ia >= i + expr.Length; ia--) {
-												Expressions[ia] = Expressions[ia - expr.Length + 1];
-											}
-											for (int ia = 0; ia < expr.Length; ia++) {
-												Expressions[i + ia] = expr[ia];
-											}
-										}
-										i--;
-										continueWithNextExpression = true;
-									}
-									break;
-								case "$chr":
-								case "$chruni":
-									{
-										int x;
-										if (NumberFormats.TryParseIntVb6(s, out x)) {
-											if (x < 0)
-											{
-												//Must be non-negative
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "Index must be a non-negative character in " + t + Epilog);
-											}
-											else
-											{
-												Expressions[i].Text = Expressions[i].Text.Substring(0, j) + char.ConvertFromUtf32(x) + Expressions[i].Text.Substring(h + 1);
-											}
-										}
-										else {
-											continueWithNextExpression = true;
-											Interface.AddMessage(MessageType.Error, false, "Index is invalid in " + t + Epilog);
-										}
-									} break;
-								case "$chrascii":
-								{
-									int x;
-									if (NumberFormats.TryParseIntVb6(s, out x))
-									{
-										if (x < 0 || x > 128)
-										{
-											//Standard ASCII characters from 0-128
-											continueWithNextExpression = true;
-											Interface.AddMessage(MessageType.Error, false, "Index does not correspond to a valid ASCII character in " + t + Epilog);
-										}
-										else
-										{
-											Expressions[i].Text = Expressions[i].Text.Substring(0, j) + char.ConvertFromUtf32(x) + Expressions[i].Text.Substring(h + 1);
-										}
-									}
-									else
-									{
-										continueWithNextExpression = true;
-										Interface.AddMessage(MessageType.Error, false, "Index is invalid in " + t + Epilog);
-									}
-								}
-									break;
-								case "$rnd":
-									{
-										int m = s.IndexOf(";", StringComparison.Ordinal);
-										if (m >= 0) {
-											string s1 = s.Substring(0, m).TrimEnd();
-											string s2 = s.Substring(m + 1).TrimStart();
-											int x; if (NumberFormats.TryParseIntVb6(s1, out x)) {
-												int y; if (NumberFormats.TryParseIntVb6(s2, out y)) {
-													int z = x + (int)Math.Floor(Program.RandomNumberGenerator.NextDouble() * (double)(y - x + 1));
-													Expressions[i].Text = Expressions[i].Text.Substring(0, j) + z.ToString(Culture) + Expressions[i].Text.Substring(h + 1);
-												} else {
-													continueWithNextExpression = true;
-													Interface.AddMessage(MessageType.Error, false, "Index2 is invalid in " + t + Epilog);
-												}
-											} else {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "Index1 is invalid in " + t + Epilog);
-											}
-										} else {
-											continueWithNextExpression = true;
-											Interface.AddMessage(MessageType.Error, false, "Two arguments are expected in " + t + Epilog);
-										}
-									} break;
-								case "$sub":
-									{
-										l = 0;
-										bool f = false;
-										int m;
-										for (m = h + 1; m < Expressions[i].Text.Length; m++) {
-											switch (Expressions[i].Text[m]) {
-													case '(': l++; break;
-													case ')': l--; break;
-													case '=': if (l == 0) {
-														f = true;
-													}
-													break;
-												default:
-													if (!char.IsWhiteSpace(Expressions[i].Text[m])) l = -1;
-													break;
-											}
-											if (f | l < 0) break;
-										}
-										if (f) {
-											l = 0;
-											int n;
-											for (n = m + 1; n < Expressions[i].Text.Length; n++) {
-												switch (Expressions[i].Text[n]) {
-														case '(': l++; break;
-														case ')': l--; break;
-												}
-												if (l < 0) break;
-											}
-											int x;
-											if (NumberFormats.TryParseIntVb6(s, out x)) {
-												if (x >= 0) {
-													while (x >= Subs.Length) {
-														Array.Resize<string>(ref Subs, Subs.Length << 1);
-													}
-													Subs[x] = Expressions[i].Text.Substring(m + 1, n - m - 1).Trim();
-													Expressions[i].Text = Expressions[i].Text.Substring(0, j) + Expressions[i].Text.Substring(n);
-												} else {
-													continueWithNextExpression = true;
-													Interface.AddMessage(MessageType.Error, false, "Index is expected to be non-negative in " + t + Epilog);
-												}
-											} else {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "Index is invalid in " + t + Epilog);
-											}
-										} else {
-											int x;
-											if (NumberFormats.TryParseIntVb6(s, out x)) {
-												if (x >= 0 & x < Subs.Length && Subs[x] != null) {
-													Expressions[i].Text = Expressions[i].Text.Substring(0, j) + Subs[x] + Expressions[i].Text.Substring(h + 1);
-												} else {
-													continueWithNextExpression = true;
-													Interface.AddMessage(MessageType.Error, false, "Index is out of range in " + t + Epilog);
-												}
-											} else {
-												continueWithNextExpression = true;
-												Interface.AddMessage(MessageType.Error, false, "Index is invalid in " + t + Epilog);
-											}
-										}
-										
-									}
-									break;
-							}
-						}
-					}
-					if (continueWithNextExpression) {
-						break;
-					}
-				}
-			}
-			// handle comments introduced via chr, rnd, sub
-			{
-				int length = Expressions.Length;
-				for (int i = 0; i < length; i++) {
-					Expressions[i].Text = Expressions[i].Text.Trim();
-					if (Expressions[i].Text.Length != 0) {
-						if (Expressions[i].Text[0] == ';') {
-							for (int j = i; j < length - 1; j++) {
-								Expressions[j] = Expressions[j + 1];
-							}
-							length--;
-							i--;
-						}
-					} else {
-						for (int j = i; j < length - 1; j++) {
-							Expressions[j] = Expressions[j + 1];
-						}
-						length--;
-						i--;
-					}
-				}
-				if (length != Expressions.Length) {
-					Array.Resize<Expression>(ref Expressions, length);
-				}
-			}
-		}
-
-		// preprocess options
-		
-
 		// preprocess sort by track position
 		private struct PositionedExpression {
 			internal double TrackPosition;
 			internal Expression Expression;
 		}
-		private static void PreprocessSortByTrackPosition(bool IsRW, double[] UnitFactors, ref Expression[] Expressions) {
-			System.Globalization.CultureInfo Culture = System.Globalization.CultureInfo.InvariantCulture;
-			PositionedExpression[] p = new PositionedExpression[Expressions.Length];
-			int n = 0;
-			double a = -1.0;
-			bool NumberCheck = !IsRW;
-			for (int i = 0; i < Expressions.Length; i++) {
-				if (IsRW) {
-					// only check for track positions in the railway section for RW routes
-					if (Expressions[i].Text.StartsWith("[", StringComparison.Ordinal) & Expressions[i].Text.EndsWith("]", StringComparison.Ordinal)) {
-						string s = Expressions[i].Text.Substring(1, Expressions[i].Text.Length - 2).Trim();
-						if (string.Compare(s, "Railway", StringComparison.OrdinalIgnoreCase) == 0) {
-							NumberCheck = true;
-						} else {
-							NumberCheck = false;
-						}
-					}
-				}
-				double x;
-				if (NumberCheck && NumberFormats.TryParseDouble(Expressions[i].Text, UnitFactors, out x)) {
-					x += Expressions[i].TrackPositionOffset;
-					if (x >= 0.0) {
-						a = x;
-					} else {
-						Interface.AddMessage(MessageType.Error, false, "Negative track position encountered at line " + Expressions[i].Line.ToString(Culture) + ", column " + Expressions[i].Column.ToString(Culture) + " in file " + Expressions[i].File);
-					}
-				} else {
-					p[n].TrackPosition = a;
-					p[n].Expression = Expressions[i];
-					int j = n;
-					n++;
-					while (j > 0) {
-						if (p[j].TrackPosition < p[j - 1].TrackPosition) {
-							PositionedExpression t = p[j];
-							p[j] = p[j - 1];
-							p[j - 1] = t;
-							j--;
-						} else {
-							break;
-						}
-					}
-				}
-			}
-			a = -1.0;
-			Expression[] e = new Expression[Expressions.Length];
-			int m = 0;
-			for (int i = 0; i < n; i++) {
-				if (p[i].TrackPosition != a) {
-					a = p[i].TrackPosition;
-					e[m] = new Expression();
-					e[m].Text = (a / UnitFactors[UnitFactors.Length - 1]).ToString(Culture);
-					e[m].Line = -1;
-					e[m].Column = -1;
-					m++;
-				}
-				e[m] = p[i].Expression;
-				m++;
-			}
-			Array.Resize<Expression>(ref e, m);
-			Expressions = e;
-		}
-
-		// separate commands and arguments
 		
 
 		private static int freeObjCount = 0;
@@ -1334,6 +622,21 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "Interval " + k.ToString(Culture) + " is greater than 12 hours in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													continue;
 												}
+
+												if (o < 120 && Interface.CurrentOptions.EnableBveTsHacks)
+												{
+													/*
+													 * An AI train follows the same schedule / rules as the player train
+													 * ==>
+													 * x Waiting time before departure at the first station (30s to 1min is 'normal')
+													 * x Time to accelerate to linespeed
+													 * x Time to clear (as a minimum) the protecting signal on station exit
+													 *
+													 * When the runinterval is below ~2minutes, on large numbers of routes, this
+													 * shows up as a train overlapping the player train (bad....)
+													 */
+													o = 120;
+												}
 												intervals.Add(o);
 											}
 											intervals.Sort();
@@ -1582,7 +885,7 @@ namespace OpenBve {
 									}
 									else
 									{
-										int cv = -1;
+										int cv;
 										if (!NumberFormats.TryParseIntVb6(Arguments[0], out cv))
 										{
 											switch (Arguments[0].ToLowerInvariant())
@@ -1617,6 +920,19 @@ namespace OpenBve {
 										{
 											Interface.AddMessage(MessageType.Error, false, Command + " is invalid at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 										}
+									}
+									break;
+								case "route.tfoxml":
+									if (!PreviewOnly) {
+										string tfoFile = Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[0]);
+										if (!System.IO.File.Exists(tfoFile))
+										{
+											Interface.AddMessage(MessageType.Error, true, "TrackFollowingObject XML file " + tfoFile + " not found in Track.TfoXML at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+											break;
+										}
+										int n = TrainManager.TFOs.Length;
+										Array.Resize(ref TrainManager.TFOs, n + 1);
+										TrainManager.TFOs[n] = TrackFollowingObjectParser.ParseTrackFollowingObject(tfoFile);
 									}
 									break;
 									// train
@@ -1777,7 +1093,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.RailObjects.Add(CommandIndex1, obj, "RailStructure");
@@ -1802,7 +1118,7 @@ namespace OpenBve {
 													if (!System.IO.File.Exists(f)) {
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.Beacon.Add(CommandIndex1, obj, "BeaconStructure");
@@ -1826,19 +1142,19 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "FileName " + Arguments[0] + " contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
 													if (CommandIndex1 >= Data.Structure.Poles.Length) {
-														Array.Resize<ObjectManager.UnifiedObject[]>(ref Data.Structure.Poles, CommandIndex1 + 1);
+														Array.Resize<UnifiedObject[]>(ref Data.Structure.Poles, CommandIndex1 + 1);
 													}
 													if (Data.Structure.Poles[CommandIndex1] == null) {
-														Data.Structure.Poles[CommandIndex1] = new ObjectManager.UnifiedObject[CommandIndex2 + 1];
+														Data.Structure.Poles[CommandIndex1] = new UnifiedObject[CommandIndex2 + 1];
 													} else if (CommandIndex2 >= Data.Structure.Poles[CommandIndex1].Length) {
-														Array.Resize<ObjectManager.UnifiedObject>(ref Data.Structure.Poles[CommandIndex1], CommandIndex2 + 1);
+														Array.Resize<UnifiedObject>(ref Data.Structure.Poles[CommandIndex1], CommandIndex2 + 1);
 													}
 													string f = Arguments[0];
 													if (!LocateObject(ref f, ObjectPath))
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														Data.Structure.Poles[CommandIndex1][CommandIndex2] = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														Data.Structure.Poles[CommandIndex1][CommandIndex2] = ObjectManager.LoadObject(f, Encoding, false);
 													}
 												}
 											}
@@ -1860,7 +1176,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.Ground.Add(CommandIndex1, obj, "GroundStructure");
@@ -1886,7 +1202,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.WallL.Add(CommandIndex1, obj, "Left WallStructure");
@@ -1912,7 +1228,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.WallR.Add(CommandIndex1, obj, "Right WallStructure");
@@ -1938,7 +1254,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.DikeL.Add(CommandIndex1, obj, "Left DikeStructure");
@@ -1964,7 +1280,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.DikeR.Add(CommandIndex1, obj, "Right DikeStructure");
@@ -1990,7 +1306,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.FormL.Add(CommandIndex1, obj, "Left FormStructure");
@@ -2016,7 +1332,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.FormR.Add(CommandIndex1, obj, "Right FormStructure");
@@ -2042,7 +1358,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.FormCL.Add(CommandIndex1, obj, "Left FormCStructure");
@@ -2068,7 +1384,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.FormCR.Add(CommandIndex1, obj, "Right FormCStructure");
@@ -2104,7 +1420,7 @@ namespace OpenBve {
 														{
 															Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 														} else {
-															var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+															var obj = ObjectManager.LoadObject(f, Encoding, false);
 															if (obj != null)
 															{
 																Data.Structure.RoofL.Add(CommandIndex1, obj, "Left RoofStructure");
@@ -2141,7 +1457,7 @@ namespace OpenBve {
 														{
 															Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 														} else {
-															var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+															var obj = ObjectManager.LoadObject(f, Encoding, false);
 															if (obj != null)
 															{
 																Data.Structure.RoofR.Add(CommandIndex1, obj, "Right RoofStructure");
@@ -2178,7 +1494,7 @@ namespace OpenBve {
 														{
 															Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 														} else {
-															var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+															var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 															if (obj != null)
 															{
 																Data.Structure.RoofCL.Add(CommandIndex1, obj, "Left RoofCStructure");
@@ -2215,7 +1531,7 @@ namespace OpenBve {
 														{
 															Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 														} else {
-															var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+															var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 															if (obj != null)
 															{
 																Data.Structure.RoofCR.Add(CommandIndex1, obj, "Right RoofCStructure");
@@ -2242,7 +1558,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, true, false, false);
+														var obj = ObjectManager.LoadStaticObject(f, Encoding, true);
 														if (obj != null)
 														{
 															Data.Structure.CrackL.Add(CommandIndex1, obj, "Left CrackStructure");
@@ -2268,7 +1584,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, true, false, false);
+														var obj = ObjectManager.LoadStaticObject(f, Encoding, true);
 														if (obj != null)
 														{
 															Data.Structure.CrackR.Add(CommandIndex1, obj, "Right CrackStructure");
@@ -2294,7 +1610,7 @@ namespace OpenBve {
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " could not be found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														var obj = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
 															Data.Structure.FreeObjects.Add(CommandIndex1, obj, "FreeObject");
@@ -2329,10 +1645,10 @@ namespace OpenBve {
 														if (!System.IO.File.Exists(f)) {
 															Interface.AddMessage(MessageType.Error, true, "SignalFileWithoutExtension " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 														} else {
-															ObjectManager.UnifiedObject Object = ObjectManager.LoadObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+															UnifiedObject Object = ObjectManager.LoadObject(f, Encoding, false);
 															if (Object is ObjectManager.AnimatedObjectCollection) {
 																AnimatedObjectSignalData Signal = new AnimatedObjectSignalData();
-																Signal.Objects = (ObjectManager.AnimatedObjectCollection)Object;
+																Signal.Objects = Object;
 																Data.Signals[CommandIndex1] = Signal;
 															} else {
 																Interface.AddMessage(MessageType.Error, true, "GlowFileWithoutExtension " + f + " is not a valid animated object in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -2394,7 +1710,7 @@ namespace OpenBve {
 														}
 														Bve4SignalData Signal = new Bve4SignalData
 														{
-															BaseObject = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false),
+															BaseObject = ObjectManager.LoadStaticObject(f, Encoding, false),
 															GlowObject = null
 														};
 														string Folder = System.IO.Path.GetDirectoryName(f);
@@ -2409,7 +1725,29 @@ namespace OpenBve {
 																} else
 																{
 																	f = Arguments[1];
-																	bool notFound = false;
+																	bool glowFileFound = false;
+																	if (!System.IO.File.Exists(f) && System.IO.Path.HasExtension(f))
+																	{
+																		string ext = System.IO.Path.GetExtension(f);
+																		switch (ext.ToLowerInvariant())
+																		{
+																			case ".csv":
+																			case ".b3d":
+																			case ".x":
+																				Interface.AddMessage(MessageType.Warning, false, "GlowFileWithoutExtension should not supply a file extension in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+																				f = Path.CombineFile(ObjectPath, f);
+																				glowFileFound = true;
+																				break;
+																			case ".animated":
+																			case ".s":
+																				Interface.AddMessage(MessageType.Error, false, "GlowFileWithoutExtension must be a static object in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+																				break;
+																			default:
+																				Interface.AddMessage(MessageType.Error, false, "GlowFileWithoutExtension is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+																				break;
+																		}
+																		
+																	}
 																	if (!System.IO.File.Exists(f) && !System.IO.Path.HasExtension(f))
 																	{
 																		string ff;
@@ -2419,35 +1757,37 @@ namespace OpenBve {
 																			if (System.IO.File.Exists(ff))
 																			{
 																				f = ff;
+																				glowFileFound = true;
 																				break;
 																			}
 																			ff = Path.CombineFile(ObjectPath, f + ".csv");
 																			if (System.IO.File.Exists(ff))
 																			{
 																				f = ff;
+																				glowFileFound = true;
 																				break;
 																			}
 																			ff = Path.CombineFile(ObjectPath, f + ".b3d");
 																			if (System.IO.File.Exists(ff))
 																			{
 																				f = ff;
+																				glowFileFound = true;
 																				break;
 																			}
 																			Interface.AddMessage(MessageType.Error, false, "GlowFileWithoutExtension does not exist in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-																			notFound = true;
 																			break;
 																		}
 																	}
-																	if (!notFound)
+																	if (glowFileFound)
 																	{
-																		Signal.GlowObject = ObjectManager.LoadStaticObject(f, Encoding, ObjectLoadMode.Normal, false, false, false);
+																		Signal.GlowObject = ObjectManager.LoadStaticObject(f, Encoding, false);
 																		if (Signal.GlowObject != null)
 																		{
 																			Signal.GlowTextures = LoadAllTextures(f, true);
 																			for (int p = 0; p < Signal.GlowObject.Mesh.Materials.Length; p++)
 																			{
-																				Signal.GlowObject.Mesh.Materials[p].BlendMode = World.MeshMaterialBlendMode.Additive;
-																				Signal.GlowObject.Mesh.Materials[p].GlowAttenuationData = World.GetGlowAttenuationData(200.0, GlowAttenuationMode.DivisionExponent4);
+																				Signal.GlowObject.Mesh.Materials[p].BlendMode = MeshMaterialBlendMode.Additive;
+																				Signal.GlowObject.Mesh.Materials[p].GlowAttenuationData = Glow.GetAttenuationData(200.0, GlowAttenuationMode.DivisionExponent4);
 																			}
 																		}
 																	}
@@ -2864,6 +2204,7 @@ namespace OpenBve {
 								case "cycle.rail":
 								case "route.loadingscreen":
 								case "route.displayspeed":
+								case "route.othertrainxml":
 									break;
 									// track
 								case "track.railstart":
@@ -2973,6 +2314,21 @@ namespace OpenBve {
 												}
 											}
 										}
+										double cant = 0.0;
+										if (Arguments.Length >= 5 && Arguments[4].Length > 0 && !NumberFormats.TryParseDoubleVb6(Arguments[4], out cant))
+										{
+											if (Arguments[4] != "id 0") //RouteBuilder inserts these, harmless so let's ignore
+											{
+												Interface.AddMessage(MessageType.Error, false, "CantInMillimeters is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+											}
+											
+											cant = 0.0;
+										}
+										else
+										{
+											cant *= 0.001;
+										}
+										Data.Blocks[BlockIndex].Rails[idx].CurveCant = cant;
 									}
 									break;
 								case "track.railend":
@@ -3247,7 +2603,7 @@ namespace OpenBve {
 												Array.Resize<Section>(ref Data.Blocks[BlockIndex].Sections, n + 1);
 												Data.Blocks[BlockIndex].Sections[n].TrackPosition = Data.TrackPosition;
 												Data.Blocks[BlockIndex].Sections[n].Aspects = aspects;
-												Data.Blocks[BlockIndex].Sections[n].Type = valueBased ? Game.SectionType.ValueBased : Game.SectionType.IndexBased;
+												Data.Blocks[BlockIndex].Sections[n].Type = valueBased ? SectionType.ValueBased : SectionType.IndexBased;
 												Data.Blocks[BlockIndex].Sections[n].DepartureStationIndex = -1;
 												if (CurrentStation >= 0 && Game.Stations[CurrentStation].ForceStopSignal) {
 													if (CurrentStation >= 0 & CurrentStop >= 0 & !DepartureSignalUsed) {
@@ -3358,6 +2714,7 @@ namespace OpenBve {
 													case 1: aspects = new int[] { 0, 2, 3 }; comp = 4; break;
 													case 2: aspects = new int[] { 0, 2 }; comp = 0; break;
 													case -2: aspects = new int[] { 0, 4 }; comp = 1; break;
+													case -3: aspects = new int[] { 0, 2, 4 }; comp = 2; break; //Undocumented, see https://github.com/leezer3/OpenBVE/issues/336
 													case 3: aspects = new int[] { 0, 2, 4 }; comp = 2; break;
 													case 4: aspects = new int[] { 0, 1, 2, 4 }; comp = 3; break;
 													case -4: aspects = new int[] { 0, 2, 3, 4 }; comp = 4; break;
@@ -3372,7 +2729,7 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Sections[n].Aspects = aspects;
 											Data.Blocks[BlockIndex].Sections[n].DepartureStationIndex = -1;
 											Data.Blocks[BlockIndex].Sections[n].Invisible = x == 0.0;
-											Data.Blocks[BlockIndex].Sections[n].Type = Game.SectionType.ValueBased;
+											Data.Blocks[BlockIndex].Sections[n].Type = SectionType.ValueBased;
 											if (CurrentStation >= 0 && Game.Stations[CurrentStation].ForceStopSignal) {
 												if (CurrentStation >= 0 & CurrentStop >= 0 & !DepartureSignalUsed) {
 													Data.Blocks[BlockIndex].Sections[n].DepartureStationIndex = CurrentStation;
@@ -3909,8 +3266,8 @@ namespace OpenBve {
 												device = 0;
 											}
 										}
-										Sounds.SoundBuffer arrsnd = null;
-										Sounds.SoundBuffer depsnd = null;
+										OpenBveApi.Sounds.SoundHandle arrsnd = null;
+										OpenBveApi.Sounds.SoundHandle depsnd = null;
 										if (!PreviewOnly) {
 											if (Arguments.Length >= 8 && Arguments[7].Length > 0) {
 												if (Path.ContainsInvalidChars(Arguments[7])) {
@@ -3921,7 +3278,7 @@ namespace OpenBve {
 														Interface.AddMessage(MessageType.Error, true, "ArrivalSound " + f + " not found in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
 														const double radius = 30.0;
-														arrsnd = Sounds.RegisterBuffer(f, radius);
+														Program.CurrentHost.RegisterSound(f, radius, out arrsnd);
 													}
 												}
 											}
@@ -3953,7 +3310,7 @@ namespace OpenBve {
 														Interface.AddMessage(MessageType.Error, true, "DepartureSound " + f + " not found in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
 														const double radius = 30.0;
-														depsnd = Sounds.RegisterBuffer(f, radius);
+														Program.CurrentHost.RegisterSound(f, radius, out depsnd);
 													}
 												}
 											}
@@ -4258,20 +3615,20 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "FormStructureIndex is invalid in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													pf = 0;
 												}
-												if (roof != 0 & (roof < 0 || !Data.Structure.RoofL.ContainsKey(roof) || !Data.Structure.RoofR.ContainsKey(roof))) {
+												if (roof != 0 & (roof < 0 || (!Data.Structure.RoofL.ContainsKey(roof) && !Data.Structure.RoofR.ContainsKey(roof)))) {
 													Interface.AddMessage(MessageType.Error, false, "RoofStructureIndex " + roof + " references an object not loaded in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-												} else {
-													if (pf < 0 | (!Data.Structure.FormL.ContainsKey(pf) & !Data.Structure.FormR.ContainsKey(pf))) {
+												} 
+
+												if (pf < 0 | (!Data.Structure.FormL.ContainsKey(pf) & !Data.Structure.FormR.ContainsKey(pf))) {
 														Interface.AddMessage(MessageType.Error, false, "FormStructureIndex " + pf + " references an object not loaded in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-													}
-													int n = Data.Blocks[BlockIndex].Forms.Length;
-													Array.Resize<Form>(ref Data.Blocks[BlockIndex].Forms, n + 1);
-													Data.Blocks[BlockIndex].Forms[n].PrimaryRail = idx1;
-													Data.Blocks[BlockIndex].Forms[n].SecondaryRail = idx2;
-													Data.Blocks[BlockIndex].Forms[n].FormType = pf;
-													Data.Blocks[BlockIndex].Forms[n].RoofType = roof;
 												}
-											}
+												int n = Data.Blocks[BlockIndex].Forms.Length;
+												Array.Resize<Form>(ref Data.Blocks[BlockIndex].Forms, n + 1);
+												Data.Blocks[BlockIndex].Forms[n].PrimaryRail = idx1;
+												Data.Blocks[BlockIndex].Forms[n].SecondaryRail = idx2;
+												Data.Blocks[BlockIndex].Forms[n].FormType = pf;
+												Data.Blocks[BlockIndex].Forms[n].RoofType = roof;
+											}											
 										}
 									} break;
 								case "track.pole":
@@ -4751,6 +4108,17 @@ namespace OpenBve {
 								case "track.freeobj":
 									{
 										if (!PreviewOnly) {
+											if (Arguments.Length < 2)
+											{
+												/*
+												 * If no / one arguments are supplied, this previously produced FreeObject 0 dropped on either
+												 * Rail 0 (no arguments) or on the rail specified by the first argument.
+												 *
+												 * BVE4 ignores these, and we should too.
+												 */
+												Interface.AddMessage(MessageType.Error, false, "An insufficient number of arguments was supplied in Track.FreeObj at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+												continue;
+											}
 											int idx = 0, sttype = 0;
 											if (Arguments.Length >= 1 && Arguments[0].Length > 0 && !NumberFormats.TryParseIntVb6(Arguments[0], out idx)) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex is invalid in Track.FreeObj at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);

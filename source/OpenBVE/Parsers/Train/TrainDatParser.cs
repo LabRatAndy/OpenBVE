@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using OpenBve.BrakeSystems;
@@ -512,7 +512,15 @@ namespace OpenBve {
 										else
 										{
 											brakeNotches = 8;
-											Interface.AddMessage(MessageType.Error, false, "NumberOfBrakeNotches is expected to be positive and non-zero at line " + (i + 1).ToString(Culture) + " in " + FileName);
+											if (trainBrakeType != BrakeSystemType.AutomaticAirBrake)
+											{
+												/*
+												 * NumberOfBrakeNotches is ignored when using the auto-air brake
+												 * Whilst this value is invalid, it doesn't actually get used so get
+												 * rid of the pointless error message it generates
+												 */
+												Interface.AddMessage(MessageType.Error, false, "NumberOfBrakeNotches is expected to be positive and non-zero at line " + (i + 1).ToString(Culture) + " in " + FileName);
+											}											
 										}
 										break;
 									case 3:
@@ -643,7 +651,7 @@ namespace OpenBve {
 										if (a <= 0.0) {
 											Interface.AddMessage(MessageType.Error, false, "UnexposedFrontalArea is expected to be positive at line " + (i + 1).ToString(Culture) + " in " + FileName);
 										} else {
-											CarExposedFrontalArea = a;
+											CarUnexposedFrontalArea = a;
 										} break;
 								}
 							} i++; n++;
@@ -676,7 +684,7 @@ namespace OpenBve {
 										Train.Handles.HasHoldBrake = a == 1.0; break;
 									case 5:
 										int dt = (int) Math.Round(a);
-										if (dt < 3 && dt > -1)
+										if (dt < 4 && dt > -1)
 										{
 											ReAdhesionDevice = (TrainManager.ReadhesionDeviceType)dt;
 										}
@@ -778,7 +786,15 @@ namespace OpenBve {
 									} m++;
 								} i++; n++;
 							}
-							Array.Resize<TrainManager.MotorSoundTableEntry>(ref Tables[msi].Entries, n);
+
+							if (n != 0)
+							{
+								/*
+								 * Handle duplicated section header:
+								 * If no entries, don't resize
+								 */
+								Array.Resize<TrainManager.MotorSoundTableEntry>(ref Tables[msi].Entries, n);
+							}
 							i--;
 						} break;
 				}
@@ -850,8 +866,6 @@ namespace OpenBve {
 			for (int i = 0; i < Train.Cars.Length; i++)
 			{
 				Train.Cars[i] = new TrainManager.Car(Train, i);
-				Train.Cars[i].FrontBogie = new TrainManager.Bogie(Train, Train.Cars[i]);
-				Train.Cars[i].RearBogie = new TrainManager.Bogie(Train, Train.Cars[i]);
 			}
 			double DistanceBetweenTheCars = 0.3;
 			
@@ -1159,7 +1173,6 @@ namespace OpenBve {
 				Train.Cars[i].Specs.AerodynamicDragCoefficient = AerodynamicDragCoefficient;
 				Train.Cars[i].Specs.ExposedFrontalArea = CarExposedFrontalArea;
 				Train.Cars[i].Specs.UnexposedFrontalArea = CarUnexposedFrontalArea;
-				Train.Cars[i].Doors = new TrainManager.Door[2];
 				Train.Cars[i].Doors[0].Direction = -1;
 				Train.Cars[i].Doors[0].State = 0.0;
 				Train.Cars[i].Doors[1].Direction = 1;

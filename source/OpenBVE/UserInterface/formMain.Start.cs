@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -755,7 +755,7 @@ namespace OpenBve
 				Result.RouteFile = null;
 				checkboxTrainDefault.Text = Translations.GetInterfaceString("start_train_usedefault");
 				routeWorkerThread.Dispose();
-				this.Cursor = Cursors.Default;
+				this.Cursor = System.Windows.Forms.Cursors.Default;
 				return;
 			}
 			try
@@ -841,7 +841,7 @@ namespace OpenBve
 				ShowDefaultTrain();
 			}
 
-			this.Cursor = Cursors.Default;
+			this.Cursor = System.Windows.Forms.Cursors.Default;
 			//Deliberately select the tab when the process is complete
 			//This hopefully fixes another instance of the 'grey tabs' bug
 			
@@ -859,7 +859,7 @@ namespace OpenBve
 			}
 			if (Result.RouteFile != null && !routeWorkerThread.IsBusy)
 			{
-				this.Cursor = Cursors.WaitCursor;
+				this.Cursor = System.Windows.Forms.Cursors.WaitCursor;
 				TryLoadImage(pictureboxRouteImage, "loading.png");
 				groupboxRouteDetails.Visible = true;
 				textboxRouteDescription.Text = Translations.GetInterfaceString("start_route_processing");
@@ -1017,7 +1017,7 @@ namespace OpenBve
 					case TextEncoding.Encoding.EUC_KR:
 						comboboxTrainEncoding.SelectedIndex = 0;
 						comboboxTrainEncoding.Items[0] = "Korean - 949";
-						Result.TrainEncoding = System.Text.Encoding.GetEncoding(950);
+						Result.TrainEncoding = System.Text.Encoding.GetEncoding(949);
 						break;
 				}
 				int i;
