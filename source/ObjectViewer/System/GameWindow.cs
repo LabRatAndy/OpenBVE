@@ -31,9 +31,9 @@ namespace OpenBve
         private static double MoveYSpeed = 0.0;
         private static double MoveZSpeed = 0.0;
         //transform matrix for shaders
-        private Matrix4 model;
-        private Matrix4 view;
-        private Matrix4 projection;
+        private Matrix4d model;
+        private Matrix4d view;
+        private Matrix4d projection;
 
         //moving what looks like non rendering code to here from RenderFrame
         protected override void OnUpdateFrame(FrameEventArgs e)
@@ -226,7 +226,7 @@ namespace OpenBve
                 World.AbsoluteCameraPosition.Z += MoveZSpeed * timeElapsed * World.AbsoluteCameraDirection.Z;
                 keep = true;
             }
-            // lighting
+            /*// lighting
             if (Program.LightingRelative == -1)
             {
                 Program.LightingRelative = (double)Program.LightingTarget;
@@ -285,7 +285,10 @@ namespace OpenBve
                 Renderer.OptionDiffuseColor.G = (byte)Math.Round(32.0 + 128.0 * Program.LightingRelative);
                 Renderer.OptionDiffuseColor.B = (byte)Math.Round(32.0 + 128.0 * Math.Sqrt(Program.LightingRelative));
                 Renderer.InitializeLighting();
-            }
+            }*/
+            // matricies 
+            
+            projection = Matrix4.CreatePerspectiveFieldOfView(, (float)(Height / Width), 0.001f, 600.00f);
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
