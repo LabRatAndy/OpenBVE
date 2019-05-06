@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenTK;
 using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
 using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace OpenBve
@@ -226,7 +227,7 @@ namespace OpenBve
                 World.AbsoluteCameraPosition.Z += MoveZSpeed * timeElapsed * World.AbsoluteCameraDirection.Z;
                 keep = true;
             }
-            /*// lighting
+            /*// lighting should be done within shader anyway eventually.
             if (Program.LightingRelative == -1)
             {
                 Program.LightingRelative = (double)Program.LightingTarget;
@@ -287,12 +288,17 @@ namespace OpenBve
                 Renderer.InitializeLighting();
             }*/
             // matricies 
-            
-            projection = Matrix4.CreatePerspectiveFieldOfView(, (float)(Height / Width), 0.001f, 600.00f);
+            model = Matrix4d.Identity;
+            Vector3d camerapos = new Vector3d(World.AbsoluteCameraPosition.X, World.AbsoluteCameraPosition.Y, World.AbsoluteCameraPosition.Z);
+            Vector3d targetdir = new Vector3d(World.AbsoluteCameraDirection.X, World.AbsoluteCameraDirection.Y, World.AbsoluteCameraDirection.Z);
+            Vector3d upDir = new Vector3d(World.AbsoluteCameraUp.X, World.AbsoluteCameraUp.Y, World.AbsoluteCameraUp.Z);
+            view = Matrix4d.LookAt(camerapos, targetdir, upDir);
+            double fov = MathHelper.DegreesToRadians(100.00d);//field of view(must be in radians)100 degrees to start with.
+            projection = Matrix4d.CreatePerspectiveFieldOfView(fov, (double)(Height / Width), 0.0001d, 600.00d);
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            Renderer.RenderScene();
+            
             SwapBuffers();
         }
 
