@@ -1,7 +1,6 @@
 ﻿using System;
 using OpenTK;
 using OpenTK.Graphics;
-using OpenTK.Graphics.OpenGL;
 using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace OpenBve
@@ -298,7 +297,7 @@ namespace OpenBve
         }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            
+          
             SwapBuffers();
         }
 
