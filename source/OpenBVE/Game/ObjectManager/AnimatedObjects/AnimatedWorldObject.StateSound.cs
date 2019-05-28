@@ -34,7 +34,7 @@ namespace OpenBve
 
 			private int lastState;
 
-			internal override void Update(double TimeElapsed, bool ForceUpdate)
+			public override void Update(double TimeElapsed, bool ForceUpdate)
 			{
 				const double extraRadius = 10.0;
 				double z = Object.TranslateZFunction == null ? 0.0 : Object.TranslateZFunction.LastResult;
@@ -178,7 +178,7 @@ namespace OpenBve
 				{
 					if (currentObject.Object.States[i].Object == null)
 					{
-						currentObject.Object.States[i].Object = new StaticObject { RendererIndex =  -1 };
+						currentObject.Object.States[i].Object = new StaticObject(Program.CurrentHost) { RendererIndex =  -1 };
 					}
 				}
 				double r = 0.0;

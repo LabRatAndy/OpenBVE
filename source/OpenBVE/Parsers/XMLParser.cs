@@ -17,7 +17,7 @@ namespace OpenBve
         {
             //The current XML file to load
             XmlDocument currentXML = new XmlDocument();
-            ObjectManager.StaticObject Object = null;
+            StaticObject Object = null;
             //Load the object's XML file 
             currentXML.Load(fileName);
             //Check for null
@@ -44,14 +44,17 @@ namespace OpenBve
                         }
                         if (objectPath != null && System.IO.File.Exists(objectPath))
                         {
+	                        UnifiedObject obj;
                             switch (System.IO.Path.GetExtension(objectPath).ToLowerInvariant())
                             {
                                 case ".csv":
                                 case ".b3d":
-                                    Object = CsvB3dObjectParser.ReadObject(objectPath, encoding);
+	                                Program.CurrentHost.LoadObject(objectPath, encoding, out obj);
+	                                Object = (StaticObject) obj;
                                     break;
                                 case ".x":
-                                    Object = XObjectParser.ReadObject(objectPath, encoding);
+	                                Program.CurrentHost.LoadObject(objectPath, encoding, out obj);
+	                                Object = (StaticObject) obj;
                                     break;
                                 case ".animated":
                                     //Not currently working.

@@ -5,6 +5,7 @@ using OpenBveApi.Runtime;
 using OpenBveApi.Math;
 using OpenBveApi.Interface;
 using OpenBveApi.Trains;
+using OpenBve.SignalManager;
 
 namespace OpenBve
 {
@@ -18,7 +19,8 @@ namespace OpenBve
 		{
 			/// <summary>The plugin used by this train.</summary>
 			internal PluginManager.Plugin Plugin;
-
+			/// <summary>The driver body</summary>
+			internal World.DriverBody DriverBody;
 			internal Handles Handles;
 			internal Car[] Cars;
 			internal Coupler[] Couplers;
@@ -92,13 +94,13 @@ namespace OpenBve
 				}
 				Sounds.StopAllSounds(this);
 
-				for (int i = 0; i < Game.Sections.Length; i++)
+				for (int i = 0; i < CurrentRoute.Sections.Length; i++)
 				{
-					Game.Sections[i].Leave(this);
+					CurrentRoute.Sections[i].Leave(this);
 				}
-				if (Game.Sections.Length != 0)
+				if (CurrentRoute.Sections.Length != 0)
 				{
-					Game.UpdateSection(Game.Sections.Length - 1);
+					Game.UpdateSection(CurrentRoute.Sections.Length - 1);
 				}
 			}
 
@@ -139,7 +141,7 @@ namespace OpenBve
 						{
 							if (CurrentSectionIndex >= 0)
 							{
-								if (!Game.Sections[CurrentSectionIndex].IsFree())
+								if (!CurrentRoute.Sections[CurrentSectionIndex].IsFree())
 								{
 									introduce = false;
 								}
@@ -1019,6 +1021,16 @@ namespace OpenBve
 						TrackPosition -= 0.5 * (Couplers[i].MinimumDistanceBetweenCars + Couplers[i].MaximumDistanceBetweenCars);
 					}
 				}
+			}
+
+			public override double FrontCarTrackPosition()
+			{
+				return Cars[0].FrontAxle.Follower.TrackPosition - Cars[0].FrontAxle.Position + 0.5 * Cars[0].Length;
+			}
+
+			public override double RearCarTrackPosition()
+			{
+				return Cars[Cars.Length - 1].RearAxle.Follower.TrackPosition - Cars[Cars.Length - 1].RearAxle.Position - 0.5 * Cars[Cars.Length - 1].Length;
 			}
 		}
 	}

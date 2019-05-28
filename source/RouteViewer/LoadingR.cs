@@ -9,6 +9,8 @@ using System;
 using System.Threading;
 using System.Text;
 using System.Windows.Forms;
+using LibRender;
+using OpenBve.SignalManager;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
 using OpenBveApi.Runtime;
@@ -146,8 +148,8 @@ namespace OpenBve {
 			ObjectManager.FinishCreatingObjects();
 			// signals
 			System.Threading.Thread.Sleep(1); if (Cancel) return;
-			if (Game.Sections.Length > 0) {
-				Game.UpdateSection(Game.Sections.Length - 1);
+			if (CurrentRoute.Sections.Length > 0) {
+				Game.UpdateSection(CurrentRoute.Sections.Length - 1);
 			}
 			// starting track position
 			System.Threading.Thread.Sleep(1); if (Cancel) return;
@@ -173,7 +175,7 @@ namespace OpenBve {
 			// initialize camera
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, -1.0, true, false);
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, FirstStationPosition, true, false);
-			World.CameraCurrentAlignment = new World.CameraAlignment(new Vector3(0.0, 2.5, 0.0), 0.0, 0.0, 0.0, FirstStationPosition, 1.0);
+			World.CameraCurrentAlignment = new CameraAlignment(new Vector3(0.0, 2.5, 0.0), 0.0, 0.0, 0.0, FirstStationPosition, 1.0);
 			World.UpdateAbsoluteCamera(0.0);
 			ObjectManager.UpdateVisibility(World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z);
 		}

@@ -1,5 +1,7 @@
 ﻿using System;
 using OpenBveApi.Math;
+using OpenBve.SignalManager;
+
 // ReSharper disable UnusedMember.Global
 
 namespace OpenBve
@@ -25,22 +27,22 @@ namespace OpenBve
                 if (IsPartOfTrain)
                 {
                     int nextSectionIndex = Train.CurrentSectionIndex + 1;
-                    if (nextSectionIndex >= 0 & nextSectionIndex < Game.Sections.Length)
+                    if (nextSectionIndex >= 0 & nextSectionIndex < CurrentRoute.Sections.Length)
                     {
-                        int a = Game.Sections[nextSectionIndex].CurrentAspect;
-                        if (a >= 0 & a < Game.Sections[nextSectionIndex].Aspects.Length)
+                        int a = CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
+                        if (a >= 0 & a < CurrentRoute.Sections[nextSectionIndex].Aspects.Length)
                         {
-                            return Game.Sections[nextSectionIndex].Aspects[a].Number;
+                            return CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
                         }
                         return 0;
                     }
                 }
-                else if (SectionIndex >= 0 & SectionIndex < Game.Sections.Length)
+                else if (SectionIndex >= 0 & SectionIndex < CurrentRoute.Sections.Length)
                 {
-                    int a = Game.Sections[SectionIndex].CurrentAspect;
-                    if (a >= 0 & a < Game.Sections[SectionIndex].Aspects.Length)
+                    int a = CurrentRoute.Sections[SectionIndex].CurrentAspect;
+                    if (a >= 0 & a < CurrentRoute.Sections[SectionIndex].Aspects.Length)
                     {
-                        return Game.Sections[SectionIndex].Aspects[a].Number;
+                        return CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
                     }
                 }
                 return 0;
@@ -212,11 +214,8 @@ namespace OpenBve
             public static double trackDistance(TrainManager.Train Train, double TrackPosition)
             {
                 if (Train == null) return 0.0;
-                int r = Train.Cars.Length - 1;
-                double t0 = Train.Cars[0].FrontAxle.Follower.TrackPosition - Train.Cars[0].FrontAxle.Position +
-                            0.5*Train.Cars[0].Length;
-                double t1 = Train.Cars[r].RearAxle.Follower.TrackPosition - Train.Cars[r].RearAxle.Position -
-                            0.5*Train.Cars[r].Length;
+                double t0 = Train.FrontCarTrackPosition();
+                double t1 = Train.RearCarTrackPosition();
                 return TrackPosition > t0 ? TrackPosition - t0 : TrackPosition < t1 ? TrackPosition - t1 : 0.0;
             }
 

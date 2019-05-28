@@ -9,6 +9,8 @@ using System;
 using OpenBveApi.Graphics;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
+using OpenBveApi.Objects;
+using OpenBveApi.Trains;
 
 namespace OpenBve {
 
@@ -41,20 +43,6 @@ namespace OpenBve {
 			internal int Number;
 			internal double Speed;
 		}
-		internal struct Section {
-			internal int PreviousSection;
-			internal int NextSection;
-			internal TrainManager.Train[] Trains;
-			internal bool TrainReachedStopPoint;
-			internal int StationIndex;
-			internal bool Invisible;
-			internal double TrackPosition;
-			internal SectionType Type;
-			internal SectionAspect[] Aspects;
-			internal int CurrentAspect;
-			internal int FreeSections;
-		}
-		internal static Section[] Sections = new Section[] { };
 		internal static int InfoTotalTriangles = 0;
 		internal static int InfoTotalTriangleStrip = 0;
 		internal static int InfoTotalQuads = 0;
@@ -62,7 +50,7 @@ namespace OpenBve {
 		internal static int InfoTotalPolygon = 0;
 		internal static void Reset() {
 			Renderer.Reset();
-			ObjectManager.Objects = new ObjectManager.StaticObject[16];
+			ObjectManager.Objects = new StaticObject[16];
 			ObjectManager.ObjectsUsed = 0;
 			ObjectManager.ObjectsSortedByStart = new int[] { };
 			ObjectManager.ObjectsSortedByEnd = new int[] { };
@@ -118,21 +106,13 @@ namespace OpenBve {
 		    internal int AntialiasingLevel;
 			internal int ObjectOptimizationBasicThreshold;
 			internal int ObjectOptimizationFullThreshold;
-			internal int CurrentXParser;
-			internal int CurrentObjParser;
+			internal XParsers CurrentXParser;
+			internal ObjParsers CurrentObjParser;
 		}
 		internal static Options CurrentOptions;
 
 		// ================================
 
 #pragma warning restore 0649
-
-		// round to power of two
-		internal static int RoundToPowerOfTwo(int Value) {
-			Value -= 1;
-			for (int i = 1; i < sizeof(int) * 8; i *= 2) {
-				Value = Value | Value >> i;
-			} return Value + 1;
-		}
 	}
 }

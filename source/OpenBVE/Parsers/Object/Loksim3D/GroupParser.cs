@@ -6,6 +6,7 @@ using System.Linq;
 using OpenBveApi.FunctionScripting;
 using OpenBveApi.Interface;
 using OpenBveApi.Objects;
+using OpenTK.Graphics.ES20;
 
 namespace OpenBve
 {
@@ -188,7 +189,7 @@ namespace OpenBve
 
 					//Single mesh object, containing all static components of the LS3D object
 					//If we use multiples, the Z-sorting throws a wobbly
-					ObjectManager.StaticObject staticObject = new ObjectManager.StaticObject
+					StaticObject staticObject = new StaticObject(Program.CurrentHost)
 					{
 						Mesh = new Mesh
 						{
@@ -203,7 +204,7 @@ namespace OpenBve
 						{
 							continue;
 						}
-						ObjectManager.StaticObject Object = null;
+						StaticObject Object = null;
 						ObjectManager.AnimatedObjectCollection AnimatedObject = null;
 						try {
 							if (CurrentObjects[i].Name.ToLowerInvariant().EndsWith(".l3dgrp"))
@@ -233,8 +234,8 @@ namespace OpenBve
 								int aL = Result.Objects.Length;
 								Array.Resize<ObjectManager.AnimatedObject>(ref Result.Objects, aL + 1);
 								ObjectManager.AnimatedObject a = new ObjectManager.AnimatedObject();
-								ObjectManager.AnimatedObjectState aos = new ObjectManager.AnimatedObjectState(Object, CurrentObjects[i].Position);
-								a.States = new ObjectManager.AnimatedObjectState[] { aos };
+								AnimatedObjectState aos = new AnimatedObjectState(Object, CurrentObjects[i].Position);
+								a.States = new AnimatedObjectState[] { aos };
 								Result.Objects[aL] = a;
 								Result.Objects[aL].StateFunction = new FunctionScript(Program.CurrentHost, CurrentObjects[i].FunctionScript + " 1 == --", false);
 							}
@@ -266,7 +267,7 @@ namespace OpenBve
 								else
 								{
 									Result.Objects[o] = new ObjectManager.AnimatedObject();
-									Result.Objects[o].States = new ObjectManager.AnimatedObjectState[0];
+									Result.Objects[o].States = new AnimatedObjectState[0];
 								}
 							}
 						}
@@ -275,8 +276,8 @@ namespace OpenBve
 					{
 						Array.Resize<ObjectManager.AnimatedObject>(ref Result.Objects, Result.Objects.Length + 1);
 						ObjectManager.AnimatedObject a = new ObjectManager.AnimatedObject();
-						ObjectManager.AnimatedObjectState aos = new ObjectManager.AnimatedObjectState(staticObject, Vector3.Zero);
-						a.States = new ObjectManager.AnimatedObjectState[] { aos };
+						AnimatedObjectState aos = new AnimatedObjectState(staticObject, Vector3.Zero);
+						a.States = new AnimatedObjectState[] { aos };
 						Result.Objects[Result.Objects.Length - 1] = a;
 					}
 				}

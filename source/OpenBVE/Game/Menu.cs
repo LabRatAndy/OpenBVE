@@ -5,6 +5,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;             // for Key
 using System;
 using System.Drawing;
+using LibRender;
 
 namespace OpenBve
 {
@@ -151,7 +152,7 @@ namespace OpenBve
 				{
 					case MenuType.Top:          // top level menu
 						for (i = 0; i < Game.Stations.Length; i++)
-							if (Game.PlayerStopsAtStation(i) & Game.Stations[i].Stops.Length > 0)
+							if (Game.Stations[i].PlayerStops() & Game.Stations[i].Stops.Length > 0)
 							{
 								jump = 1;
 								break;
@@ -177,7 +178,7 @@ namespace OpenBve
 													// count the number of available stations
 						menuItem = 0;
 						for (i = 0; i < Game.Stations.Length; i++)
-							if (Game.PlayerStopsAtStation(i) & Game.Stations[i].Stops.Length > 0)
+							if (Game.Stations[i].PlayerStops() & Game.Stations[i].Stops.Length > 0)
 								menuItem++;
 						// list available stations, selecting the next station as predefined choice
 						jump = 0;                           // no jump found yet
@@ -185,7 +186,7 @@ namespace OpenBve
 						Items[0] = new MenuCommand(Translations.GetInterfaceString("menu_back"), MenuTag.MenuBack, 0);
 						menuItem = 1;
 						for (i = 0; i < Game.Stations.Length; i++)
-							if (Game.PlayerStopsAtStation(i) & Game.Stations[i].Stops.Length > 0)
+							if (Game.Stations[i].PlayerStops() & Game.Stations[i].Stops.Length > 0)
 							{
 								Items[menuItem] = new MenuCommand(Game.Stations[i].Name, MenuTag.JumpToStation, i);
 								// if no preferred jump-to-station found yet and this station is
@@ -314,7 +315,7 @@ namespace OpenBve
 					{
 						continue;
 					}
-					size = Renderer.MeasureString(Game.Menu.MenuFont, Items[i].Text);
+					size = Game.Menu.MenuFont.MeasureString(Items[i].Text);
 					if (size.Width > Width)
 						Width = size.Width;
 					if (!(Items[i] is MenuCaption) && size.Width > ItemWidth)
@@ -337,7 +338,7 @@ namespace OpenBve
 		// the total line height from the top of an item to the top of the item below (in pixels)
 		private int lineHeight;
 		private SingleMenu[] Menus = { };
-		private Fonts.OpenGlFont menuFont = null;
+		private OpenGlFont menuFont = null;
 		// area occupied by the items of the current menu in screen coordinates
 		private int menuXmin, menuXmax, menuYmin, menuYmax;
 		private int topItemY;           // the top edge of top item
@@ -350,7 +351,7 @@ namespace OpenBve
 				return lineHeight;
 			}
 		}
-		internal Fonts.OpenGlFont MenuFont
+		internal OpenGlFont MenuFont
 		{
 			get
 			{
@@ -752,7 +753,7 @@ namespace OpenBve
 					itemLeft + menu.ItemWidth + MenuItemBorderX, menuYmin + em + MenuItemBorderY * 2);
 			}
 			if (menu.TopItem > 0)
-				Renderer.DrawString(MenuFont, "...", new Point(itemX, menuYmin),
+				LibRender.Renderer.DrawString(MenuFont, "...", new Point(itemX, menuYmin),
 					menu.Align, ColourDimmed, false);
 			// draw the items
 			int itemY = topItemY;
@@ -771,14 +772,14 @@ namespace OpenBve
 					Renderer.RenderOverlaySolid(itemLeft - MenuItemBorderX, itemY/*-MenuItemBorderY*/,
 						itemLeft + menu.ItemWidth + MenuItemBorderX, itemY + em + MenuItemBorderY * 2);
 					// draw the text
-					Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
+					LibRender.Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
 						menu.Align, ColourHighlight, false);
 				}
 				else if (menu.Items[i] is MenuCaption)
-					Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
+					LibRender.Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
 						menu.Align, ColourCaption, false);
 				else
-					Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
+					LibRender.Renderer.DrawString(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
 						menu.Align, ColourNormal, false);
 				itemY += lineHeight;
 			}
@@ -792,7 +793,7 @@ namespace OpenBve
 			}
 			// if not at the end of the menu, draw a dimmed ellipsis item at the bottom
 			if (i < menu.Items.Length - 1)
-				Renderer.DrawString(MenuFont, "...", new Point(itemX, itemY),
+				LibRender.Renderer.DrawString(MenuFont, "...", new Point(itemX, itemY),
 					menu.Align, ColourDimmed, false);
 		}
 

@@ -1,9 +1,11 @@
 ﻿using System;
 using CSScriptLibrary;
+using LibRender;
 using OpenBveApi.FunctionScripting;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
+using OpenBveApi.Trains;
 using OpenBveApi.World;
 
 namespace OpenBve
@@ -11,81 +13,9 @@ namespace OpenBve
 	/// <summary>The ObjectManager is the root class containing functions to load and manage objects within the simulation world</summary>
 	public static partial class ObjectManager
 	{
-		internal struct AnimatedObjectState
+		
+		internal class AnimatedObject : AnimatedObjectBase
 		{
-			internal Vector3 Position;
-			internal StaticObject Object;
-
-			internal AnimatedObjectState(StaticObject stateObject, Vector3 position)
-			{
-				Object = stateObject;
-				Position = position;
-			}
-		}
-		internal class AnimatedObject
-		{
-			// states
-			internal AnimatedObjectState[] States;
-			internal FunctionScript StateFunction;
-			internal int CurrentState;
-			internal Vector3 TranslateXDirection;
-			internal Vector3 TranslateYDirection;
-			internal Vector3 TranslateZDirection;
-			internal FunctionScript TranslateXFunction;
-			internal FunctionScript TranslateYFunction;
-			internal FunctionScript TranslateZFunction;
-
-			internal Vector3 RotateXDirection;
-			internal Vector3 RotateYDirection;
-			internal Vector3 RotateZDirection;
-			internal FunctionScript RotateXFunction;
-			internal FunctionScript RotateYFunction;
-			internal FunctionScript RotateZFunction;
-			internal Damping RotateXDamping;
-			internal Damping RotateYDamping;
-			internal Damping RotateZDamping;
-			internal Vector2 TextureShiftXDirection;
-			internal Vector2 TextureShiftYDirection;
-			internal FunctionScript TextureShiftXFunction;
-			internal FunctionScript TextureShiftYFunction;
-			internal bool LEDClockwiseWinding;
-			internal double LEDInitialAngle;
-			internal double LEDLastAngle;
-			/// <summary>If LEDFunction is used, an array of five vectors representing the bottom-left, up-left, up-right, bottom-right and center coordinates of the LED square, or a null reference otherwise.</summary>
-			internal Vector3[] LEDVectors;
-			internal FunctionScript LEDFunction;
-			internal double RefreshRate;
-			internal double SecondsSinceLastUpdate;
-			internal int ObjectIndex;
-
-			//This section holds script files executed by CS-Script
-			/// <summary>The absolute path to the script file to be evaluated when TranslateXScript is called</summary>
-			internal string TranslateXScriptFile;
-			internal AnimationScript TranslateXAnimationScript;
-			/// <summary>The absolute path to the script file to be evaluated when TranslateYScript is called</summary>
-			internal AnimationScript TranslateYAnimationScript;
-			internal string TranslateYScriptFile;
-			/// <summary>The absolute path to the script file to be evaluated when TranslateZScript is called</summary>
-			internal AnimationScript TranslateZAnimationScript;
-			internal string TranslateZScriptFile;
-
-			internal FunctionScript TrackFollowerFunction;
-			//This section holds parameters used by the track following function
-			internal double FrontAxlePosition = 1;
-			internal double RearAxlePosition = -1;
-
-			/// <summary>Checks whether this object contains any functions</summary>
-			internal bool IsFreeOfFunctions()
-			{
-				if (this.StateFunction != null) return false;
-				if (this.TrackFollowerFunction != null) return false;
-				if (this.TranslateXFunction != null | this.TranslateYFunction != null | this.TranslateZFunction != null) return false;
-				if (this.RotateXFunction != null | this.RotateYFunction != null | this.RotateZFunction != null) return false;
-				if (this.TextureShiftXFunction != null | this.TextureShiftYFunction != null) return false;
-				if (this.LEDFunction != null) return false;
-				if (this.TranslateXScriptFile != null | this.TranslateYScriptFile != null | this.TranslateZScriptFile != null) return false;
-				return true;
-			}
 			/// <summary>Clones this object</summary>
 			/// <returns>The new object</returns>
 			internal AnimatedObject Clone()
@@ -96,7 +26,7 @@ namespace OpenBve
 					Result.States[i].Position = this.States[i].Position;
 					if (this.States[i].Object != null)
 					{
-						Result.States[i].Object = this.States[i].Object.Clone();
+						Result.States[i].Object = (StaticObject)this.States[i].Object.Clone();
 					}
 				}
 				Result.TrackFollowerFunction = this.TrackFollowerFunction == null ? null : this.TrackFollowerFunction.Clone();
@@ -143,6 +73,13 @@ namespace OpenBve
 				Result.RefreshRate = this.RefreshRate;
 				Result.SecondsSinceLastUpdate = 0.0;
 				Result.ObjectIndex = -1;
+				for (int i = 0; i < Timetable.CustomObjectsUsed; i++)
+				{
+					if (Timetable.CustomObjects[i] == this)
+					{
+						Timetable.AddObjectForCustomTimetable(Result);
+					}
+				}
 				return Result;
 			}
 
@@ -184,7 +121,7 @@ namespace OpenBve
 				}
 				else
 				{
-					ObjectManager.Objects[i] = new StaticObject();
+					ObjectManager.Objects[i] = new StaticObject(Program.CurrentHost);
 				}
 				CurrentState = StateIndex;
 				if (Show)
@@ -216,7 +153,7 @@ namespace OpenBve
 			/// <param name="TimeElapsed">The time elapsed since this object was last updated</param>
 			/// <param name="EnableDamping">Whether damping is to be applied for this call</param>
             /// <param name="IsTouch">Whether Animated Object belonging to TouchElement class.</param>
-			internal void Update(bool IsPartOfTrain, TrainManager.Train Train, int CarIndex, int SectionIndex, double TrackPosition, Vector3 Position, Vector3 Direction, Vector3 Up, Vector3 Side, bool Overlay, bool UpdateFunctions, bool Show, double TimeElapsed, bool EnableDamping, bool IsTouch = false)
+			internal void Update(bool IsPartOfTrain, AbstractTrain Train, int CarIndex, int SectionIndex, double TrackPosition, Vector3 Position, Vector3 Direction, Vector3 Up, Vector3 Side, bool Overlay, bool UpdateFunctions, bool Show, double TimeElapsed, bool EnableDamping, bool IsTouch = false)
 			{
 				int s = CurrentState;
 				int i = ObjectIndex;
@@ -746,7 +683,7 @@ namespace OpenBve
 						ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates.Rotate(RotateZDirection, cosZ, sinZ);
 					}
 					// translate
-					if (Overlay & World.CameraRestriction != Camera.RestrictionMode.NotAvailable)
+					if (Overlay & World.CameraRestriction != CameraRestrictionMode.NotAvailable)
 					{
 						ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates += States[s].Position - Position;
 						ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates.Rotate(World.AbsoluteCameraDirection, World.AbsoluteCameraUp, World.AbsoluteCameraSide);
@@ -845,7 +782,7 @@ namespace OpenBve
 					{
 						if (currentObject.Object.States[i].Object == null)
 						{
-							currentObject.Object.States[i].Object = new StaticObject { RendererIndex =  -1 };
+							currentObject.Object.States[i].Object = new StaticObject(Program.CurrentHost) { RendererIndex =  -1 };
 						}
 					}
 					double r = 0.0;
@@ -859,10 +796,7 @@ namespace OpenBve
 						}
 						for (int j = 0; j < currentObject.Object.States[i].Object.Mesh.Vertices.Length; j++)
 						{
-							double x = States[i].Object.Mesh.Vertices[j].Coordinates.X;
-							double y = States[i].Object.Mesh.Vertices[j].Coordinates.Y;
-							double z = States[i].Object.Mesh.Vertices[j].Coordinates.Z;
-							double t = x * x + y * y + z * z;
+							double t = States[i].Object.Mesh.Vertices[j].Coordinates.Norm();
 							if (t > r) r = t;
 						}
 					}
@@ -889,7 +823,7 @@ namespace OpenBve
 					{
 						if (currentObject.Object.States[i].Object == null)
 						{
-							currentObject.Object.States[i].Object = new StaticObject { RendererIndex =  -1 };
+							currentObject.Object.States[i].Object = new StaticObject(Program.CurrentHost) { RendererIndex =  -1 };
 						}
 					}
 					double r = 0.0;
@@ -903,10 +837,7 @@ namespace OpenBve
 						}
 						for (int j = 0; j < currentObject.Object.States[i].Object.Mesh.Vertices.Length; j++)
 						{
-							double x = States[i].Object.Mesh.Vertices[j].Coordinates.X;
-							double y = States[i].Object.Mesh.Vertices[j].Coordinates.Y;
-							double z = States[i].Object.Mesh.Vertices[j].Coordinates.Z;
-							double t = x * x + y * y + z * z;
+							double t = States[i].Object.Mesh.Vertices[j].Coordinates.Norm();
 							if (t > r) r = t;
 						}
 					}

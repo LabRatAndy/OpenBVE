@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using OpenBveApi;
 using OpenBveApi.Interface;
+using OpenBve.SignalManager;
 
 namespace OpenBve {
 	internal static class Illustrations {
@@ -171,7 +172,7 @@ namespace OpenBve {
 							// if StationStartEvent found, look for a change in ATS/ATC control;
 							// if there is a change, draw all previous track elements
 							// with colour for the previous control state
-							if (Game.Stations[e.StationIndex].SafetySystem == Game.SafetySystem.Atc)
+							if (Game.Stations[e.StationIndex].SafetySystem == SafetySystem.Atc)
 							{
 								if (!atc)
 								{
@@ -215,7 +216,7 @@ namespace OpenBve {
 							// station circle
 							RectangleF r = new RectangleF((float)x - StationRadius, (float)y - StationRadius,
 								StationDiameter, StationDiameter);
-							bool q = Game.PlayerStopsAtStation(e.StationIndex);
+							bool q = Game.Stations[e.StationIndex].PlayerStops();
 							g.FillEllipse(q ? mapColors[mode].actStatnFill : mapColors[mode].inactStatnFill, r);
 							g.DrawEllipse(q ? mapColors[mode].actStatnBrdr : mapColors[mode].inactStatnBrdr, r);
 							// adjust bitmap occupied area
@@ -249,7 +250,7 @@ namespace OpenBve {
 								double y = TrackManager.Tracks[0].Elements[i].WorldPosition.Z;
 								x = ox + (x - x0) * xd;
 								y = oy + (z0 - y) * zd + h;
-								bool stop = Game.PlayerStopsAtStation(e.StationIndex);
+								bool stop = Game.Stations[e.StationIndex].PlayerStops();
 								string t = Game.Stations[e.StationIndex].Name;
 								SizeF m = g.MeasureString(t, f, Width, StringFormat.GenericDefault);
 								double sx = TrackManager.Tracks[0].Elements[i].WorldSide.X;
@@ -449,7 +450,7 @@ namespace OpenBve {
 							TrackManager.StationStartEvent e = (TrackManager.StationStartEvent)TrackManager.Tracks[0].Elements[i].Events[j];
 							if (Game.Stations[e.StationIndex].Name != string.Empty)
 							{
-								bool stop = Game.PlayerStopsAtStation(e.StationIndex);
+								bool stop = Game.Stations[e.StationIndex].PlayerStops();
 								if (Game.Stations[e.StationIndex].Name.IsJapanese())
 								{
 									m.Alignment = StringAlignment.Near;

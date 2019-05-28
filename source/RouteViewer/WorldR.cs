@@ -6,7 +6,9 @@
 // ╚═════════════════════════════════════════════════════════════╝
 
 using System;
+using LibRender;
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
 using OpenBveApi.Runtime;
 using OpenBveApi.Textures;
 
@@ -22,38 +24,33 @@ namespace OpenBve {
 		internal static double BackwardViewingDistance;
 		internal static double ExtraViewingDistance;
 		internal static double BackgroundImageDistance;
-		internal struct Background {
+		internal class StaticBackground : BackgroundHandle {
 			internal Texture Texture;
 			internal int Repetition;
 			internal bool KeepAspectRatio;
-			internal Background(Texture texture, int Repetition, bool KeepAspectRatio) {
+			internal StaticBackground(Texture texture, int Repetition, bool KeepAspectRatio) {
 				this.Texture = texture;
 				this.Repetition = Repetition;
 				this.KeepAspectRatio = KeepAspectRatio;
 			}
+
+			public override void UpdateBackground(double ElapsedTime, bool Target)
+			{
+			}
+
+			public override void RenderBackground(float Alpha, float Scale)
+			{
+			}
+
+			public override void RenderBackground(float Scale)
+			{
+			}
 		}
-		internal static Background CurrentBackground = new Background(null, 6, false);
-		internal static Background TargetBackground = new Background(null, 6, false);
+		internal static BackgroundHandle CurrentBackground = new StaticBackground(null, 6, false);
+		internal static BackgroundHandle TargetBackground = new StaticBackground(null, 6, false);
 		internal const double TargetBackgroundDefaultCountdown = 0.8;
 		internal static double TargetBackgroundCountdown;
 
-		// relative camera
-		internal struct CameraAlignment {
-			internal Vector3 Position;
-			internal double Yaw;
-			internal double Pitch;
-			internal double Roll;
-			internal double TrackPosition;
-			internal double Zoom;
-			internal CameraAlignment(Vector3 Position, double Yaw, double Pitch, double Roll, double TrackPosition, double Zoom) {
-				this.Position = Position;
-				this.Yaw = Yaw;
-				this.Pitch = Pitch;
-				this.Roll = Roll;
-				this.TrackPosition = TrackPosition;
-				this.Zoom = Zoom;
-			}
-		}
 		internal static TrackManager.TrackFollower CameraTrackFollower;
 		internal static CameraAlignment CameraCurrentAlignment;
 		internal static CameraAlignment CameraAlignmentDirection;
@@ -64,11 +61,6 @@ namespace OpenBve {
 		internal static CameraViewMode CameraMode;
 
 		// camera restriction
-		internal enum CameraRestrictionMode {
-			NotAvailable = -1,
-			Off = 0,
-			On = 1
-		}
 		internal static CameraRestrictionMode CameraRestriction = CameraRestrictionMode.NotAvailable;
 		
 		// absolute camera

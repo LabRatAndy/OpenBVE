@@ -1496,7 +1496,7 @@ namespace OpenBve {
 			Vertex t1 = new Vertex(v[1], new Vector2(0.0f, 0.0f));
 			Vertex t2 = new Vertex(v[2], new Vector2(1.0f, 0.0f));
 			Vertex t3 = new Vertex(v[3], new Vector2(1.0f, 1.0f));
-			ObjectManager.StaticObject Object = new ObjectManager.StaticObject();
+			StaticObject Object = new StaticObject(Program.CurrentHost);
 			Object.Mesh.Vertices = new VertexTemplate[] { t0, t1, t2, t3 };
 			Object.Mesh.Faces = new MeshFace[] { new MeshFace(new int[] { 0, 1, 2, 3 }) };
 			Object.Mesh.Materials = new MeshMaterial[1];
@@ -1515,7 +1515,7 @@ namespace OpenBve {
 			if (AddStateToLastElement) {
 				int n = Group.Elements.Length - 1;
 				int j = Group.Elements[n].States.Length;
-				Array.Resize<ObjectManager.AnimatedObjectState>(ref Group.Elements[n].States, j + 1);
+				Array.Resize<AnimatedObjectState>(ref Group.Elements[n].States, j + 1);
 				Group.Elements[n].States[j].Position = o;
 				Group.Elements[n].States[j].Object = Object;
 				return n;
@@ -1523,12 +1523,12 @@ namespace OpenBve {
 				int n = Group.Elements.Length;
 				Array.Resize<ObjectManager.AnimatedObject>(ref Group.Elements, n + 1);
 				Group.Elements[n] = new ObjectManager.AnimatedObject();
-				Group.Elements[n].States = new ObjectManager.AnimatedObjectState[1];
+				Group.Elements[n].States = new AnimatedObjectState[1];
 				Group.Elements[n].States[0].Position = o;
 				Group.Elements[n].States[0].Object = Object;
 				Group.Elements[n].CurrentState = 0;
 				Group.Elements[n].ObjectIndex = ObjectManager.CreateDynamicObject();
-				ObjectManager.Objects[Group.Elements[n].ObjectIndex] = Object.Clone();
+				ObjectManager.Objects[Group.Elements[n].ObjectIndex] = (StaticObject)Object.Clone();
 				return n;
 			}
 		}

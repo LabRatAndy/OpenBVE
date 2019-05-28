@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenBveApi.Runtime;
 using OpenBveApi.Trains;
+using OpenBve.SignalManager;
 
 namespace OpenBve
 {
@@ -57,6 +58,14 @@ namespace OpenBve
 			}
 			private void PerformDefault()
 			{
+				if (Train.Derailed)
+				{
+					if (Train.Handles.EmergencyBrake.Driver != true)
+					{
+						Train.ApplyEmergencyBrake();
+					}
+					return;
+				}
 				// personality
 				double spd = Train.Specs.CurrentAverageSpeed;
 				if (Train.Station >= 0 & Train.StationState == TrainManager.TrainStopState.Boarding)
@@ -218,7 +227,7 @@ namespace OpenBve
 						if (Train.Station >= 0 & Train.StationState == TrainManager.TrainStopState.Completed)
 						{
 							// ready for departure - close doors
-							if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == TrainManager.DoorInterlockStates.Unlocked)
+							if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == DoorInterlockStates.Unlocked)
 							{
 								TrainManager.CloseTrainDoors(Train, true, true);
 							}
@@ -229,7 +238,7 @@ namespace OpenBve
 						else
 						{
 							// not at station - close doors
-							if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == TrainManager.DoorInterlockStates.Unlocked)
+							if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == DoorInterlockStates.Unlocked)
 							{
 								TrainManager.CloseTrainDoors(Train, true, true);
 							}
@@ -239,7 +248,7 @@ namespace OpenBve
 				else if (Train.Station >= 0 && stopIndex >= 0 && Train.StationDistanceToStopPoint < Stations[Train.Station].Stops[stopIndex].BackwardTolerance && (StopsAtStation(Train.Station, Train) & (Stations[Train.Station].OpenLeftDoors | Stations[Train.Station].OpenRightDoors) & Math.Abs(Train.Specs.CurrentAverageSpeed) < 0.25 & Train.StationState == TrainManager.TrainStopState.Pending))
 				{
 					// arrived at station - open doors
-					if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == TrainManager.DoorInterlockStates.Unlocked)
+					if (Train.Specs.DoorOpenMode != TrainManager.DoorMode.Automatic && Train.Specs.DoorInterlockState == DoorInterlockStates.Unlocked)
 					{
 						TrainManager.OpenTrainDoors(Train, Stations[Train.Station].OpenLeftDoors, Stations[Train.Station].OpenRightDoors);
 					}
@@ -361,7 +370,7 @@ namespace OpenBve
 					bool reduceDecelerationCruiseAndStart = false;
 					// look ahead
 					double lookahead = (Train.Station >= 0 ? 150.0 : 50.0) + (spd * spd) / (2.0 * decelerationCruise);
-					double tp = Train.Cars[0].FrontAxle.Follower.TrackPosition - Train.Cars[0].FrontAxle.Position + 0.5 * Train.Cars[0].Length;
+					double tp = Train.FrontCarTrackPosition();
 					double stopDistance = double.MaxValue;
 					{
 						// next station stop
@@ -417,9 +426,9 @@ namespace OpenBve
 									TrackManager.SectionChangeEvent e = (TrackManager.SectionChangeEvent)TrackManager.Tracks[0].Elements[i].Events[j];
 									if (stp + e.TrackPositionDelta > tp)
 									{
-										if (!Game.Sections[e.NextSectionIndex].Invisible & Game.Sections[e.NextSectionIndex].CurrentAspect >= 0)
+										if (!CurrentRoute.Sections[e.NextSectionIndex].Invisible & CurrentRoute.Sections[e.NextSectionIndex].CurrentAspect >= 0)
 										{
-											double elim = Game.Sections[e.NextSectionIndex].Aspects[Game.Sections[e.NextSectionIndex].CurrentAspect].Speed * this.CurrentSpeedFactor;
+											double elim = CurrentRoute.Sections[e.NextSectionIndex].Aspects[CurrentRoute.Sections[e.NextSectionIndex].CurrentAspect].Speed * this.CurrentSpeedFactor;
 											if (elim < spd | spd <= 0.0)
 											{
 												double dist = stp + e.TrackPositionDelta - tp;

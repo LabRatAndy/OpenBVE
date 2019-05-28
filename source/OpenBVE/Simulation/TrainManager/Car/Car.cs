@@ -1,4 +1,5 @@
 using System;
+using LibRender;
 using OpenBve.BrakeSystems;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
@@ -16,13 +17,13 @@ namespace OpenBve
 			/// <summary>Rear axle about which the car pivots</summary>
 			internal Axle RearAxle;
 			/// <summary>The front bogie</summary>
-			internal Bogie FrontBogie;
+			internal readonly Bogie FrontBogie;
 			/// <summary>The rear bogie</summary>
-			internal Bogie RearBogie;
+			internal readonly Bogie RearBogie;
 			/// <summary>The horns attached to this car</summary>
 			internal Horn[] Horns;
 			/// <summary>The doors for this car</summary>
-			internal Door[] Doors;
+			internal readonly Door[] Doors;
 			/// <summary>The car brake for this car</summary>
 			internal CarBrake CarBrake;
 			/// <summary>The car sections (objects) attached to the car</summary>
@@ -51,9 +52,9 @@ namespace OpenBve
 			/// <summary>The index of the car within the train</summary>
 			internal readonly int Index;
 			/// <summary>Stores the camera restriction mode for the interior view of this car</summary>
-			internal Camera.RestrictionMode CameraRestrictionMode = Camera.RestrictionMode.NotSpecified;
+			internal CameraRestrictionMode CameraRestrictionMode = CameraRestrictionMode.NotSpecified;
 			/// <summary>Stores the camera interior camera alignment for this car</summary>
-			internal World.CameraAlignment InteriorCamera;
+			internal CameraAlignment InteriorCamera;
 
 			internal bool HasInteriorView = false;
 			
@@ -377,12 +378,12 @@ namespace OpenBve
 					Groups = new ElementsGroup[1]
 				};
 				CarSections[j].Groups[0] = new ElementsGroup();
-				if (currentObject is ObjectManager.StaticObject)
+				if (currentObject is StaticObject)
 				{
-					ObjectManager.StaticObject s = (ObjectManager.StaticObject)currentObject;
+					StaticObject s = (StaticObject)currentObject;
 					CarSections[j].Groups[0].Elements = new ObjectManager.AnimatedObject[1];
 					CarSections[j].Groups[0].Elements[0] = new ObjectManager.AnimatedObject();
-					CarSections[j].Groups[0].Elements[0].States = new ObjectManager.AnimatedObjectState[1];
+					CarSections[j].Groups[0].Elements[0].States = new AnimatedObjectState[1];
 					CarSections[j].Groups[0].Elements[0].States[0].Position = Vector3.Zero;
 					CarSections[j].Groups[0].Elements[0].States[0].Object = s;
 					CarSections[j].Groups[0].Elements[0].CurrentState = 0;
@@ -611,7 +612,7 @@ namespace OpenBve
 			private void UpdateCarSectionElement(int SectionIndex, int GroupIndex, int ElementIndex, Vector3 Position, Vector3 Direction, Vector3 Up, Vector3 Side, bool Show, double TimeElapsed, bool ForceUpdate, bool EnableDamping)
 			{
 				Vector3 p;
-				if (CarSections[SectionIndex].Groups[GroupIndex].Overlay & World.CameraRestriction != Camera.RestrictionMode.NotAvailable)
+				if (CarSections[SectionIndex].Groups[GroupIndex].Overlay & World.CameraRestriction != CameraRestrictionMode.NotAvailable)
 				{
 					p = new Vector3(Driver.X, Driver.Y, Driver.Z);
 				}
@@ -652,7 +653,7 @@ namespace OpenBve
 			private void UpdateCarSectionTouchElement(int SectionIndex, int GroupIndex, int ElementIndex, Vector3 Position, Vector3 Direction, Vector3 Up, Vector3 Side, bool Show, double TimeElapsed, bool ForceUpdate, bool EnableDamping)
 			{
 				Vector3 p;
-				if (CarSections[SectionIndex].Groups[GroupIndex].Overlay & World.CameraRestriction != Camera.RestrictionMode.NotAvailable)
+				if (CarSections[SectionIndex].Groups[GroupIndex].Overlay & World.CameraRestriction != CameraRestrictionMode.NotAvailable)
 				{
 					p = new Vector3(Driver.X, Driver.Y, Driver.Z);
 				}

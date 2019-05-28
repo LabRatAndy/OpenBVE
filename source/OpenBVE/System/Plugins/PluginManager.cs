@@ -4,6 +4,7 @@ using System.Reflection;
 using OpenBveApi.Runtime;
 using OpenBveApi.Interface;
 using OpenBveApi.Trains;
+using OpenBve.SignalManager;
 
 namespace OpenBve {
 	internal static class PluginManager {
@@ -43,8 +44,6 @@ namespace OpenBve {
 			//NEW: Whether this plugin can disable the time acceleration factor
 			/// <summary>Whether this plugin can disable time acceleration.</summary>
 			internal static bool DisableTimeAcceleration;
-			/// <summary>The current camera view mode</summary>
-			internal CameraViewMode CurrentCameraViewMode;
 
 			private List<Station> currentRouteStations;
 			internal bool StationsLoaded;
@@ -139,18 +138,13 @@ namespace OpenBve {
 				 * */
 				double totalTime = Game.SecondsSinceMidnight;
 				double elapsedTime = Game.SecondsSinceMidnight - LastTime;
-				/* 
-				 * Set the current camera view mode
-				 * Could probably do away with the CurrentCameraViewMode and use a direct cast??
-				 * 
-				 */
-				CurrentCameraViewMode = (CameraViewMode)World.CameraMode;
-				ElapseData data = new ElapseData(vehicle, precedingVehicle, handles, (DoorInterlockStates)this.Train.Specs.DoorInterlockState, new Time(totalTime), new Time(elapsedTime), currentRouteStations, CurrentCameraViewMode, Translations.CurrentLanguageCode, this.Train.Destination);
+
+				ElapseData data = new ElapseData(vehicle, precedingVehicle, handles, this.Train.Specs.DoorInterlockState, new Time(totalTime), new Time(elapsedTime), currentRouteStations, World.CameraMode, Translations.CurrentLanguageCode, this.Train.Destination);
 				ElapseData inputDevicePluginData = data;
 				LastTime = Game.SecondsSinceMidnight;
 				Elapse(data);
 				this.PluginMessage = data.DebugMessage;
-				this.Train.Specs.DoorInterlockState = (TrainManager.DoorInterlockStates)data.DoorInterlockState;
+				this.Train.Specs.DoorInterlockState = data.DoorInterlockState;
 				DisableTimeAcceleration = data.DisableTimeAcceleration;
 				for (int i = 0; i < InputDevicePlugin.AvailablePluginInfos.Count; i++) {
 					if (InputDevicePlugin.AvailablePluginInfos[i].Status == InputDevicePlugin.PluginInfo.PluginStatus.Enable) {
@@ -434,12 +428,12 @@ namespace OpenBve {
 				if (sectionIndex == -1) {
 					sectionIndex = this.Train.CurrentSectionIndex + 1;
 					SignalData signal = null;
-					while (sectionIndex < Game.Sections.Length) {
-						signal = Game.GetPluginSignal(this.Train, sectionIndex);
+					while (sectionIndex < CurrentRoute.Sections.Length) {
+						signal = CurrentRoute.Sections[sectionIndex].GetPluginSignal(this.Train);
 						if (signal.Aspect == 0) break;
 						sectionIndex++;
 					}
-					if (sectionIndex < Game.Sections.Length) {
+					if (sectionIndex < CurrentRoute.Sections.Length) {
 						SetBeacon(new BeaconData(type, optional, signal));
 					} else {
 						SetBeacon(new BeaconData(type, optional, new SignalData(-1, double.MaxValue)));
@@ -447,8 +441,8 @@ namespace OpenBve {
 				}
 				if (sectionIndex >= 0) {
 					SignalData signal;
-					if (sectionIndex < Game.Sections.Length) {
-						signal = Game.GetPluginSignal(this.Train, sectionIndex);
+					if (sectionIndex < CurrentRoute.Sections.Length) {
+						signal = CurrentRoute.Sections[sectionIndex].GetPluginSignal(this.Train);
 					} else {
 						signal = new SignalData(0, double.MaxValue);
 					}

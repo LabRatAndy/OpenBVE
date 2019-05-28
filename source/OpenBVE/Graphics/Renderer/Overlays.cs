@@ -1,4 +1,5 @@
 ﻿using System;
+using LibRender;
 using OpenBveApi.Colors;
 using OpenBveApi.Graphics;
 using OpenBveApi.Runtime;
@@ -19,7 +20,7 @@ namespace OpenBve
 		{
 			//Initialize openGL
 			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-			GL.Enable(EnableCap.Blend); BlendEnabled = true;
+			GL.Enable(EnableCap.Blend); LibRender.Renderer.BlendEnabled = true;
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.PushMatrix();
 			GL.LoadIdentity();
@@ -141,7 +142,7 @@ namespace OpenBve
 				GL.Color4(0.0f, 0.0f, 0.0f, 0.5f);
 				RenderOverlaySolid(0.0, 0.0, (double)Screen.Width, (double)Screen.Height);
 				GL.Color4(1.0f, 1.0f, 1.0f, 1.0f);
-				DrawString(Fonts.VeryLargeFont, "PAUSE", new System.Drawing.Point(Screen.Width / 2, Screen.Height / 2), TextAlignment.CenterMiddle, Color128.White, true);
+				LibRender.Renderer.DrawString(Fonts.VeryLargeFont, "PAUSE", new System.Drawing.Point(Screen.Width / 2, Screen.Height / 2), TextAlignment.CenterMiddle, Color128.White, true);
 			}
 			else if (Game.CurrentInterface == Game.InterfaceType.Menu)
 				Game.Menu.Draw();

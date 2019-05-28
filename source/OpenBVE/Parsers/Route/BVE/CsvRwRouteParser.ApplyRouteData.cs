@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using OpenBveApi.Colors;
 using OpenBveApi.Math;
@@ -8,6 +8,7 @@ using OpenBveApi.Interface;
 using OpenBveApi.Objects;
 using OpenBveApi.FunctionScripting;
 using OpenBve.SignalManager;
+using OpenBveApi.Trains;
 
 namespace OpenBve
 {
@@ -859,7 +860,7 @@ namespace OpenBve
 									}
 									else
 									{
-										ObjectManager.CreateStaticObject((ObjectManager.StaticObject)Data.Structure.FormCL[Data.Blocks[i].Forms[k].FormType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
+										ObjectManager.CreateStaticObject((StaticObject)Data.Structure.FormCL[Data.Blocks[i].Forms[k].FormType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 									}
 									if (Data.Blocks[i].Forms[k].RoofType > 0)
 									{
@@ -877,7 +878,7 @@ namespace OpenBve
 										}
 										else
 										{
-											ObjectManager.CreateStaticObject((ObjectManager.StaticObject)Data.Structure.RoofCL[Data.Blocks[i].Forms[k].RoofType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
+											ObjectManager.CreateStaticObject((StaticObject)Data.Structure.RoofCL[Data.Blocks[i].Forms[k].RoofType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 										}
 									}
 								}
@@ -897,7 +898,7 @@ namespace OpenBve
 									}
 									else
 									{
-										ObjectManager.CreateStaticObject((ObjectManager.StaticObject)Data.Structure.FormCR[Data.Blocks[i].Forms[k].FormType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
+										ObjectManager.CreateStaticObject((StaticObject)Data.Structure.FormCR[Data.Blocks[i].Forms[k].FormType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 									}
 									if (Data.Blocks[i].Forms[k].RoofType > 0)
 									{
@@ -915,7 +916,7 @@ namespace OpenBve
 										}
 										else
 										{
-											ObjectManager.CreateStaticObject((ObjectManager.StaticObject)Data.Structure.RoofCR[Data.Blocks[i].Forms[k].RoofType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
+											ObjectManager.CreateStaticObject((StaticObject)Data.Structure.RoofCR[Data.Blocks[i].Forms[k].RoofType], pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 										}
 									}
 								}
@@ -951,7 +952,7 @@ namespace OpenBve
 											}
 											else
 											{
-												ObjectManager.StaticObject FormC = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.FormCL[Data.Blocks[i].Forms[k].FormType], d0, d1);
+												StaticObject FormC = GetTransformedStaticObject((StaticObject)Data.Structure.FormCL[Data.Blocks[i].Forms[k].FormType], d0, d1);
 												ObjectManager.CreateStaticObject(FormC, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 											}
 											if (Data.Blocks[i].Forms[k].RoofType > 0)
@@ -970,7 +971,7 @@ namespace OpenBve
 												}
 												else
 												{
-													ObjectManager.StaticObject RoofC = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.RoofCL[Data.Blocks[i].Forms[k].RoofType], d0, d1);
+													StaticObject RoofC = GetTransformedStaticObject((StaticObject)Data.Structure.RoofCL[Data.Blocks[i].Forms[k].RoofType], d0, d1);
 													ObjectManager.CreateStaticObject(RoofC, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 												}
 											}
@@ -991,7 +992,7 @@ namespace OpenBve
 											}
 											else
 											{
-												ObjectManager.StaticObject FormC = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.FormCR[Data.Blocks[i].Forms[k].FormType], d0, d1);
+												StaticObject FormC = GetTransformedStaticObject((StaticObject)Data.Structure.FormCR[Data.Blocks[i].Forms[k].FormType], d0, d1);
 												ObjectManager.CreateStaticObject(FormC, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 											}
 											if (Data.Blocks[i].Forms[k].RoofType > 0)
@@ -1010,7 +1011,7 @@ namespace OpenBve
 												}
 												else
 												{
-													ObjectManager.StaticObject RoofC = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.RoofCR[Data.Blocks[i].Forms[k].RoofType], d0, d1);
+													StaticObject RoofC = GetTransformedStaticObject((StaticObject)Data.Structure.RoofCR[Data.Blocks[i].Forms[k].RoofType], d0, d1);
 													ObjectManager.CreateStaticObject(RoofC, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 												}
 											}
@@ -1099,7 +1100,7 @@ namespace OpenBve
 										}
 										else
 										{
-											ObjectManager.StaticObject Crack = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.CrackL[Data.Blocks[i].Cracks[k].Type], d0, d1);
+											StaticObject Crack = GetTransformedStaticObject((StaticObject)Data.Structure.CrackL[Data.Blocks[i].Cracks[k].Type], d0, d1);
 											ObjectManager.CreateStaticObject(Crack, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 										}
 									}
@@ -1111,7 +1112,7 @@ namespace OpenBve
 										}
 										else
 										{
-											ObjectManager.StaticObject Crack = GetTransformedStaticObject((ObjectManager.StaticObject)Data.Structure.CrackR[Data.Blocks[i].Cracks[k].Type], d0, d1);
+											StaticObject Crack = GetTransformedStaticObject((StaticObject)Data.Structure.CrackR[Data.Blocks[i].Cracks[k].Type], d0, d1);
 											ObjectManager.CreateStaticObject(Crack, pos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, StartingDistance, EndingDistance, Data.BlockInterval, StartingDistance);
 										}
 									}
@@ -1248,10 +1249,10 @@ namespace OpenBve
 											ObjectManager.AnimatedObjectCollection aoc = new ObjectManager.AnimatedObjectCollection();
 											aoc.Objects = new ObjectManager.AnimatedObject[1];
 											aoc.Objects[0] = new ObjectManager.AnimatedObject();
-											aoc.Objects[0].States = new ObjectManager.AnimatedObjectState[csd.Numbers.Length];
+											aoc.Objects[0].States = new AnimatedObjectState[csd.Numbers.Length];
 											for (int l = 0; l < csd.Numbers.Length; l++)
 											{
-												aoc.Objects[0].States[l].Object = csd.Objects[l].Clone();
+												aoc.Objects[0].States[l].Object = (StaticObject)csd.Objects[l].Clone();
 											}
 											string expr = "";
 											for (int l = 0; l < csd.Numbers.Length - 1; l++)
@@ -1285,28 +1286,43 @@ namespace OpenBve
 											ObjectManager.AnimatedObjectCollection aoc = new ObjectManager.AnimatedObjectCollection();
 											aoc.Objects = new ObjectManager.AnimatedObject[1];
 											aoc.Objects[0] = new ObjectManager.AnimatedObject();
-											aoc.Objects[0].States = new ObjectManager.AnimatedObjectState[zn];
+											aoc.Objects[0].States = new AnimatedObjectState[zn];
 											int zi = 0;
 											string expr = "";
 											for (int l = 0; l < m; l++)
 											{
 												bool qs = l < b4sd.SignalTextures.Length && b4sd.SignalTextures[l] != null;
 												bool qg = l < b4sd.GlowTextures.Length && b4sd.GlowTextures[l] != null;
+												StaticObject so = new StaticObject(Program.CurrentHost);
+												StaticObject go = null;
 												if (qs & qg)
 												{
-													ObjectManager.StaticObject so = b4sd.BaseObject.Clone(b4sd.SignalTextures[l], null);
-													ObjectManager.StaticObject go = b4sd.GlowObject.Clone(b4sd.GlowTextures[l], null);
+
+													if (b4sd.BaseObject != null)
+													{
+														so = b4sd.BaseObject.Clone(b4sd.SignalTextures[l], null);
+													}
+													if (b4sd.GlowObject != null)
+													{
+														go = b4sd.GlowObject.Clone(b4sd.GlowTextures[l], null);
+													}
 													so.JoinObjects(go);
 													aoc.Objects[0].States[zi].Object = so;
 												}
 												else if (qs)
 												{
-													ObjectManager.StaticObject so = b4sd.BaseObject.Clone(b4sd.SignalTextures[l], null);
+													if (b4sd.BaseObject != null)
+													{
+														so = b4sd.BaseObject.Clone(b4sd.SignalTextures[l], null);
+													}
 													aoc.Objects[0].States[zi].Object = so;
 												}
 												else if (qg)
 												{
-													ObjectManager.StaticObject go = b4sd.GlowObject.Clone(b4sd.GlowTextures[l], null);
+													if (b4sd.GlowObject != null)
+													{
+														go = b4sd.GlowObject.Clone(b4sd.GlowTextures[l], null);
+													}
 													aoc.Objects[0].States[zi].Object = go;
 												}
 												if (qs | qg)
@@ -1336,8 +1352,8 @@ namespace OpenBve
 							// sections
 							for (int k = 0; k < Data.Blocks[i].Sections.Length; k++)
 							{
-								int m = Game.Sections.Length;
-								Array.Resize <SignalManager.Section>(ref Game.Sections, m + 1);
+								int m = CurrentRoute.Sections.Length;
+								Array.Resize <SignalManager.Section>(ref CurrentRoute.Sections, m + 1);
 								// create associated transponders
 								for (int g = 0; g <= i; g++)
 								{
@@ -1354,35 +1370,35 @@ namespace OpenBve
 									}
 								}
 								// create section
-								Game.Sections[m].TrackPosition = Data.Blocks[i].Sections[k].TrackPosition;
-								Game.Sections[m].Aspects = new SectionAspect[Data.Blocks[i].Sections[k].Aspects.Length];
+								CurrentRoute.Sections[m].TrackPosition = Data.Blocks[i].Sections[k].TrackPosition;
+								CurrentRoute.Sections[m].Aspects = new SectionAspect[Data.Blocks[i].Sections[k].Aspects.Length];
 								for (int l = 0; l < Data.Blocks[i].Sections[k].Aspects.Length; l++)
 								{
-									Game.Sections[m].Aspects[l].Number = Data.Blocks[i].Sections[k].Aspects[l];
+									CurrentRoute.Sections[m].Aspects[l].Number = Data.Blocks[i].Sections[k].Aspects[l];
 									if (Data.Blocks[i].Sections[k].Aspects[l] >= 0 & Data.Blocks[i].Sections[k].Aspects[l] < Data.SignalSpeeds.Length)
 									{
-										Game.Sections[m].Aspects[l].Speed = Data.SignalSpeeds[Data.Blocks[i].Sections[k].Aspects[l]];
+										CurrentRoute.Sections[m].Aspects[l].Speed = Data.SignalSpeeds[Data.Blocks[i].Sections[k].Aspects[l]];
 									}
 									else
 									{
-										Game.Sections[m].Aspects[l].Speed = double.PositiveInfinity;
+										CurrentRoute.Sections[m].Aspects[l].Speed = double.PositiveInfinity;
 									}
 								}
-								Game.Sections[m].Type = Data.Blocks[i].Sections[k].Type;
-								Game.Sections[m].CurrentAspect = -1;
+								CurrentRoute.Sections[m].Type = Data.Blocks[i].Sections[k].Type;
+								CurrentRoute.Sections[m].CurrentAspect = -1;
 								if (m > 0)
 								{
-									Game.Sections[m].PreviousSection = m - 1;
-									Game.Sections[m - 1].NextSection = m;
+									CurrentRoute.Sections[m].PreviousSection = m - 1;
+									CurrentRoute.Sections[m - 1].NextSection = m;
 								}
 								else
 								{
-									Game.Sections[m].PreviousSection = -1;
+									CurrentRoute.Sections[m].PreviousSection = -1;
 								}
-								Game.Sections[m].NextSection = -1;
-								Game.Sections[m].StationIndex = Data.Blocks[i].Sections[k].DepartureStationIndex;
-								Game.Sections[m].Invisible = Data.Blocks[i].Sections[k].Invisible;
-								Game.Sections[m].Trains = new TrainManager.Train[] { };
+								CurrentRoute.Sections[m].NextSection = -1;
+								CurrentRoute.Sections[m].StationIndex = Data.Blocks[i].Sections[k].DepartureStationIndex;
+								CurrentRoute.Sections[m].Invisible = Data.Blocks[i].Sections[k].Invisible;
+								CurrentRoute.Sections[m].Trains = new AbstractTrain[] { };
 								// create section change event
 								double d = Data.Blocks[i].Sections[k].TrackPosition - StartingDistance;
 								int p = TrackManager.Tracks[0].Elements[n].Events.Length;
@@ -1395,7 +1411,7 @@ namespace OpenBve
 								if (Data.Blocks[i].Transponders[l].Type != -1)
 								{
 									int t = Data.Blocks[i].Transponders[l].SectionIndex;
-									if (t >= 0 & t < Game.Sections.Length)
+									if (t >= 0 & t < CurrentRoute.Sections.Length)
 									{
 										int m = TrackManager.Tracks[0].Elements[n].Events.Length;
 										Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.Tracks[0].Elements[n].Events, m + 1);
@@ -1665,7 +1681,7 @@ namespace OpenBve
 							if (TrackManager.Tracks[0].Elements[i].Events[j] is TrackManager.StationStartEvent)
 							{
 								TrackManager.StationStartEvent station = (TrackManager.StationStartEvent)TrackManager.Tracks[0].Elements[i].Events[j];
-								if (Game.Stations[station.StationIndex].SafetySystem == Game.SafetySystem.Atc)
+								if (Game.Stations[station.StationIndex].SafetySystem == SafetySystem.Atc)
 								{
 									Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.Tracks[0].Elements[i].Events, TrackManager.Tracks[0].Elements[i].Events.Length + 2);
 									TrackManager.Tracks[0].Elements[i].Events[TrackManager.Tracks[0].Elements[i].Events.Length - 2] = new TrackManager.TransponderEvent(0.0, TrackManager.SpecialTransponderTypes.AtcTrackStatus, 0, 0, false);
@@ -1679,7 +1695,7 @@ namespace OpenBve
 							if (TrackManager.Tracks[0].Elements[i].Events[j] is TrackManager.StationStartEvent)
 							{
 								TrackManager.StationStartEvent station = (TrackManager.StationStartEvent)TrackManager.Tracks[0].Elements[i].Events[j];
-								if (Game.Stations[station.StationIndex].SafetySystem == Game.SafetySystem.Ats)
+								if (Game.Stations[station.StationIndex].SafetySystem == SafetySystem.Ats)
 								{
 									Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.Tracks[0].Elements[i].Events, TrackManager.Tracks[0].Elements[i].Events.Length + 2);
 									TrackManager.Tracks[0].Elements[i].Events[TrackManager.Tracks[0].Elements[i].Events.Length - 2] = new TrackManager.TransponderEvent(0.0, TrackManager.SpecialTransponderTypes.AtcTrackStatus, 2, 0, false);
@@ -1689,13 +1705,13 @@ namespace OpenBve
 							else if (TrackManager.Tracks[0].Elements[i].Events[j] is TrackManager.StationEndEvent)
 							{
 								TrackManager.StationEndEvent station = (TrackManager.StationEndEvent)TrackManager.Tracks[0].Elements[i].Events[j];
-								if (Game.Stations[station.StationIndex].SafetySystem == Game.SafetySystem.Atc)
+								if (Game.Stations[station.StationIndex].SafetySystem == SafetySystem.Atc)
 								{
 									Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.Tracks[0].Elements[i].Events, TrackManager.Tracks[0].Elements[i].Events.Length + 2);
 									TrackManager.Tracks[0].Elements[i].Events[TrackManager.Tracks[0].Elements[i].Events.Length - 2] = new TrackManager.TransponderEvent(0.0, TrackManager.SpecialTransponderTypes.AtcTrackStatus, 1, 0, false);
 									TrackManager.Tracks[0].Elements[i].Events[TrackManager.Tracks[0].Elements[i].Events.Length - 1] = new TrackManager.TransponderEvent(0.0, TrackManager.SpecialTransponderTypes.AtcTrackStatus, 2, 0, false);
 								}
-								else if (Game.Stations[station.StationIndex].SafetySystem == Game.SafetySystem.Ats)
+								else if (Game.Stations[station.StationIndex].SafetySystem == SafetySystem.Ats)
 								{
 									Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.Tracks[0].Elements[i].Events, TrackManager.Tracks[0].Elements[i].Events.Length + 2);
 									TrackManager.Tracks[0].Elements[i].Events[TrackManager.Tracks[0].Elements[i].Events.Length - 2] = new TrackManager.TransponderEvent(0.0, TrackManager.SpecialTransponderTypes.AtcTrackStatus, 3, 0, false);

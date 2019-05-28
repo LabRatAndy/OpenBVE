@@ -2,6 +2,7 @@ using System;
 using OpenBveApi.Math;
 using OpenBveApi.FunctionScripting;
 using OpenBveApi.Runtime;
+using OpenBve.SignalManager;
 
 namespace OpenBve {
 	internal static class FunctionScripts {
@@ -388,9 +389,8 @@ namespace OpenBve {
 						break;
 					case Instructions.TrainTrackDistance:
 						if (Train != null) {
-							int r = Train.Cars.Length - 1;
-							double t0 = Train.Cars[0].FrontAxle.Follower.TrackPosition - Train.Cars[0].FrontAxle.Position + 0.5 * Train.Cars[0].Length;
-							double t1 = Train.Cars[r].RearAxle.Follower.TrackPosition - Train.Cars[r].RearAxle.Position - 0.5 * Train.Cars[r].Length;
+							double t0 = Train.FrontCarTrackPosition();
+							double t1 = Train.RearCarTrackPosition();
 							Function.Stack[s] = TrackPosition > t0 ? TrackPosition - t0 : TrackPosition < t1 ? TrackPosition - t1 : 0.0;
 						} else {
 							Function.Stack[s] = 0.0;
@@ -1087,18 +1087,18 @@ namespace OpenBve {
 					case Instructions.SectionAspectNumber:
 						if (IsPartOfTrain) {
 							int nextSectionIndex = Train.CurrentSectionIndex + 1;
-							if (nextSectionIndex >= 0 & nextSectionIndex < Game.Sections.Length) {
-								int a = Game.Sections[nextSectionIndex].CurrentAspect;
-								if (a >= 0 & a < Game.Sections[nextSectionIndex].Aspects.Length) {
-									Function.Stack[s] = (double)Game.Sections[nextSectionIndex].Aspects[a].Number;
+							if (nextSectionIndex >= 0 & nextSectionIndex < CurrentRoute.Sections.Length) {
+								int a = CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
+								if (a >= 0 & a < CurrentRoute.Sections[nextSectionIndex].Aspects.Length) {
+									Function.Stack[s] = (double)CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
 								} else {
 									Function.Stack[s] = 0;
 								}
 							}
-						} else if (SectionIndex >= 0 & SectionIndex < Game.Sections.Length) {
-							int a = Game.Sections[SectionIndex].CurrentAspect;
-							if (a >= 0 & a < Game.Sections[SectionIndex].Aspects.Length) {
-								Function.Stack[s] = (double)Game.Sections[SectionIndex].Aspects[a].Number;
+						} else if (SectionIndex >= 0 & SectionIndex < CurrentRoute.Sections.Length) {
+							int a = CurrentRoute.Sections[SectionIndex].CurrentAspect;
+							if (a >= 0 & a < CurrentRoute.Sections[SectionIndex].Aspects.Length) {
+								Function.Stack[s] = (double)CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
 							} else {
 								Function.Stack[s] = 0;
 							}

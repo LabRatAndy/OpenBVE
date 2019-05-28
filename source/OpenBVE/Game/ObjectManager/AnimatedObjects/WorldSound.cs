@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenBveApi.FunctionScripting;
 using OpenBveApi.Math;
+using OpenBveApi.Objects;
 using OpenBveApi.Trains;
 using OpenBveApi.World;
 
@@ -42,7 +43,7 @@ namespace OpenBve
 				{
 					Buffer = this.Buffer,
 					//Must clone the vector, not pass the reference
-					Position = new Vector3(position.X, position.Y, position.Z),
+					Position = new Vector3(position),
 					Follower =  new TrackManager.TrackFollower(),
 					currentTrackPosition = trackPosition
 				};
@@ -55,7 +56,7 @@ namespace OpenBve
 				AnimatedWorldObjectsUsed++;
 			}
 
-			internal override void Update(double TimeElapsed, bool ForceUpdate)
+			public override void Update(double TimeElapsed, bool ForceUpdate)
 			{
 				const double extraRadius = 10.0;
 				const double Radius = 25.0;

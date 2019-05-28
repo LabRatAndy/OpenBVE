@@ -84,14 +84,14 @@ namespace OpenBve {
 			RouteSeaLevelAirPressure = 101325.0;
 			RouteSeaLevelAirTemperature = 293.15;
 			Stations = new Station[] { };
-			Sections = new Section[] { };
+			CurrentRoute.Sections = new Section[] { };
 			BufferTrackPositions = new double[] { };
 			//Messages = new Message[] { };
 			MarkerTextures = new Texture[] { };
 			PointsOfInterest = new PointOfInterest[] { };
 			PrecedingTrainTimeDeltas = new double[] { };
 			PrecedingTrainSpeedLimit = double.PositiveInfinity;
-			BogusPretrainInstructions = new BogusPretrainInstruction[] { };
+			CurrentRoute.BogusPretrainInstructions = new BogusPretrainInstruction[] { };
 			TrainName = "";
 			TrainStart = TrainStartMode.EmergencyBrakesNoAts;
 			NoFogStart = (float)Math.Max(1.33333333333333 * Interface.CurrentOptions.ViewingDistance, 800.0);

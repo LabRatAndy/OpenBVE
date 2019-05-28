@@ -1,4 +1,5 @@
-﻿using OpenBveApi.Colors;
+﻿using LibRender;
+using OpenBveApi.Colors;
 using OpenBveApi.Math;
 using OpenTK.Graphics.OpenGL;
 
@@ -12,7 +13,7 @@ namespace OpenBve
 			GL.Light(LightName.Light0, LightParameter.Ambient, new float[] { inv255 * (float)OptionAmbientColor.R, inv255 * (float)OptionAmbientColor.G, inv255 * (float)OptionAmbientColor.B, 1.0f });
 			GL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { inv255 * (float)OptionDiffuseColor.R, inv255 * (float)OptionDiffuseColor.G, inv255 * (float)OptionDiffuseColor.B, 1.0f });
 			GL.LightModel(LightModelParameter.LightModelAmbient, new float[] { 0.0f, 0.0f, 0.0f, 1.0f });
-			GL.CullFace(CullFaceMode.Front); CullEnabled = true; // possibly undocumented, but required for correct lighting
+			GL.CullFace(CullFaceMode.Front); LibRender.Renderer.CullEnabled = true; // possibly undocumented, but required for correct lighting
 			GL.Enable(EnableCap.Light0);
 			GL.Enable(EnableCap.ColorMaterial);
 			GL.ColorMaterial(MaterialFace.FrontAndBack, ColorMaterialParameter.AmbientAndDiffuse);
@@ -20,34 +21,13 @@ namespace OpenBve
 			float x = (float)OptionAmbientColor.R + (float)OptionAmbientColor.G + (float)OptionAmbientColor.B;
 			float y = (float)OptionDiffuseColor.R + (float)OptionDiffuseColor.G + (float)OptionDiffuseColor.B;
 			if (x < y) x = y;
-			OptionLightingResultingAmount = 0.00208333333333333f * x;
-			if (OptionLightingResultingAmount > 1.0f) OptionLightingResultingAmount = 1.0f;
-			GL.Enable(EnableCap.Lighting); LightingEnabled = true;
+			LibRender.Renderer.OptionLightingResultingAmount = 0.00208333333333333f * x;
+			if (LibRender.Renderer.OptionLightingResultingAmount > 1.0f) LibRender.Renderer.OptionLightingResultingAmount = 1.0f;
+			GL.Enable(EnableCap.Lighting); LibRender.Renderer.LightingEnabled = true;
 			GL.DepthFunc(DepthFunction.Lequal);
 		}
 
-		internal struct LightDefinition
-		{
-			/// <summary>The ambient lighting color</summary>
-			internal Color24 AmbientColor;
-			/// <summary>The color of the light emitted by the sun (Directional light)</summary>
-			internal Color24 DiffuseColor;
-			/// <summary>The position of the sun in the sky (Directional light)</summary>
-			internal Vector3 LightPosition;
-			/// <summary>The time in seconds since midnight</summary>
-			internal int Time;
-
-			internal double CabBrightness;
-
-			public LightDefinition(Color24 ambientColor, Color24 diffuseColor, Vector3 lightPosition, int time, double cab)
-			{
-				AmbientColor = ambientColor;
-				DiffuseColor = diffuseColor;
-				LightPosition = lightPosition;
-				Time = time;
-				CabBrightness = cab;
-			}
-		}
+		
 		/// <summary>Whether dynamic lighting is currently enabled</summary>
 		internal static bool DynamicLighting = false;
 		/// <summary>The current dynamic cab brightness</summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using LibRender;
 using OpenBveApi.Interface;
 using OpenBveApi.Objects;
 using OpenBveApi.Runtime;
@@ -197,20 +198,20 @@ namespace OpenBve
 			GL.MatrixMode(MatrixMode.Modelview);
 			GL.LoadMatrix(ref LookAt);
 
-			if (LightingEnabled)
+			if (LibRender.Renderer.LightingEnabled)
 			{
 				GL.Disable(EnableCap.Lighting);
-				LightingEnabled = false; // TODO: was 'true' before
+				LibRender.Renderer.LightingEnabled = false; // TODO: was 'true' before
 			}
-			OptionLighting = false;
-			if (!BlendEnabled)
+			LibRender.Renderer.OptionLighting = false;
+			if (!LibRender.Renderer.BlendEnabled)
 			{
 				GL.Enable(EnableCap.Blend);
-				BlendEnabled = true;
+				LibRender.Renderer.BlendEnabled = true;
 			}
 			GL.DepthMask(false);
 			GL.Disable(EnableCap.DepthTest);
-			UnsetAlphaFunc();
+			LibRender.Renderer.UnsetAlphaFunc();
 			Touch.SortPolygons();
 			for (int i = 0; i < Touch.FaceCount; i++)
 			{
@@ -220,7 +221,7 @@ namespace OpenBve
 			}
 
 			GL.PopName();
-			OptionLighting = true;
+			LibRender.Renderer.OptionLighting = true;
 		}
 
 		/// <summary>Function to perform start processing of mouse picking.</summary>
@@ -232,7 +233,7 @@ namespace OpenBve
 			GL.SelectBuffer(SelectBuffer.Length, SelectBuffer);
 			GL.RenderMode(RenderingMode.Select);
 
-			ResetOpenGlState();
+			LibRender.Renderer.ResetOpenGlState();
 			GL.PushMatrix();
 
 			UpdateViewportSelection(Point, Delta);
@@ -333,7 +334,7 @@ namespace OpenBve
 						ShowObjectSelection(o);
 					}
 
-					ResetOpenGlState();
+					LibRender.Renderer.ResetOpenGlState();
 					GL.PushMatrix();
 					
 					UpdateViewport(ViewPortChangeMode.ChangeToCab);

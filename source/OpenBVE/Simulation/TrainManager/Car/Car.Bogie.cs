@@ -31,6 +31,8 @@ namespace OpenBve
 			/// <summary>Holds a reference to the base car</summary>
 			private readonly Car baseCar;
 			/// <summary>Holds a reference to the base train</summary>
+			// We don't want this to be read-only if we ever manage to uncouple cars...
+			// ReSharper disable once FieldCanBeMadeReadOnly.Local
 			private Train baseTrain;
 
 			internal Bogie(Train train, Car car)
@@ -119,13 +121,13 @@ namespace OpenBve
 					Groups = new ElementsGroup[1]
 				};
 				CarSections[j].Groups[0] = new ElementsGroup();
-				if (currentObject is ObjectManager.StaticObject)
+				if (currentObject is StaticObject)
 				{
-					ObjectManager.StaticObject s = (ObjectManager.StaticObject)currentObject;
+					StaticObject s = (StaticObject)currentObject;
 					CarSections[j].Groups[0].Elements = new ObjectManager.AnimatedObject[1];
 					CarSections[j].Groups[0].Elements[0] = new ObjectManager.AnimatedObject
 					{
-						States = new ObjectManager.AnimatedObjectState[1]
+						States = new AnimatedObjectState[1]
 						
 					};
 					CarSections[j].Groups[0].Elements[0].States[0].Position = Vector3.Zero;

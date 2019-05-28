@@ -43,7 +43,7 @@ namespace OpenBve
 						t += " - " + (TrainManager.PlayerTrain.Handles.LocoBrake.Actual != 0 ? "L" + TrainManager.PlayerTrain.Handles.LocoBrake.Actual.ToString(Culture) : "N");
 					}
 				}
-				DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 46), TextAlignment.TopLeft, Color128.White, true);
+				LibRender.Renderer.DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 46), TextAlignment.TopLeft, Color128.White, true);
 			}
 			// safety handles
 			{
@@ -74,7 +74,7 @@ namespace OpenBve
 						t += " - " + (TrainManager.PlayerTrain.Handles.LocoBrake.Actual != 0 ? "L" + TrainManager.PlayerTrain.Handles.LocoBrake.Actual.ToString(Culture) : "N");
 					}
 				}
-				DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 32), TextAlignment.TopLeft, Color128.White, true);
+				LibRender.Renderer.DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 32), TextAlignment.TopLeft, Color128.White, true);
 			}
 			// driver handles
 			{
@@ -104,7 +104,7 @@ namespace OpenBve
 						t += " - " + (TrainManager.PlayerTrain.Handles.LocoBrake.Actual != 0 ? "L" + TrainManager.PlayerTrain.Handles.LocoBrake.Actual.ToString(Culture) : "N");
 					}
 				}
-				DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 18), TextAlignment.TopLeft, Color128.White, true);
+				LibRender.Renderer.DrawString(Fonts.SmallFont, t, new System.Drawing.Point(2, Screen.Height - 18), TextAlignment.TopLeft, Color128.White, true);
 			}
 			// debug information
 			int texturesLoaded = Textures.GetNumberOfLoadedTextures();
@@ -141,7 +141,7 @@ namespace OpenBve
 				"speed: " + (Math.Abs(TrainManager.PlayerTrain.Specs.CurrentAverageSpeed) * 3.6).ToString("0.00", Culture) + " km/h",
 				"power (car " + car.ToString(Culture) +  "): " + (TrainManager.PlayerTrain.Cars[car].Specs.CurrentAccelerationOutput < 0.0 ? TrainManager.PlayerTrain.Cars[car].Specs.CurrentAccelerationOutput * (double)Math.Sign(TrainManager.PlayerTrain.Cars[car].Specs.CurrentSpeed) : TrainManager.PlayerTrain.Cars[car].Specs.CurrentAccelerationOutput * (double)TrainManager.PlayerTrain.Handles.Reverser.Actual).ToString("0.0000", Culture) + " m/s²",
 				"acceleration: " + TrainManager.PlayerTrain.Specs.CurrentAverageAcceleration.ToString("0.0000", Culture) + " m/s²",
-				"position: " + (TrainManager.PlayerTrain.Cars[0].FrontAxle.Follower.TrackPosition - TrainManager.PlayerTrain.Cars[0].FrontAxle.Position + 0.5 * TrainManager.PlayerTrain.Cars[0].Length).ToString("0.00", Culture) + " m",
+				"position: " + TrainManager.PlayerTrain.FrontCarTrackPosition().ToString("0.00", Culture) + " m",
 				"elevation: " + (Game.RouteInitialElevation + TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].FrontAxle.Follower.WorldPosition.Y).ToString("0.00", Culture) + " m",
 				"temperature: " + (TrainManager.PlayerTrain.Specs.CurrentAirTemperature - 273.15).ToString("0.00", Culture) + " °C",
 				"air pressure: " + (0.001 * TrainManager.PlayerTrain.Specs.CurrentAirPressure).ToString("0.00", Culture) + " kPa",
@@ -194,14 +194,14 @@ namespace OpenBve
 					if (Lines[i][0] == '=')
 					{
 						string text = Lines[i].Substring(1);
-						System.Drawing.Size size = MeasureString(Fonts.SmallFont, text);
+						System.Drawing.Size size = Fonts.SmallFont.MeasureString(text);
 						GL.Color4(0.35f, 0.65f, 0.90f, 0.8f);
 						RenderOverlaySolid(x, y, x + size.Width + 6.0f, y + size.Height + 2.0f);
-						DrawString(Fonts.SmallFont, text, new System.Drawing.Point((int)x + 3, (int)y), TextAlignment.TopLeft, Color128.White);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, text, new System.Drawing.Point((int)x + 3, (int)y), TextAlignment.TopLeft, Color128.White);
 					}
 					else
 					{
-						DrawString(Fonts.SmallFont, Lines[i], new System.Drawing.Point((int)x, (int)y), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, Lines[i], new System.Drawing.Point((int)x, (int)y), TextAlignment.TopLeft, Color128.White, true);
 					}
 					y += 14.0;
 				}
@@ -250,14 +250,14 @@ namespace OpenBve
 					if (Lines[i][0] == '=')
 					{
 						string text = Lines[i].Substring(1);
-						System.Drawing.Size size = MeasureString(Fonts.SmallFont, text);
+						System.Drawing.Size size = Fonts.SmallFont.MeasureString(text);
 						GL.Color4(0.35f, 0.65f, 0.90f, 0.8f);
 						RenderOverlaySolid(x, y, x + size.Width + 6.0f, y + size.Height + 2.0f);
-						DrawString(Fonts.SmallFont, text, new System.Drawing.Point((int)x + 3, (int)y), TextAlignment.TopLeft, Color128.White);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, text, new System.Drawing.Point((int)x + 3, (int)y), TextAlignment.TopLeft, Color128.White);
 					}
 					else
 					{
-						DrawString(Fonts.SmallFont, Lines[i], new System.Drawing.Point((int)x, (int)y), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, Lines[i], new System.Drawing.Point((int)x, (int)y), TextAlignment.TopLeft, Color128.White, true);
 					}
 					y += 14.0;
 					if (y > Screen.Height - 20.0)
@@ -286,7 +286,7 @@ namespace OpenBve
 				{
 					if (!heading[0])
 					{
-						DrawString(Fonts.SmallFont, "Brake pipe", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Brake pipe", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[0] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);
@@ -301,7 +301,7 @@ namespace OpenBve
 				{
 					if (!heading[1])
 					{
-						DrawString(Fonts.SmallFont, "Auxillary reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Auxillary reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[1] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);
@@ -315,7 +315,7 @@ namespace OpenBve
 				{
 					if (!heading[2])
 					{
-						DrawString(Fonts.SmallFont, "Brake cylinder", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Brake cylinder", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[2] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);
@@ -330,7 +330,7 @@ namespace OpenBve
 				{
 					if (!heading[3])
 					{
-						DrawString(Fonts.SmallFont, "Main reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Main reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[3] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);
@@ -345,7 +345,7 @@ namespace OpenBve
 				{
 					if (!heading[4])
 					{
-						DrawString(Fonts.SmallFont, "Equalizing reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Equalizing reservoir", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[4] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);
@@ -360,7 +360,7 @@ namespace OpenBve
 				{
 					if (!heading[5])
 					{
-						DrawString(Fonts.SmallFont, "Straight air pipe", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
+						LibRender.Renderer.DrawString(Fonts.SmallFont, "Straight air pipe", new System.Drawing.Point((int)x, (int)(oy - 16)), TextAlignment.TopLeft, Color128.White, true);
 						heading[5] = true;
 					}
 					GL.Color3(0.0f, 0.0f, 0.0f);

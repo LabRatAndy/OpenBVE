@@ -7,6 +7,7 @@ using OpenBveApi.Math;
 using OpenBveApi.Runtime;
 using OpenBveApi.Objects;
 using OpenBveApi.Interface;
+using OpenBveApi.Routes;
 using OpenBveApi.Trains;
 using OpenBve.SignalManager;
 
@@ -125,26 +126,26 @@ namespace OpenBve {
 				Data.Structure.RailCycles = new int[][] { };
 				Data.Structure.Run = new int[] {};
 				Data.Structure.Flange = new int[] {};
-				Data.Backgrounds = new BackgroundManager.BackgroundHandle[] {};
+				Data.Backgrounds = new BackgroundHandle[] {};
 				Data.TimetableDaytime = new OpenBveApi.Textures.Texture[] {null, null, null, null};
 				Data.TimetableNighttime = new OpenBveApi.Textures.Texture[] {null, null, null, null};
 				// signals
 				string SignalFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Signals");
 				Data.Signals = new SignalData[7];
-				Data.Signals[3] = new CompatibilitySignalData(new int[] {0, 2, 4}, new ObjectManager.StaticObject[]
+				Data.Signals[3] = new CompatibilitySignalData(new int[] {0, 2, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8, false)
 				});
-				Data.Signals[4] = new CompatibilitySignalData(new int[] {0, 1, 2, 4}, new ObjectManager.StaticObject[]
+				Data.Signals[4] = new CompatibilitySignalData(new int[] {0, 1, 2, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8, false)
 				});
-				Data.Signals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4}, new ObjectManager.StaticObject[]
+				Data.Signals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8, false),
@@ -152,7 +153,7 @@ namespace OpenBve {
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false)
 				});
-				Data.Signals[6] = new CompatibilitySignalData(new int[] {0, 3, 4}, new ObjectManager.StaticObject[]
+				Data.Signals[6] = new CompatibilitySignalData(new int[] {0, 3, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"),
 						System.Text.Encoding.UTF8, false),
@@ -164,26 +165,26 @@ namespace OpenBve {
 				// compatibility signals
 				Data.CompatibilitySignals = new CompatibilitySignalData[9];
 				Data.CompatibilitySignals[0] = new CompatibilitySignalData(new int[] {0, 2},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2a_2.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[1] = new CompatibilitySignalData(new int[] {0, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_2b_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[2] = new CompatibilitySignalData(new int[] {0, 2, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[3] = new CompatibilitySignalData(new int[] {0, 1, 2, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8, false),
@@ -191,7 +192,7 @@ namespace OpenBve {
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[4] = new CompatibilitySignalData(new int[] {0, 2, 3, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_2.csv"), System.Text.Encoding.UTF8, false),
@@ -199,7 +200,7 @@ namespace OpenBve {
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4b_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8, false),
@@ -208,7 +209,7 @@ namespace OpenBve {
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[6] = new CompatibilitySignalData(new int[] {0, 2, 3, 4, 5},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8, false),
@@ -217,7 +218,7 @@ namespace OpenBve {
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5b_5.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[7] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4, 5},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_0.csv"), System.Text.Encoding.UTF8, false),
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_1.csv"), System.Text.Encoding.UTF8, false),
@@ -227,7 +228,7 @@ namespace OpenBve {
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_6_5.csv"), System.Text.Encoding.UTF8, false)
 					});
 				Data.CompatibilitySignals[8] = new CompatibilitySignalData(new int[] {0, 3, 4},
-					new ObjectManager.StaticObject[]
+					new StaticObject[]
 					{
 						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"),
 							System.Text.Encoding.UTF8, false),
@@ -237,15 +238,15 @@ namespace OpenBve {
 							System.Text.Encoding.UTF8, false)
 					});
 				// game data
-				Game.Sections = new SignalManager.Section[1];
-				Game.Sections[0].Aspects = new SectionAspect[]
+				CurrentRoute.Sections = new SignalManager.Section[1];
+				CurrentRoute.Sections[0].Aspects = new SectionAspect[]
 				{new SectionAspect(0, 0.0), new SectionAspect(4, double.PositiveInfinity)};
-				Game.Sections[0].CurrentAspect = 0;
-				Game.Sections[0].NextSection = -1;
-				Game.Sections[0].PreviousSection = -1;
-				Game.Sections[0].StationIndex = -1;
-				Game.Sections[0].TrackPosition = 0;
-				Game.Sections[0].Trains = new AbstractTrain[] {};
+				CurrentRoute.Sections[0].CurrentAspect = 0;
+				CurrentRoute.Sections[0].NextSection = -1;
+				CurrentRoute.Sections[0].PreviousSection = -1;
+				CurrentRoute.Sections[0].StationIndex = -1;
+				CurrentRoute.Sections[0].TrackPosition = 0;
+				CurrentRoute.Sections[0].Trains = new AbstractTrain[] {};
 
 				/*
 				 * These are the speed limits for the default Japanese signal aspects, and in most cases will be overwritten
@@ -310,6 +311,21 @@ namespace OpenBve {
 			// process non-track namespaces
 			//Check for any special-cased fixes we might need
 			CheckRouteSpecificFixes(FileName, ref Data, ref Expressions);
+			//Apply parameters to object loaders
+			if (!PreviewOnly)
+			{
+				for (int i = 0; i < Plugins.LoadedPlugins.Length; i++)
+				{
+					if (Plugins.LoadedPlugins[i].Object != null)
+					{
+						Plugins.LoadedPlugins[i].Object.SetCompatibilityHacks(Interface.CurrentOptions.EnableBveTsHacks, CylinderHack);
+						//Remember that these will be ignored if not the correct plugin
+						Plugins.LoadedPlugins[i].Object.SetObjectParser(Interface.CurrentOptions.CurrentXParser);
+						Plugins.LoadedPlugins[i].Object.SetObjectParser(Interface.CurrentOptions.CurrentObjParser);
+					}
+				}
+			}
+			
 			for (int j = 0; j < Expressions.Length; j++) {
 				Loading.RouteProgress = (double)j * progressFactor;
 				if ((j & 255) == 0) {
@@ -463,7 +479,14 @@ namespace OpenBve {
 									}
 									else
 									{
-										Interface.CurrentOptions.CurrentXParser = (Interface.XParsers)parser;
+										for (int i = 0; i < Plugins.LoadedPlugins.Length; i++)
+										{
+											if (Plugins.LoadedPlugins[i].Object != null)
+											{
+												Plugins.LoadedPlugins[i].Object.SetObjectParser((XParsers)parser); //Remember that this will be ignored if not the X plugin!
+											}
+										}
+
 									}
 								} break;
 								case "options.objparser":
@@ -474,7 +497,13 @@ namespace OpenBve {
 										}
 										else
 										{
-											Interface.CurrentOptions.CurrentObjParser = (Interface.ObjParsers)parser;
+											for (int i = 0; i < Plugins.LoadedPlugins.Length; i++)
+											{
+												if (Plugins.LoadedPlugins[i].Object != null)
+												{
+													Plugins.LoadedPlugins[i].Object.SetObjectParser((ObjParsers)parser); //Remember that this will be ignored if not the Obj plugin!
+												}
+											}
 										}
 									} break;
 								case "options.unitoflength":
@@ -1025,6 +1054,9 @@ namespace OpenBve {
 													if (System.IO.File.Exists(f)) {
 														Textures.RegisterTexture(f, out Data.TimetableDaytime[CommandIndex1]);
 													}
+													else {
+														Interface.AddMessage(MessageType.Error, false, "DaytimeTimetable " + CommandIndex1 + " with FileName " + Arguments[0] + " was not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+													}
 												}
 											}
 										}
@@ -1053,6 +1085,9 @@ namespace OpenBve {
 													}
 													if (System.IO.File.Exists(f)) {
 														Textures.RegisterTexture(f, out Data.TimetableNighttime[CommandIndex1]);
+													}
+													else {
+														Interface.AddMessage(MessageType.Error, false, "DaytimeTimetable " + CommandIndex1 + " with FileName " + Arguments[0] + " was not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													}
 												}
 											}
@@ -1815,7 +1850,7 @@ namespace OpenBve {
 												} else {
 													if (CommandIndex1 >= Data.Backgrounds.Length) {
 														int a = Data.Backgrounds.Length;
-														Array.Resize<BackgroundManager.BackgroundHandle>(ref Data.Backgrounds, CommandIndex1 + 1);
+														Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
 														for (int k = a; k <= CommandIndex1; k++) {
 															Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
 														}
@@ -1841,7 +1876,7 @@ namespace OpenBve {
 														{
 															try
 															{
-																BackgroundManager.BackgroundHandle h = DynamicBackgroundParser.ReadBackgroundXML(f);
+																BackgroundHandle h = DynamicBackgroundParser.ReadBackgroundXML(f);
 																Data.Backgrounds[CommandIndex1] = h;
 															}
 															catch
@@ -1877,7 +1912,7 @@ namespace OpenBve {
 											} else {
 												if (CommandIndex1 >= Data.Backgrounds.Length) {
 													int a = Data.Backgrounds.Length;
-													Array.Resize<BackgroundManager.BackgroundHandle>(ref Data.Backgrounds, CommandIndex1 + 1);
+													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
 													for (int k = a; k <= CommandIndex1; k++) {
 														Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
 													}
@@ -1908,7 +1943,7 @@ namespace OpenBve {
 											} else {
 												if (CommandIndex1 >= Data.Backgrounds.Length) {
 													int a = Data.Backgrounds.Length;
-													Array.Resize<BackgroundManager.BackgroundHandle>(ref Data.Backgrounds, CommandIndex1 + 1);
+													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
 													for (int k = a; k <= CommandIndex1; k++) {
 														Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
 													}
@@ -3405,7 +3440,7 @@ namespace OpenBve {
 										Game.Stations[CurrentStation].ForceStopSignal = stop == 1;
 										Game.Stations[CurrentStation].OpenLeftDoors = door < 0.0 | doorboth;
 										Game.Stations[CurrentStation].OpenRightDoors = door > 0.0 | doorboth;
-										Game.Stations[CurrentStation].SafetySystem = device == 1 ? Game.SafetySystem.Atc : Game.SafetySystem.Ats;
+										Game.Stations[CurrentStation].SafetySystem = device == 1 ? SafetySystem.Atc : SafetySystem.Ats;
 										Game.Stations[CurrentStation].Stops = new Game.StationStop[] { };
 										Game.Stations[CurrentStation].PassengerRatio = 0.01 * jam;
 										Game.Stations[CurrentStation].TimetableDaytimeTexture = tdt;
@@ -3521,7 +3556,7 @@ namespace OpenBve {
 										Game.Stations[CurrentStation].ForceStopSignal = stop == 1;
 										Game.Stations[CurrentStation].OpenLeftDoors = true;
 										Game.Stations[CurrentStation].OpenRightDoors = true;
-										Game.Stations[CurrentStation].SafetySystem = device == 1 ? Game.SafetySystem.Atc : Game.SafetySystem.Ats;
+										Game.Stations[CurrentStation].SafetySystem = device == 1 ? SafetySystem.Atc : SafetySystem.Ats;
 										Game.Stations[CurrentStation].Stops = new Game.StationStop[] { };
 										Game.Stations[CurrentStation].PassengerRatio = 1.0;
 										Game.Stations[CurrentStation].TimetableDaytimeTexture = null;
@@ -4369,13 +4404,13 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "Time is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													time = 0.0;
 												}
-												int n = Game.BogusPretrainInstructions.Length;
-												if (n != 0 && Game.BogusPretrainInstructions[n - 1].Time >= time) {
+												int n = CurrentRoute.BogusPretrainInstructions.Length;
+												if (n != 0 && CurrentRoute.BogusPretrainInstructions[n - 1].Time >= time) {
 													Interface.AddMessage(MessageType.Error, false, "Time is expected to be in ascending order between successive " + Command + " commands at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
-												Array.Resize<Game.BogusPretrainInstruction>(ref Game.BogusPretrainInstructions, n + 1);
-												Game.BogusPretrainInstructions[n].TrackPosition = Data.TrackPosition;
-												Game.BogusPretrainInstructions[n].Time = time;
+												Array.Resize<BogusPretrainInstruction>(ref CurrentRoute.BogusPretrainInstructions, n + 1);
+												CurrentRoute.BogusPretrainInstructions[n].TrackPosition = Data.TrackPosition;
+												CurrentRoute.BogusPretrainInstructions[n].Time = time;
 											}
 										}
 									} break;

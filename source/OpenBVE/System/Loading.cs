@@ -8,6 +8,7 @@ using OpenBveApi.Interface;
 using OpenBveApi.Objects;
 using OpenBveApi.Runtime;
 using OpenBveApi.Trains;
+using OpenBve.SignalManager;
 
 namespace OpenBve {
 	internal static class Loading {
@@ -43,6 +44,7 @@ namespace OpenBve {
 		/// <summary>Initializes loading the route and train asynchronously. Set the Loading.Cancel member to cancel loading. Check the Loading.Complete member to see when loading has finished.</summary>
 		internal static void LoadAsynchronously(string RouteFile, Encoding RouteEncoding, string TrainFolder, Encoding TrainEncoding) {
 			// members
+			LibRender.Renderer.currentHost = Program.CurrentHost;
 			RouteProgress = 0.0;
 			TrainProgress = 0.0;
 			TrainProgressCurrentSum = 0.0;
@@ -189,21 +191,21 @@ namespace OpenBve {
 			createIllustrations.Start();
 			System.Threading.Thread.Sleep(1); if (Cancel) return;
 			Game.CalculateSeaLevelConstants();
-			if (Game.BogusPretrainInstructions.Length != 0) {
-				double t = Game.BogusPretrainInstructions[0].Time;
-				double p = Game.BogusPretrainInstructions[0].TrackPosition;
-				for (int i = 1; i < Game.BogusPretrainInstructions.Length; i++) {
-					if (Game.BogusPretrainInstructions[i].Time > t) {
-						t = Game.BogusPretrainInstructions[i].Time;
+			if (CurrentRoute.BogusPretrainInstructions.Length != 0) {
+				double t = CurrentRoute.BogusPretrainInstructions[0].Time;
+				double p = CurrentRoute.BogusPretrainInstructions[0].TrackPosition;
+				for (int i = 1; i < CurrentRoute.BogusPretrainInstructions.Length; i++) {
+					if (CurrentRoute.BogusPretrainInstructions[i].Time > t) {
+						t = CurrentRoute.BogusPretrainInstructions[i].Time;
 					} else {
 						t += 1.0;
-						Game.BogusPretrainInstructions[i].Time = t;
+						CurrentRoute.BogusPretrainInstructions[i].Time = t;
 					}
-					if (Game.BogusPretrainInstructions[i].TrackPosition > p) {
-						p = Game.BogusPretrainInstructions[i].TrackPosition;
+					if (CurrentRoute.BogusPretrainInstructions[i].TrackPosition > p) {
+						p = CurrentRoute.BogusPretrainInstructions[i].TrackPosition;
 					} else {
 						p += 1.0;
-						Game.BogusPretrainInstructions[i].TrackPosition = p;
+						CurrentRoute.BogusPretrainInstructions[i].TrackPosition = p;
 					}
 				}
 			}
@@ -217,10 +219,10 @@ namespace OpenBve {
 			RouteProgress = 1.0;
 			// initialize trains
 			System.Threading.Thread.Sleep(1); if (Cancel) return;
-			TrainManager.Trains = new TrainManager.Train[Game.PrecedingTrainTimeDeltas.Length + 1 + (Game.BogusPretrainInstructions.Length != 0 ? 1 : 0)];
+			TrainManager.Trains = new TrainManager.Train[Game.PrecedingTrainTimeDeltas.Length + 1 + (CurrentRoute.BogusPretrainInstructions.Length != 0 ? 1 : 0)];
 			for (int k = 0; k < TrainManager.Trains.Length; k++)
 			{
-				if (k == TrainManager.Trains.Length - 1 & Game.BogusPretrainInstructions.Length != 0)
+				if (k == TrainManager.Trains.Length - 1 & CurrentRoute.BogusPretrainInstructions.Length != 0)
 				{
 					TrainManager.Trains[k] = new TrainManager.Train(TrainState.Bogus);
 				}
@@ -360,7 +362,7 @@ namespace OpenBve {
 						if (CarObjects[i] == null) {
 							// load default exterior object
 							string file = OpenBveApi.Path.CombineFile(Program.FileSystem.GetDataFolder("Compatibility"), "exterior.csv");
-							ObjectManager.StaticObject so = ObjectManager.LoadStaticObject(file, System.Text.Encoding.UTF8, false);
+							StaticObject so = ObjectManager.LoadStaticObject(file, System.Text.Encoding.UTF8, false);
 							if (so == null) {
 								CarObjects[i] = null;
 							} else {
@@ -408,8 +410,8 @@ namespace OpenBve {
 			Array.Resize(ref ObjectManager.Objects, ObjectManager.ObjectsUsed);
 			Array.Resize(ref ObjectManager.AnimatedWorldObjects, ObjectManager.AnimatedWorldObjectsUsed);
 			// update sections
-			if (Game.Sections.Length > 0) {
-				Game.UpdateSection(Game.Sections.Length - 1);
+			if (CurrentRoute.Sections.Length > 0) {
+				Game.UpdateSection(CurrentRoute.Sections.Length - 1);
 			}
 			// load plugin
 			for (int i = 0; i < TrainManager.Trains.Length; i++) {
