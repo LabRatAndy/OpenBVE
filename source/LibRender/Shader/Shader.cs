@@ -27,6 +27,7 @@ namespace LibRender
         /// </summary>
         /// <param name="vertexshaderfile">File path for vertex shader source code</param>
         /// <param name="fragmentshaderfile">File path for fragment shader source code</param>
+        /// <exception cref="">ShaderCompileException</exception>
         internal Shader(string vertexshaderfile, string fragmentshaderfile)
         {
             handle = GL.CreateProgram();
@@ -100,6 +101,7 @@ namespace LibRender
         /// </summary>
         /// <param name="filename">Filename of the shader sourcecode</param>
         /// <param name="shadertype">Shader type either Vertex or fragment</param>
+        /// <exception cref="">Throws ShaderCompileException</exception>
         private void LoadShader(string filename, ShaderType shadertype)
         {
             string shadersource = System.IO.File.ReadAllText(filename, System.Text.Encoding.UTF8);
