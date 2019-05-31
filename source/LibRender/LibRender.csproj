@@ -47,7 +47,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Buffers\Attribute.cs" />
     <Compile Include="Buffers\EBO.cs" />
+    <Compile Include="Buffers\VAO.cs" />
     <Compile Include="Buffers\VBO.cs" />
     <Compile Include="Camera\CameraAlignment.cs" />
     <Compile Include="Camera\CameraRestrictionMode.cs" />
