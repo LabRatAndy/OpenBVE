@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace OpenBveApi.Math {
 	/// <summary>Represents a two-dimensional vector.</summary>
+    [StructLayout(LayoutKind.Explicit)]
 	public struct Vector2 {
-		
-		// --- members ---
-		
-		/// <summary>The x-coordinate.</summary>
-		public double X;
-		
-		/// <summary>The y-coordinate.</summary>
-		public double Y;
+
+        // --- members ---
+
+        /// <summary>The x-coordinate.</summary>
+        [FieldOffset(0)]
+        public double X;
+
+        /// <summary>The y-coordinate.</summary>
+        [FieldOffset(sizeof(double))]
+        public double Y;
 		
 		
 		// --- constructors ---
