@@ -4,6 +4,9 @@ using OpenBveApi.Math;
 
 namespace LibRender
 {
+    /// <summary>
+    /// Struct to hold vertex data to asssemble a VBO from 
+    /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct Vertex
     {
@@ -59,6 +62,16 @@ namespace LibRender
             if (this.normals != b.normals) return false;
             if (this.texcoords != b.texcoords) return false;
             return true;
+        }
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashcode = this.coordinates.GetHashCode();
+                hashcode = (hashcode * 397) ^ this.Normals.GetHashCode();
+                hashcode = (hashcode * 397) ^ this.texcoords.GetHashCode();
+                return hashcode;
+            }
         }
 
     }
