@@ -7,7 +7,7 @@ using OpenBveApi.Textures;
 namespace OpenBveApi.Objects
 {
 	/// <summary>The MeshBuilder is a helper class used when creating a 3D model from a textual object file</summary>
-	public partial class MeshBuilder
+	public class MeshBuilder
 	{
 		/// <summary>The vertices</summary>
 		public VertexTemplate[] Vertices;
