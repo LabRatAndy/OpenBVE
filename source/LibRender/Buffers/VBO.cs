@@ -13,7 +13,7 @@ namespace LibRender
         /// vertex data array of doubles. May need changing to vertex struct array in future. 
         /// </summary>
         private double[] vertexData = null;
-
+        private Vertex[] vertices = null;
         /// <summary>
         /// Constructor for the VBO. Using the supplied array of doubles containing data on the vertices.
         /// </summary>
@@ -22,6 +22,15 @@ namespace LibRender
         {
             GL.GenBuffers(1, out handle);
             vertexData = vertexdata;
+        }
+        /// <summary>
+        /// Constructor for the VBO using the supplied array of Vertex structs 
+        /// </summary>
+        /// <param name="vertexdata">Array of vertex Structs containing vertex data</param>
+        public VertexBufferObject(Vertex[] vertexdata)
+        {
+            GL.GenBuffers(1, out handle);
+            vertices = vertexdata;
         }
         /// <summary>
         /// Binds / activates the VBO for use
