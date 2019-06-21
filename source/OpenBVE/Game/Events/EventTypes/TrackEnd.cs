@@ -1,16 +1,20 @@
-﻿namespace OpenBve
+﻿using LibRender;
+using OpenBveApi.Routes;
+using OpenBveApi.Trains;
+
+namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>This event is placed at the end of the track</summary>
-		internal class TrackEndEvent : GeneralEvent
+		internal class TrackEndEvent : GeneralEvent<AbstractTrain>
 		{
 			internal TrackEndEvent(double TrackPositionDelta)
 			{
 				this.TrackPositionDelta = TrackPositionDelta;
 				this.DontTriggerAnymore = false;
 			}
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, AbstractTrain Train, int CarIndex)
 			{
 				if (TriggerType == EventTriggerType.RearCarRearAxle & Train != TrainManager.PlayerTrain)
 				{
@@ -23,7 +27,7 @@
 
 				if (TriggerType == EventTriggerType.Camera)
 				{
-					World.CameraAtWorldEnd = !World.CameraAtWorldEnd;
+					Camera.AtWorldEnd = !Camera.AtWorldEnd;
 				}
 			}
 		}

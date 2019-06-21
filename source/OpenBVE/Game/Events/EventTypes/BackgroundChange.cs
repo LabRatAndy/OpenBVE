@@ -1,11 +1,13 @@
-﻿using OpenBveApi.Routes;
+﻿using OpenBve.RouteManager;
+using OpenBveApi.Routes;
+using OpenBveApi.Trains;
 
 namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>Called when the displayed backgrond image or object should be changed</summary>
-		internal class BackgroundChangeEvent : GeneralEvent
+		internal class BackgroundChangeEvent : GeneralEvent<AbstractTrain>
 		{
 			/// <summary>The background which applies previously to this point</summary>
 			private readonly BackgroundHandle PreviousBackground;
@@ -19,19 +21,19 @@ namespace OpenBve
 				this.PreviousBackground = PreviousBackground;
 				this.NextBackground = NextBackground;
 			}
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, AbstractTrain Train, int CarIndex)
 			{
 				if (TriggerType == EventTriggerType.Camera)
 				{
 					if (Direction < 0)
 					{
-						BackgroundManager.TargetBackground = this.PreviousBackground;
-						BackgroundManager.TargetBackground.Countdown = 0;
+						CurrentRoute.TargetBackground = this.PreviousBackground;
+						CurrentRoute.TargetBackground.Countdown = 0;
 					}
 					else if (Direction > 0)
 					{
-						BackgroundManager.TargetBackground = this.NextBackground;
-						BackgroundManager.TargetBackground.Countdown = 0;
+						CurrentRoute.TargetBackground = this.NextBackground;
+						CurrentRoute.TargetBackground.Countdown = 0;
 					}
 				}
 			}

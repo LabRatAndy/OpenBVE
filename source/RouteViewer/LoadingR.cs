@@ -10,9 +10,10 @@ using System.Threading;
 using System.Text;
 using System.Windows.Forms;
 using LibRender;
-using OpenBve.SignalManager;
+using OpenBve.RouteManager;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
 using OpenBveApi.Runtime;
 
 namespace OpenBve {
@@ -34,7 +35,7 @@ namespace OpenBve {
 		// load
 		internal static void Load(string RouteFile, Encoding RouteEncoding) {
 			// members
-			Renderer.InitLoading();
+			LoadingScreen.InitLoading(Program.FileSystem.GetDataFolder("In-game"), typeof(Renderer).Assembly.GetName().Version.ToString());
 			RouteProgress = 0.0;
 			TrainProgress = 0.0;
 			TrainProgressCurrentSum = 0.0;
@@ -127,7 +128,7 @@ namespace OpenBve {
 			World.CameraTrackFollower = new TrackManager.TrackFollower();
 			World.CameraTrackFollower.Train = null;
 			World.CameraTrackFollower.CarIndex = -1;
-			World.CameraMode = CameraViewMode.Interior;
+			Camera.CurrentMode = CameraViewMode.Interior;
 			// load route
 			bool IsRW = string.Equals(System.IO.Path.GetExtension(CurrentRouteFile), ".rw", StringComparison.OrdinalIgnoreCase);
 			CsvRwRouteParser.ParseRoute(CurrentRouteFile, IsRW, CurrentRouteEncoding, Application.StartupPath, ObjectFolder, SoundFolder, false);
@@ -139,7 +140,7 @@ namespace OpenBve {
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, 0.0, true, false);
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, 0.1, true, false);
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, -0.1, true, false);
-			World.CameraTrackFollower.TriggerType = TrackManager.EventTriggerType.Camera;
+			World.CameraTrackFollower.TriggerType = EventTriggerType.Camera;
 			// default starting time
 			Game.SecondsSinceMidnight = 0.0;
 			Game.StartupTime = 0.0;
@@ -175,9 +176,9 @@ namespace OpenBve {
 			// initialize camera
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, -1.0, true, false);
 			TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, FirstStationPosition, true, false);
-			World.CameraCurrentAlignment = new CameraAlignment(new Vector3(0.0, 2.5, 0.0), 0.0, 0.0, 0.0, FirstStationPosition, 1.0);
+			Camera.CurrentAlignment = new CameraAlignment(new Vector3(0.0, 2.5, 0.0), 0.0, 0.0, 0.0, FirstStationPosition, 1.0);
 			World.UpdateAbsoluteCamera(0.0);
-			ObjectManager.UpdateVisibility(World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z);
+			ObjectManager.UpdateVisibility(World.CameraTrackFollower.TrackPosition + Camera.CurrentAlignment.Position.Z);
 		}
 
 	}

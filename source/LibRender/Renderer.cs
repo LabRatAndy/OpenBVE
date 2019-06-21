@@ -33,11 +33,21 @@ namespace LibRender
 		public static bool OptionLighting = true;
 		/// <summary>Whether normals rendering is enabled in the debug options</summary>
 		public static bool OptionNormals = false;
+		/// <summary>Whether backface culling is enabled</summary>
+		public static bool OptionBackfaceCulling = true;
 		/// <summary>Whether wireframe rendering is enabled in the debug options</summary>
 		public static bool OptionWireframe = false;
+		/// <summary>The current viewport mode</summary>
+		public static ViewPortMode CurrentViewPortMode = ViewPortMode.Scenery;
+		/// <summary>The current debug output mode</summary>
+		public static OutputMode CurrentOutputMode = OutputMode.Default;
+		/// <summary>The previous debug output mode</summary>
+		public static OutputMode PreviousOutputMode = OutputMode.Default;
+		/// <summary>The game's current framerate</summary>
+		public static double FrameRate = 1.0;
 		/// <summary>Holds the lock for GDI Plus functions</summary>
 		public static readonly object gdiPlusLock = new object();
 
-		private const float inv255 = 1.0f / 255.0f;
+		internal const float inv255 = 1.0f / 255.0f;
     }
 }

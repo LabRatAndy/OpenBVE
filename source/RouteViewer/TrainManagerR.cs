@@ -20,7 +20,6 @@ namespace OpenBve {
 		internal struct Axle {
 			internal TrackManager.TrackFollower Follower;
 		}
-		internal struct Coupler { }
 		internal struct Section { }
 
 		// cars
@@ -365,15 +364,7 @@ namespace OpenBve {
 			internal double OptionalFloat;
 			internal int SectionIndex;
 		}
-		internal struct TrainSafety {
-			internal SafetySystem Mode;
-			internal SafetySystem ModeChange;
-			internal SafetyState State;
-			internal TrainPendingTransponder[] PendingTransponders;
-			internal Ats Ats;
-			internal Atc Atc;
-			internal Eb Eb;
-		}
+		
 		// train specs
 		internal enum PassAlarmType {
 			None = 0,
@@ -385,7 +376,6 @@ namespace OpenBve {
 		}
 		internal struct TrainSpecs {
 			internal ReverserHandle CurrentReverser;
-			internal double CurrentAverageSpeed;
 			internal int MaximumPowerNotch;
 			internal PowerHandle CurrentPowerNotch;
 			internal int MaximumBrakeNotch;
@@ -395,7 +385,6 @@ namespace OpenBve {
 			internal HoldBrakeHandle CurrentHoldBrake;
 			internal bool HasConstSpeed;
 			internal bool CurrentConstSpeed;
-			internal TrainSafety Safety;
 			internal TrainAirBrake AirBrake;
 		}
 		// train
@@ -405,7 +394,7 @@ namespace OpenBve {
 		internal class Train : AbstractTrain {
 			internal Car[] Cars;
 			internal TrainSpecs Specs;
-			internal int CurrentSectionIndex;
+
 			public override double FrontCarTrackPosition()
 			{
 				return Cars[0].FrontAxle.Follower.TrackPosition - Cars[0].FrontAxlePosition + 0.5 * Cars[0].Length;

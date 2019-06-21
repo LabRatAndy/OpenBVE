@@ -1,8 +1,9 @@
 ﻿using System;
+using OpenBve.BackgroundManager;
+using OpenBve.RouteManager;
 using LibRender;
 using OpenBveApi.Colors;
 using OpenTK;
-using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using Vector3 = OpenBveApi.Math.Vector3;
 
@@ -40,9 +41,9 @@ namespace OpenBve
             OverlayAlpha = new ObjectList();
             Touch = new ObjectList();
             LibRender.Renderer.OptionLighting = true;
-            OptionAmbientColor = new Color24(160, 160, 160);
-            OptionDiffuseColor = new Color24(160, 160, 160);
-            OptionLightPosition = new Vector3(0.223606797749979f, 0.86602540378444f, -0.447213595499958f);
+            LibRender.Renderer.OptionAmbientColor = new Color24(160, 160, 160);
+            LibRender.Renderer.OptionDiffuseColor = new Color24(160, 160, 160);
+            LibRender.Renderer.OptionLightPosition = new Vector3(0.223606797749979f, 0.86602540378444f, -0.447213595499958f);
             LibRender.Renderer.OptionLightingResultingAmount = 1.0f;
             OptionClock = false;
             OptionBrakeSystems = false;
@@ -89,29 +90,29 @@ namespace OpenBve
 	    {
 		    if (Mode == ViewPortChangeMode.ChangeToCab)
 		    {
-			    CurrentViewPortMode = ViewPortMode.Cab;
+			    LibRender.Renderer.CurrentViewPortMode = ViewPortMode.Cab;
 		    }
 		    else
 		    {
-			    CurrentViewPortMode = ViewPortMode.Scenery;
+			    LibRender.Renderer.CurrentViewPortMode = ViewPortMode.Scenery;
 		    }
 
-		    GL.Viewport(0, 0, Screen.Width, Screen.Height);
-		    World.AspectRatio = (double)Screen.Width / (double)Screen.Height;
-		    World.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * World.VerticalViewingAngle) * World.AspectRatio);
+		    GL.Viewport(0, 0, LibRender.Screen.Width, LibRender.Screen.Height);
+		    LibRender.Screen.AspectRatio = (double)LibRender.Screen.Width / (double)LibRender.Screen.Height;
+		    Camera.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * Camera.VerticalViewingAngle) * LibRender.Screen.AspectRatio);
 		    GL.MatrixMode(MatrixMode.Projection);
 		    GL.LoadIdentity();
-		    if (CurrentViewPortMode == ViewPortMode.Cab)
+		    if (LibRender.Renderer.CurrentViewPortMode == ViewPortMode.Cab)
 		    {
 
-			    Matrix4d perspective = Matrix4d.Perspective(World.VerticalViewingAngle, -World.AspectRatio, 0.025, 50.0);
+			    Matrix4d perspective = Matrix4d.Perspective(Camera.VerticalViewingAngle, -LibRender.Screen.AspectRatio, 0.025, 50.0);
 			    GL.MultMatrix(ref perspective);
 		    }
 		    else
 		    {
-			    var b = BackgroundManager.CurrentBackground as BackgroundManager.BackgroundObject;
-			    var cd = b != null ? Math.Max(World.BackgroundImageDistance, b.ClipDistance) : World.BackgroundImageDistance;
-			    Matrix4d perspective = Matrix4d.Perspective(World.VerticalViewingAngle, -World.AspectRatio, 0.5, cd);
+			    var b = CurrentRoute.CurrentBackground as BackgroundObject;
+			    var cd = b != null ? Math.Max(Backgrounds.BackgroundImageDistance, b.ClipDistance) : Backgrounds.BackgroundImageDistance;
+			    Matrix4d perspective = Matrix4d.Perspective(Camera.VerticalViewingAngle, -LibRender.Screen.AspectRatio, 0.5, cd);
 			    GL.MultMatrix(ref perspective);
 		    }
 		    GL.MatrixMode(MatrixMode.Modelview);

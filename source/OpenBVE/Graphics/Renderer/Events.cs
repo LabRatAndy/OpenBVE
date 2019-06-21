@@ -1,4 +1,6 @@
-﻿using OpenBveApi.Textures;
+﻿using LibRender;
+using OpenBveApi.Routes;
+using OpenBveApi.Textures;
 using OpenTK.Graphics.OpenGL;
 using Vector2 = OpenBveApi.Math.Vector2;
 using Vector3 = OpenBveApi.Math.Vector3;
@@ -25,17 +27,17 @@ namespace OpenBve
 		{
 			Initialized = true;
 			string Folder = OpenBveApi.Path.CombineDirectory(Program.FileSystem.GetDataFolder(), "RouteViewer");
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "background.png"), out BackgroundChangeTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "brightness.png"), out BrightnessChangeTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "transponder.png"), out TransponderTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "section.png"), out SectionTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "limit.png"), out LimitTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "station_start.png"), out StationStartTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "station_end.png"), out StationEndTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "stop.png"), out StopTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "buffer.png"), out BufferTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "sound.png"), out SoundTexture);
-			Textures.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "switchsound.png"), out PointSoundTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "background.png"), out BackgroundChangeTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "brightness.png"), out BrightnessChangeTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "transponder.png"), out TransponderTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "section.png"), out SectionTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "limit.png"), out LimitTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "station_start.png"), out StationStartTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "station_end.png"), out StationEndTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "stop.png"), out StopTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "buffer.png"), out BufferTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "sound.png"), out SoundTexture);
+			TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(Folder, "switchsound.png"), out PointSoundTexture);
 		}
 
 		/// <summary>Renders a graphical visualisation of any events within camera range</summary>
@@ -77,7 +79,7 @@ namespace OpenBve
 				{
 					for (int j = 0; j < TrackManager.Tracks[0].Elements[i].Events.Length; j++)
 					{
-						TrackManager.GeneralEvent e = TrackManager.Tracks[0].Elements[i].Events[j];
+						dynamic e = TrackManager.Tracks[0].Elements[i].Events[j];
 						double dy, dx = 0.0, dz = 0.0;
 						double s; Texture t;
 						if (e is TrackManager.BrightnessChangeEvent)
@@ -152,7 +154,7 @@ namespace OpenBve
 						if (t != null)
 						{
 							TrackManager.TrackFollower f = new TrackManager.TrackFollower();
-							f.TriggerType = TrackManager.EventTriggerType.None;
+							f.TriggerType = EventTriggerType.None;
 							f.TrackPosition = p;
 							f.Update(p + e.TrackPositionDelta, true, false);
 							f.WorldPosition.X += dx * f.WorldSide.X + dy * f.WorldUp.X + dz * f.WorldDirection.X;
@@ -174,7 +176,7 @@ namespace OpenBve
 						const double s = 0.2;
 						double p = Game.Stations[i].Stops[j].TrackPosition;
 						TrackManager.TrackFollower f = new TrackManager.TrackFollower();
-						f.TriggerType = TrackManager.EventTriggerType.None;
+						f.TriggerType = EventTriggerType.None;
 						f.TrackPosition = p;
 						f.Update(p, true, false);
 						f.WorldPosition.X += dy * f.WorldUp.X;
@@ -194,7 +196,7 @@ namespace OpenBve
 					const double dy = 2.5;
 					const double s = 0.25;
 					TrackManager.TrackFollower f = new TrackManager.TrackFollower();
-					f.TriggerType = TrackManager.EventTriggerType.None;
+					f.TriggerType = EventTriggerType.None;
 					f.TrackPosition = p;
 					f.Update(p, true, false);
 					f.WorldPosition.X += dy * f.WorldUp.X;

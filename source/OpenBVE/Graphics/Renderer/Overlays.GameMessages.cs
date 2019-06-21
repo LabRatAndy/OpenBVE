@@ -38,8 +38,8 @@ namespace OpenBve
 			// start
 			double w = totalwidth + lw + rw;
 			double h = Element.Value2 * n;
-			double x = Element.Alignment.X < 0 ? 0.0 : Element.Alignment.X > 0 ? Screen.Width - w : 0.5 * (Screen.Width - w);
-			double y = Element.Alignment.Y < 0 ? 0.0 : Element.Alignment.Y > 0 ? Screen.Height - h : 0.5 * (Screen.Height - h);
+			double x = Element.Alignment.X < 0 ? 0.0 : Element.Alignment.X > 0 ? LibRender.Screen.Width - w : 0.5 * (LibRender.Screen.Width - w);
+			double y = Element.Alignment.Y < 0 ? 0.0 : Element.Alignment.Y > 0 ? LibRender.Screen.Height - h : 0.5 * (LibRender.Screen.Height - h);
 			x += Element.Position.X;
 			y += Element.Position.Y;
 			int m = 0;
@@ -156,33 +156,33 @@ namespace OpenBve
 				// left background
 				if (Left.BackgroundTexture != null)
 				{
-					if (Textures.LoadTexture(Left.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Left.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double u = (double)Left.BackgroundTexture.Width;
 						double v = (double)Left.BackgroundTexture.Height;
 						GL.Color4(bc.R, bc.G, bc.B, bc.A * alpha);
-						RenderOverlayTexture(Left.BackgroundTexture, px, py, px + u, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Left.BackgroundTexture, px, py, px + u, py + v);
 					}
 				}
 				// right background
 				if (Right.BackgroundTexture != null)
 				{
-					if (Textures.LoadTexture(Right.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Right.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double u = (double)Right.BackgroundTexture.Width;
 						double v = (double)Right.BackgroundTexture.Height;
 						GL.Color4(bc.R, bc.G, bc.B, bc.A * alpha);
-						RenderOverlayTexture(Right.BackgroundTexture, px + w - u, py, px + w, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Right.BackgroundTexture, px + w - u, py, px + w, py + v);
 					}
 				}
 				// middle background
 				if (Middle.BackgroundTexture != null)
 				{
-					if (Textures.LoadTexture(Middle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Middle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double v = (double)Middle.BackgroundTexture.Height;
 						GL.Color4(bc.R, bc.G, bc.B, bc.A * alpha);
-						RenderOverlayTexture(Middle.BackgroundTexture, px + lw, py, px + w - rw, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Middle.BackgroundTexture, px + lw, py, px + w - rw, py + v);
 					}
 				}
 				{
@@ -210,33 +210,33 @@ namespace OpenBve
 				// left overlay
 				if (Left.OverlayTexture != null)
 				{
-					if (Textures.LoadTexture(Left.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Left.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double u = (double)Left.OverlayTexture.Width;
 						double v = (double)Left.OverlayTexture.Height;
 						GL.Color4(oc.R, oc.G, oc.B, oc.A * alpha);
-						RenderOverlayTexture(Left.OverlayTexture, px, py, px + u, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Left.OverlayTexture, px, py, px + u, py + v);
 					}
 				}
 				// right overlay
 				if (Right.OverlayTexture != null)
 				{
-					if (Textures.LoadTexture(Right.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Right.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double u = (double)Right.OverlayTexture.Width;
 						double v = (double)Right.OverlayTexture.Height;
 						GL.Color4(oc.R, oc.G, oc.B, oc.A * alpha);
-						RenderOverlayTexture(Right.OverlayTexture, px + w - u, py, px + w, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Right.OverlayTexture, px + w - u, py, px + w, py + v);
 					}
 				}
 				// middle overlay
 				if (Middle.OverlayTexture != null)
 				{
-					if (Textures.LoadTexture(Middle.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Middle.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						double v = (double)Middle.OverlayTexture.Height;
 						GL.Color4(oc.R, oc.G, oc.B, oc.A * alpha);
-						RenderOverlayTexture(Middle.OverlayTexture, px + lw, py, px + w - rw, py + v);
+						LibRender.Renderer.RenderOverlayTexture(Middle.OverlayTexture, px + lw, py, px + w - rw, py + v);
 					}
 				}
 

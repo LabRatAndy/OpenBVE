@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using LibRender;
 using OpenBveApi.Runtime;
 using OpenBveApi.Interface;
 using OpenBveApi.Trains;
-using OpenBve.SignalManager;
+using OpenBve.RouteManager;
 
 namespace OpenBve {
 	internal static class PluginManager {
@@ -119,7 +120,7 @@ namespace OpenBve {
 							if (z >= location & z < bestLocation)
 							{
 								bestLocation = z;
-								bestSpeed = TrainManager.Trains[i].Specs.CurrentAverageSpeed;
+								bestSpeed = TrainManager.Trains[i].CurrentSpeed;
 							}
 						}
 					}
@@ -139,7 +140,7 @@ namespace OpenBve {
 				double totalTime = Game.SecondsSinceMidnight;
 				double elapsedTime = Game.SecondsSinceMidnight - LastTime;
 
-				ElapseData data = new ElapseData(vehicle, precedingVehicle, handles, this.Train.Specs.DoorInterlockState, new Time(totalTime), new Time(elapsedTime), currentRouteStations, World.CameraMode, Translations.CurrentLanguageCode, this.Train.Destination);
+				ElapseData data = new ElapseData(vehicle, precedingVehicle, handles, this.Train.Specs.DoorInterlockState, new Time(totalTime), new Time(elapsedTime), currentRouteStations, Camera.CurrentMode, Translations.CurrentLanguageCode, this.Train.Destination);
 				ElapseData inputDevicePluginData = data;
 				LastTime = Game.SecondsSinceMidnight;
 				Elapse(data);

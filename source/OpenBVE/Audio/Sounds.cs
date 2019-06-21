@@ -7,6 +7,7 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using OpenBveApi.Interface;
 using OpenBveApi.Sounds;
+using OpenBveApi.Trains;
 
 namespace OpenBve
 {
@@ -361,7 +362,7 @@ namespace OpenBve
 		/// <param name="car">The car in the train the sound is attached to.</param>
 		/// <param name="looped">Whether to play the sound in a loop.</param>
 		/// <returns>The sound source.</returns>
-		internal static void PlayCarSound(TrainManager.CarSound sound, double pitch, double volume, TrainManager.Train train, int car, bool looped)
+		internal static void PlayCarSound(TrainManager.CarSound sound, double pitch, double volume, AbstractTrain train, int car, bool looped)
 		{
 			if (sound.Buffer == null)
 			{
@@ -414,7 +415,7 @@ namespace OpenBve
 
 		/// <summary>Stops all sounds that are attached to the specified train.</summary>
 		/// <param name="train">The train.</param>
-		internal static void StopAllSounds(TrainManager.Train train)
+		internal static void StopAllSounds(AbstractTrain train)
 		{
 			for (int i = 0; i < SourceCount; i++)
 			{
