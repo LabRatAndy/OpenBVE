@@ -27,6 +27,17 @@ namespace LibRender
             GetNormals(Object);
             vbo = new VertexBufferObject(GetVertexDataAsDoubleArray());
         }
+        public int GetEBOs(out ElementBufferObject[] ebos)
+        {
+            ElementBufferObject[] ibos = new ElementBufferObject[faces.GetLength(0)];
+            for (int n = 0; n < faces.GetLength(0); n++)
+            {
+                ElementBufferObject ibo = new ElementBufferObject(faces[n]);
+                ibos[n] = ibo;
+            }
+            ebos = ibos;
+            return ebos.Length;
+        }
 
         private void GetVertexData(StaticObject obj)
         {
