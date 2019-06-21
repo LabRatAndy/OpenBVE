@@ -79,6 +79,7 @@
     <Compile Include="Text\OpenGlFontChar.cs" />
     <Compile Include="Text\OpenGlFontTable.cs" />
     <Compile Include="Text\Strings.cs" />
+    <Compile Include="VBOCreater.cs" />
     <Compile Include="Viewport\ViewportChangeModes.cs" />
     <Compile Include="Viewport\ViewportModes.cs" />
   </ItemGroup>
