@@ -6,11 +6,13 @@
 // ╚═════════════════════════════════════════════════════════════╝
 
 using System;
+using LibRender;
 using OpenBveApi.Colors;
 using OpenBveApi.Math;
 using OpenBveApi.Runtime;
 using OpenBveApi.Textures;
 using OpenBveApi.Trains;
+using OpenBve.RouteManager;
 using OpenBve.SignalManager;
 using OpenBveApi.Objects;
 using SoundHandle = OpenBveApi.Sounds.SoundHandle;
@@ -27,24 +29,7 @@ namespace OpenBve {
 		internal static bool MinimalisticSimulation = false;
 		internal static double[] RouteUnitOfLength = new double[] { 1.0 };
 
-		// fog
-		internal struct Fog {
-			internal float Start;
-			internal float End;
-			internal Color24 Color;
-			internal double TrackPosition;
-			internal Fog(float Start, float End, Color24 Color, double TrackPosition) {
-				this.Start = Start;
-				this.End = End;
-				this.Color = Color;
-				this.TrackPosition = TrackPosition;
-			}
-		}
-		internal static Fog PreviousFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.0);
-		internal static Fog CurrentFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.5);
-		internal static Fog NextFog = new Fog(0.0f, 0.0f, Color24.Grey, 1.0);
-		internal static float NoFogStart = 800.0f;
-		internal static float NoFogEnd = 1600.0f;
+		
 
 		// route constants
 		internal static string RouteComment = "";
@@ -110,8 +95,7 @@ namespace OpenBve {
 		internal static string TrainName = "";
 
 		// information
-		/// <summary>The game's current framerate</summary>
-		internal static double InfoFrameRate = 1.0;
+		
 		/// <summary>The current plugin debug message to be displayed</summary>
 		internal static string InfoDebugString = "";
 		/// <summary>The total number of OpenGL triangles in the current frame</summary>
@@ -153,11 +137,11 @@ namespace OpenBve {
 			CurrentRoute.BogusPretrainInstructions = new BogusPretrainInstruction[] { };
 			TrainName = "";
 			TrainStart = TrainStartMode.EmergencyBrakesNoAts;
-			PreviousFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.0);
-			CurrentFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.5);
-			NextFog = new Fog(0.0f, 0.0f, Color24.Grey, 1.0);
-			NoFogStart = (float)World.BackgroundImageDistance + 200.0f;
-			NoFogEnd = 2.0f * NoFogStart;
+			CurrentRoute.PreviousFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.0);
+			CurrentRoute.CurrentFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.5);
+			CurrentRoute.NextFog = new Fog(0.0f, 0.0f, Color24.Grey, 1.0);
+			CurrentRoute.NoFogStart = (float)Backgrounds.BackgroundImageDistance + 200.0f;
+			CurrentRoute.NoFogEnd = 2.0f * CurrentRoute.NoFogStart;
 			InfoTotalTriangles = 0;
 			InfoTotalTriangleStrip = 0;
 			InfoTotalQuads = 0;
@@ -341,6 +325,7 @@ namespace OpenBve {
 			internal string Text;
 		}
 		internal static PointOfInterest[] PointsOfInterest = new PointOfInterest[] { };
+
 		internal static bool ApplyPointOfInterest(int Value, bool Relative) {
 			double t = 0.0;
 			int j = -1;
@@ -376,11 +361,11 @@ namespace OpenBve {
 			// process poi
 			if (j >= 0) {
 				TrackManager.UpdateTrackFollower(ref World.CameraTrackFollower, t, true, false);
-				World.CameraCurrentAlignment.Position = PointsOfInterest[j].TrackOffset;
-				World.CameraCurrentAlignment.Yaw = PointsOfInterest[j].TrackYaw;
-				World.CameraCurrentAlignment.Pitch = PointsOfInterest[j].TrackPitch;
-				World.CameraCurrentAlignment.Roll = PointsOfInterest[j].TrackRoll;
-				World.CameraCurrentAlignment.TrackPosition = t;
+				Camera.CurrentAlignment.Position = PointsOfInterest[j].TrackOffset;
+				Camera.CurrentAlignment.Yaw = PointsOfInterest[j].TrackYaw;
+				Camera.CurrentAlignment.Pitch = PointsOfInterest[j].TrackPitch;
+				Camera.CurrentAlignment.Roll = PointsOfInterest[j].TrackRoll;
+				Camera.CurrentAlignment.TrackPosition = t;
 				World.UpdateAbsoluteCamera(0.0);
 				return true;
 			} else {

@@ -3,12 +3,13 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Threading;
+using LibRender;
 using OpenBve.Parsers.Train;
 using OpenBveApi.Interface;
 using OpenBveApi.Objects;
 using OpenBveApi.Runtime;
 using OpenBveApi.Trains;
-using OpenBve.SignalManager;
+using OpenBve.RouteManager;
 
 namespace OpenBve {
 	internal static class Loading {
@@ -44,7 +45,6 @@ namespace OpenBve {
 		/// <summary>Initializes loading the route and train asynchronously. Set the Loading.Cancel member to cancel loading. Check the Loading.Complete member to see when loading has finished.</summary>
 		internal static void LoadAsynchronously(string RouteFile, Encoding RouteEncoding, string TrainFolder, Encoding TrainEncoding) {
 			// members
-			LibRender.Renderer.currentHost = Program.CurrentHost;
 			RouteProgress = 0.0;
 			TrainProgress = 0.0;
 			TrainProgressCurrentSum = 0.0;
@@ -181,7 +181,7 @@ namespace OpenBve {
 			Game.MinimalisticSimulation = true;
 			// screen
 			World.CameraTrackFollower = new TrackManager.TrackFollower{ Train = null, CarIndex = -1 };
-			World.CameraMode = CameraViewMode.Interior;
+			Camera.CurrentMode = CameraViewMode.Interior;
 			//First, check the format of the route file
 			//RW routes were written for BVE1 / 2, and have a different command syntax
 			bool IsRW = CsvRwRouteParser.isRWFile(CurrentRouteFile);

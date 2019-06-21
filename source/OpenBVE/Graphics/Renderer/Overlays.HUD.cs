@@ -22,7 +22,7 @@ namespace OpenBve
 			double w, h;
 			if (Element.CenterMiddle.BackgroundTexture != null)
 			{
-				if (Textures.LoadTexture(Element.CenterMiddle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
+				if (Program.CurrentHost.LoadTexture(Element.CenterMiddle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 				{
 					w = (double)Element.CenterMiddle.BackgroundTexture.Width;
 					h = (double)Element.CenterMiddle.BackgroundTexture.Height;
@@ -36,8 +36,8 @@ namespace OpenBve
 			{
 				w = 0.0; h = 0.0;
 			}
-			double x = Element.Alignment.X < 0 ? 0.0 : Element.Alignment.X == 0 ? 0.5 * (Screen.Width - w) : Screen.Width - w;
-			double y = Element.Alignment.Y < 0 ? 0.0 : Element.Alignment.Y == 0 ? 0.5 * (Screen.Height - h) : Screen.Height - h;
+			double x = Element.Alignment.X < 0 ? 0.0 : Element.Alignment.X == 0 ? 0.5 * (LibRender.Screen.Width - w) : LibRender.Screen.Width - w;
+			double y = Element.Alignment.Y < 0 ? 0.0 : Element.Alignment.Y == 0 ? 0.5 * (LibRender.Screen.Height - h) : LibRender.Screen.Height - h;
 			x += Element.Position.X;
 			y += Element.Position.Y;
 			// command
@@ -579,21 +579,21 @@ namespace OpenBve
 				case "speed":
 					if (OptionSpeed == SpeedDisplayMode.Kmph)
 					{
-						double kmph = Math.Abs(TrainManager.PlayerTrain.Specs.CurrentAverageSpeed) * 3.6;
+						double kmph = Math.Abs(TrainManager.PlayerTrain.CurrentSpeed) * 3.6;
 						t = kmph.ToString("0.00", Culture) + " km/h";
 						Element.TransitionState -= speed * TimeElapsed;
 						if (Element.TransitionState < 0.0) Element.TransitionState = 0.0;
 					}
 					else if (OptionSpeed == SpeedDisplayMode.Mph)
 					{
-						double mph = Math.Abs(TrainManager.PlayerTrain.Specs.CurrentAverageSpeed) * 2.2369362920544;
+						double mph = Math.Abs(TrainManager.PlayerTrain.CurrentSpeed) * 2.2369362920544;
 						t = mph.ToString("0.00", Culture) + " mph";
 						Element.TransitionState -= speed * TimeElapsed;
 						if (Element.TransitionState < 0.0) Element.TransitionState = 0.0;
 					}
 					else
 					{
-						double mph = Math.Abs(TrainManager.PlayerTrain.Specs.CurrentAverageSpeed) * 2.2369362920544;
+						double mph = Math.Abs(TrainManager.PlayerTrain.CurrentSpeed) * 2.2369362920544;
 						t = mph.ToString("0.00", Culture) + " mph";
 						Element.TransitionState += speed * TimeElapsed;
 						if (Element.TransitionState > 1.0) Element.TransitionState = 1.0;
@@ -678,7 +678,7 @@ namespace OpenBve
 						if (Element.TransitionState > 1.0) Element.TransitionState = 1.0;
 					} break;
 				case "fps":
-					int fps = (int)Math.Round(Game.InfoFrameRate);
+					int fps = (int)Math.Round(LibRender.Renderer.FrameRate);
 					t = fps.ToString(Culture) + " fps";
 					if (OptionFrameRates)
 					{
@@ -784,11 +784,11 @@ namespace OpenBve
 				}
 				if (Element.CenterMiddle.BackgroundTexture != null)
 				{
-					if (Textures.LoadTexture(Element.CenterMiddle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Element.CenterMiddle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						Color128 c = Element.BackgroundColor.CreateBackColor(sc, alpha);
 						GL.Color4(c.R, c.G, c.B, c.A);
-						RenderOverlayTexture(Element.CenterMiddle.BackgroundTexture, x, y, x + w, y + h);
+						LibRender.Renderer.RenderOverlayTexture(Element.CenterMiddle.BackgroundTexture, x, y, x + w, y + h);
 					}
 				}
 				{ // text
@@ -805,11 +805,11 @@ namespace OpenBve
 				// overlay
 				if (Element.CenterMiddle.OverlayTexture != null)
 				{
-					if (Textures.LoadTexture(Element.CenterMiddle.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
+					if (Program.CurrentHost.LoadTexture(Element.CenterMiddle.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
 					{
 						Color128 c = Element.OverlayColor.CreateBackColor(sc, alpha);
 						GL.Color4(c.R, c.G, c.B, c.A);
-						RenderOverlayTexture(Element.CenterMiddle.OverlayTexture, x, y, x + w, y + h);
+						LibRender.Renderer.RenderOverlayTexture(Element.CenterMiddle.OverlayTexture, x, y, x + w, y + h);
 					}
 				}
 			}

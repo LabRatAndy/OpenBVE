@@ -1,4 +1,5 @@
 ﻿using System;
+using LibRender;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
 using OpenBveApi.Trains;
@@ -40,8 +41,8 @@ namespace OpenBve
 				double z = Object.TranslateZFunction == null ? 0.0 : Object.TranslateZFunction.LastResult;
 				double pa = TrackPosition + z - Radius - extraRadius;
 				double pb = TrackPosition + z + Radius + extraRadius;
-				double ta = World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z - World.BackgroundImageDistance - World.ExtraViewingDistance;
-				double tb = World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z + World.BackgroundImageDistance + World.ExtraViewingDistance;
+				double ta = World.CameraTrackFollower.TrackPosition + Camera.CurrentAlignment.Position.Z - Backgrounds.BackgroundImageDistance - World.ExtraViewingDistance;
+				double tb = World.CameraTrackFollower.TrackPosition + Camera.CurrentAlignment.Position.Z + Backgrounds.BackgroundImageDistance + World.ExtraViewingDistance;
 				bool visible = pb >= ta & pa <= tb;
 				if (visible | ForceUpdate)
 				{
@@ -186,9 +187,7 @@ namespace OpenBve
 				{
 					for (int j = 0; j < currentObject.Object.States[i].Object.Mesh.Materials.Length; j++)
 					{
-						currentObject.Object.States[i].Object.Mesh.Materials[j].Color.R = (byte)Math.Round((double)this.Object.States[i].Object.Mesh.Materials[j].Color.R * Brightness);
-						currentObject.Object.States[i].Object.Mesh.Materials[j].Color.G = (byte)Math.Round((double)this.Object.States[i].Object.Mesh.Materials[j].Color.G * Brightness);
-						currentObject.Object.States[i].Object.Mesh.Materials[j].Color.B = (byte)Math.Round((double)this.Object.States[i].Object.Mesh.Materials[j].Color.B * Brightness);
+						currentObject.Object.States[i].Object.Mesh.Materials[j].Color *= Brightness;
 					}
 					for (int j = 0; j < currentObject.Object.States[i].Object.Mesh.Vertices.Length; j++)
 					{

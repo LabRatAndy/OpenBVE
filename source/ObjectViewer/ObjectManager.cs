@@ -599,14 +599,14 @@ namespace OpenBve
 	                ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates.Rotate(Object.RotateZDirection, cosZ, sinZ);
                 }
                 // translate
-	            if (Overlay & World.CameraRestriction != CameraRestrictionMode.NotAvailable)
+	            if (Overlay & Camera.CurrentRestriction != CameraRestrictionMode.NotAvailable)
 	            {
 		            ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates += Object.States[s].Position - Position;
-		            ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates.Rotate(World.AbsoluteCameraDirection, World.AbsoluteCameraUp, World.AbsoluteCameraSide);
-		            double dx = -Math.Tan(World.CameraCurrentAlignment.Yaw) - World.CameraCurrentAlignment.Position.X;
-		            double dy = -Math.Tan(World.CameraCurrentAlignment.Pitch) - World.CameraCurrentAlignment.Position.Y;
-		            double dz = -World.CameraCurrentAlignment.Position.Z;
-		            ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates += World.AbsoluteCameraPosition + dx * World.AbsoluteCameraSide + dy * World.AbsoluteCameraUp + dz * World.AbsoluteCameraDirection;
+		            ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates.Rotate(Camera.AbsoluteDirection, Camera.AbsoluteUp, Camera.AbsoluteSide);
+		            double dx = -Math.Tan(Camera.CurrentAlignment.Yaw) - Camera.CurrentAlignment.Position.X;
+		            double dy = -Math.Tan(Camera.CurrentAlignment.Pitch) - Camera.CurrentAlignment.Position.Y;
+		            double dz = -Camera.CurrentAlignment.Position.Z;
+		            ObjectManager.Objects[i].Mesh.Vertices[k].Coordinates += Camera.AbsolutePosition + dx * Camera.AbsoluteSide + dy * Camera.AbsoluteUp + dz * Camera.AbsoluteDirection;
 	            }
 	            else
 	            {
@@ -756,9 +756,7 @@ namespace OpenBve
             {
                 for (int j = 0; j < AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Materials.Length; j++)
                 {
-                    AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Materials[j].Color.R = (byte)Math.Round((double)Prototype.States[i].Object.Mesh.Materials[j].Color.R * Brightness);
-                    AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Materials[j].Color.G = (byte)Math.Round((double)Prototype.States[i].Object.Mesh.Materials[j].Color.G * Brightness);
-                    AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Materials[j].Color.B = (byte)Math.Round((double)Prototype.States[i].Object.Mesh.Materials[j].Color.B * Brightness);
+	                AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Materials[j].Color *= Brightness;
                 }
                 for (int j = 0; j < AnimatedWorldObjects[a].Object.States[i].Object.Mesh.Vertices.Length; j++)
                 {
@@ -1111,7 +1109,7 @@ namespace OpenBve
             ObjectsSortedByStartPointer = 0;
             ObjectsSortedByEndPointer = 0;
             // initial visiblity
-            double p = World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z;
+            double p = World.CameraTrackFollower.TrackPosition + Camera.CurrentAlignment.Position.Z;
             for (int i = 0; i < ObjectsUsed; i++)
             {
                 if (Objects[i] != null && !Objects[i].Dynamic)
@@ -1143,7 +1141,7 @@ namespace OpenBve
         {
             double d = TrackPosition - LastUpdatedTrackPosition;
             int n = ObjectsSortedByStart.Length;
-            double p = World.CameraTrackFollower.TrackPosition + World.CameraCurrentAlignment.Position.Z;
+            double p = World.CameraTrackFollower.TrackPosition + Camera.CurrentAlignment.Position.Z;
             if (d < 0.0)
             {
                 if (ObjectsSortedByStartPointer >= n) ObjectsSortedByStartPointer = n - 1;

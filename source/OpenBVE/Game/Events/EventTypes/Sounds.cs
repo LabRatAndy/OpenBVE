@@ -1,12 +1,13 @@
 ﻿using System;
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
 
 namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>Called when a generic sound should be played</summary>
-		internal class SoundEvent : GeneralEvent
+		internal class SoundEvent : GeneralEvent<TrainManager.Train>
 		{
 			/// <summary>The sound buffer to play</summary>
 			private readonly Sounds.SoundBuffer SoundBuffer;
@@ -45,7 +46,7 @@ namespace OpenBve
 			/// <param name="TriggerType">They type of event which triggered this sound</param>
 			/// <param name="Train">The root train which triggered this sound</param>
 			/// <param name="CarIndex">The car index which triggered this sound</param>
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
 			{
 				if (SuppressSoundEvents) return;
 				if (TriggerType == EventTriggerType.FrontCarFrontAxle | TriggerType == EventTriggerType.OtherCarFrontAxle | TriggerType == EventTriggerType.OtherCarRearAxle | TriggerType == EventTriggerType.RearCarRearAxle)
@@ -60,7 +61,7 @@ namespace OpenBve
 						{
 							if (this.Dynamic)
 							{
-								double spd = Math.Abs(Train.Specs.CurrentAverageSpeed);
+								double spd = Math.Abs(Train.CurrentSpeed);
 								pitch = spd / this.Speed;
 								gain = pitch < 0.5 ? 2.0 * pitch : 1.0;
 								if (pitch < 0.2 | gain < 0.2)
@@ -79,7 +80,7 @@ namespace OpenBve
 			}
 		}
 
-		internal class PointSoundEvent : GeneralEvent
+		internal class PointSoundEvent : GeneralEvent<TrainManager.Train>
 		{
 			private readonly double Speed;
 
@@ -95,7 +96,7 @@ namespace OpenBve
 			/// <param name="TriggerType">They type of event which triggered this sound</param>
 			/// <param name="Train">The root train which triggered this sound</param>
 			/// <param name="CarIndex">The car index which triggered this sound</param>
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
 			{
 				if (SuppressSoundEvents) return;
 				if (TriggerType == EventTriggerType.FrontCarFrontAxle | TriggerType == EventTriggerType.OtherCarFrontAxle | TriggerType == EventTriggerType.OtherCarRearAxle | TriggerType == EventTriggerType.RearCarRearAxle)
@@ -104,7 +105,7 @@ namespace OpenBve
 					Sounds.SoundBuffer buffer;
 					if (TriggerType == EventTriggerType.FrontCarFrontAxle | TriggerType == EventTriggerType.OtherCarFrontAxle)
 					{
-						if (Train.Specs.CurrentAverageSpeed <= 0.0) return;
+						if (Train.CurrentSpeed <= 0.0) return;
 						int bufferIndex = Train.Cars[CarIndex].FrontAxle.RunIndex;
 						if (Train.Cars[CarIndex].FrontAxle.PointSounds == null || Train.Cars[CarIndex].FrontAxle.PointSounds.Length == 0)
 						{
@@ -129,7 +130,7 @@ namespace OpenBve
 					}
 					if (buffer != null)
 					{
-						double spd = Math.Abs(Train.Specs.CurrentAverageSpeed);
+						double spd = Math.Abs(Train.CurrentSpeed);
 						double pitch = spd / this.Speed;
 						double gain = pitch < 0.5 ? 2.0 * pitch : 1.0;
 						if (pitch < 0.2 | gain < 0.2)
@@ -147,7 +148,7 @@ namespace OpenBve
 		}
 
 		/// <summary>Called when the rail played for a train should be changed</summary>
-		internal class RailSoundsChangeEvent : GeneralEvent
+		internal class RailSoundsChangeEvent : GeneralEvent<TrainManager.Train>
 		{
 			private readonly int PreviousRunIndex;
 			private readonly int PreviousFlangeIndex;
@@ -167,7 +168,7 @@ namespace OpenBve
 			/// <param name="TriggerType">They type of event which triggered this sound</param>
 			/// <param name="Train">The root train which triggered this sound</param>
 			/// <param name="CarIndex">The car index which triggered this sound</param>
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
 			{
 				if (TriggerType == EventTriggerType.FrontCarFrontAxle | TriggerType == EventTriggerType.OtherCarFrontAxle)
 				{

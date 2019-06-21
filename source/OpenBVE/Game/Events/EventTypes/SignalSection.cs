@@ -1,13 +1,15 @@
 ﻿using OpenBveApi.Colors;
 using OpenBveApi.Interface;
-using OpenBve.SignalManager;
+using OpenBve.RouteManager;
+using OpenBveApi.Routes;
+using OpenBveApi.Trains;
 
 namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>Is called when a train changes from one signalling section to another</summary>
-		internal class SectionChangeEvent : GeneralEvent
+		internal class SectionChangeEvent : GeneralEvent<AbstractTrain>
 		{
 			/// <summary>The index of the previous signalling section</summary>
 			internal readonly int PreviousSectionIndex;
@@ -21,7 +23,7 @@ namespace OpenBve
 				this.PreviousSectionIndex = PreviousSectionIndex;
 				this.NextSectionIndex = NextSectionIndex;
 			}
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, AbstractTrain Train, int CarIndex)
 			{
 				if (Train != null)
 				{
@@ -57,7 +59,7 @@ namespace OpenBve
 					}
 				}
 			}
-			private void UpdateFrontBackward(TrainManager.Train Train, bool UpdateTrain)
+			private void UpdateFrontBackward(AbstractTrain Train, bool UpdateTrain)
 			{
 				// update sections
 				if (this.PreviousSectionIndex >= 0)
@@ -87,7 +89,7 @@ namespace OpenBve
 					}
 				}
 			}
-			private void UpdateFrontForward(TrainManager.Train Train, bool UpdateTrain, bool UpdateSection)
+			private void UpdateFrontForward(AbstractTrain Train, bool UpdateTrain, bool UpdateSection)
 			{
 				if (UpdateTrain)
 				{
@@ -119,7 +121,7 @@ namespace OpenBve
 						{
 							Game.AddMessage(Translations.GetInterfaceString("message_signal_stop"), MessageManager.MessageDependency.PassedRedSignal, Interface.GameMode.Normal, MessageColor.Red, double.PositiveInfinity, null);
 						}
-						else if (Train.Specs.CurrentAverageSpeed > Train.CurrentSectionLimit)
+						else if (Train.CurrentSpeed > Train.CurrentSectionLimit)
 						{
 							Game.AddMessage(Translations.GetInterfaceString("message_signal_overspeed"), MessageManager.MessageDependency.SectionLimit, Interface.GameMode.Normal, MessageColor.Orange, double.PositiveInfinity, null);
 						}
@@ -135,7 +137,7 @@ namespace OpenBve
 					}
 				}
 			}
-			private void UpdateRearBackward(TrainManager.Train Train, bool UpdateSection)
+			private void UpdateRearBackward(AbstractTrain Train, bool UpdateSection)
 			{
 				if (UpdateSection)
 				{
@@ -147,7 +149,7 @@ namespace OpenBve
 					}
 				}
 			}
-			private void UpdateRearForward(TrainManager.Train Train, bool UpdateSection)
+			private void UpdateRearForward(AbstractTrain Train, bool UpdateSection)
 			{
 				if (UpdateSection)
 				{
