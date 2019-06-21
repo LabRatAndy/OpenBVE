@@ -1,19 +1,24 @@
 ﻿using System;
 using OpenBveApi.World;
+using System.Runtime.InteropServices;
 
 namespace OpenBveApi.Math {
-	/// <summary>Represents a three-dimensional vector.</summary>
-	public struct Vector3 {
-		
-		// --- members ---
-		
-		/// <summary>The x-coordinate.</summary>
-		public double X;
+    /// <summary>Represents a three-dimensional vector.</summary>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct Vector3 {
+
+        // --- members ---
+
+        /// <summary>The x-coordinate.</summary>
+        [FieldOffset(0)] // field offset to ensure each double is after the last to ensure when used in librender vertex they can form a VBO coorectly
+        public double X;
 		
 		/// <summary>The y-coordinate.</summary>
+        [FieldOffset(sizeof(double))]
 		public double Y;
 		
 		/// <summary>The z-coordinate.</summary>
+        [FieldOffset(2*sizeof(double))]
 		public double Z;
 		
 		

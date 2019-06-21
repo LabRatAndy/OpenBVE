@@ -49,6 +49,11 @@
   <ItemGroup>
     <Compile Include="Backgrounds\Backgrounds.cs" />
     <Compile Include="Camera\Camera.cs" />
+    <Compile Include="Buffers\Attribute.cs" />
+    <Compile Include="Buffers\EBO.cs" />
+    <Compile Include="Buffers\VAO.cs" />
+    <Compile Include="Buffers\VBO.cs" />
+    <Compile Include="Buffers\VertexStruct.cs" />
     <Compile Include="Camera\CameraAlignment.cs" />
     <Compile Include="Camera\CameraRestrictionMode.cs" />
     <Compile Include="Lighting\Lighting.cs" />
@@ -68,6 +73,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Screen\Screen.cs" />
     <Compile Include="Textures\TextureManager.cs" />
+    <Compile Include="Shader\Shader.cs" />
+    <Compile Include="Shader\ShaderCompileException.cs" />
     <Compile Include="Text\OpenGlFont.cs" />
     <Compile Include="Text\OpenGlFontChar.cs" />
     <Compile Include="Text\OpenGlFontTable.cs" />
