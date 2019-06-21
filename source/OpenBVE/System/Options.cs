@@ -4,23 +4,13 @@ using System.Globalization;
 using OpenBveApi.Graphics;
 using OpenBveApi.Objects;
 using OpenBveApi.Packages;
+using LibRender;
 
 namespace OpenBve
 {
 	internal partial class Interface
 	{
-		/// <summary>Defines the levels of motion blur</summary>
-		internal enum MotionBlurMode
-		{
-			/// <summary>Motion blur is disabled</summary>
-			None = 0,
-			/// <summary>Low motion blur</summary>
-			Low = 1,
-			/// <summary>Medium motion blur</summary>
-			Medium = 2,
-			/// <summary>High motion blur</summary>
-			High = 3
-		}
+		
 
 		/// <summary>Defines the range at which a sound will be loaded</summary>
 		internal enum SoundRange
@@ -176,12 +166,7 @@ namespace OpenBve
 			 * Only relevant in developer mode, not saved
 			 */
 			internal bool ShowEvents = false;
-			/*
-			 * Note: Disabling texture resizing may produce artifacts at the edges of textures,
-			 * and may display issues with certain graphics cards.
-			 */
-			/// <summary>Whether textures are to be resized to the power of two rule</summary>
-			internal bool NoTextureResize;
+
 			/// <summary>Whether we are currently in kiosk mode</summary>
 			internal bool KioskMode;
 			/// <summary>The timer before AI controls are enabled in kiosk mode</summary>
@@ -244,7 +229,6 @@ namespace OpenBve
 				this.DisableDisplayLists = false;
 				this.LoadInAdvance = false;
 				this.UnloadUnusedTextures = false;
-				this.NoTextureResize = false;
 				this.ProxyUrl = string.Empty;
 				this.ProxyUserName = string.Empty;
 				this.ProxyPassword = string.Empty;
@@ -437,9 +421,6 @@ namespace OpenBve
 										case "unloadtextures":
 											Interface.CurrentOptions.UnloadUnusedTextures = string.Compare(Value, "false", StringComparison.OrdinalIgnoreCase) != 0;
 											break;
-										case "notextureresize":
-											Interface.CurrentOptions.NoTextureResize = string.Compare(Value, "false", StringComparison.OrdinalIgnoreCase) != 0;
-											break;
 									} break;
 								case "quality":
 									switch (Key)
@@ -498,8 +479,13 @@ namespace OpenBve
 										case "viewingdistance":
 											{
 												int a;
-												int.TryParse(Value, NumberStyles.Integer, Culture, out a);
-												Interface.CurrentOptions.ViewingDistance = a;
+												if (int.TryParse(Value, NumberStyles.Integer, Culture, out a))
+												{
+													if (a >= 100 && a <= 10000)
+													{
+														Interface.CurrentOptions.ViewingDistance = a;
+													}
+												}
 											} break;
 										case "motionblur":
 											switch (Value.ToLowerInvariant())
@@ -875,7 +861,6 @@ namespace OpenBve
 			Builder.AppendLine("disableDisplayLists = " + (CurrentOptions.DisableDisplayLists ? "true" : "false"));
 			Builder.AppendLine("loadInAdvance = " + (CurrentOptions.LoadInAdvance ? "true" : "false"));
 			Builder.AppendLine("unloadtextures = " + (CurrentOptions.UnloadUnusedTextures ? "true" : "false"));
-			Builder.AppendLine("noTextureResize = " + (CurrentOptions.NoTextureResize ? "true" : "false"));
 			Builder.AppendLine();
 			Builder.AppendLine("[quality]");
 			{

@@ -1,9 +1,11 @@
-﻿namespace OpenBve
+﻿using OpenBveApi.Routes;
+
+namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>Called when the cab brightness (lighting conditions) should be changed</summary>
-		internal class BrightnessChangeEvent : GeneralEvent
+		internal class BrightnessChangeEvent : GeneralEvent<TrainManager.Train>
 		{
 			/// <summary>The brightness to be applied from this point</summary>
 			internal readonly float CurrentBrightness;
@@ -30,13 +32,12 @@
 				this.NextBrightness = CurrentBrightness;
 				this.NextDistance = 0.0;
 			}
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
 			{
 				if (TriggerType == EventTriggerType.FrontCarFrontAxle | TriggerType == EventTriggerType.OtherCarFrontAxle)
 				{
 					if (Direction < 0)
 					{
-						//Train.Cars[CarIndex].Brightness.NextBrightness = Train.Cars[CarIndex].Brightness.PreviousBrightness;
 						Train.Cars[CarIndex].Brightness.NextBrightness = this.CurrentBrightness;
 						Train.Cars[CarIndex].Brightness.NextTrackPosition = Train.Cars[CarIndex].FrontAxle.Follower.TrackPosition;
 						Train.Cars[CarIndex].Brightness.PreviousBrightness = this.PreviousBrightness;
@@ -44,7 +45,6 @@
 					}
 					else if (Direction > 0)
 					{
-						//Train.Cars[CarIndex].Brightness.PreviousBrightness = Train.Cars[CarIndex].Brightness.NextBrightness;
 						Train.Cars[CarIndex].Brightness.PreviousBrightness = this.CurrentBrightness;
 						Train.Cars[CarIndex].Brightness.PreviousTrackPosition = Train.Cars[CarIndex].FrontAxle.Follower.TrackPosition;
 						Train.Cars[CarIndex].Brightness.NextBrightness = this.NextBrightness;

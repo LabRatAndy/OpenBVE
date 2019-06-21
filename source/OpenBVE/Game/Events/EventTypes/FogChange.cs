@@ -1,18 +1,22 @@
-﻿namespace OpenBve
+﻿using OpenBve.RouteManager;
+using OpenBveApi.Routes;
+using OpenBveApi.Trains;
+
+namespace OpenBve
 {
 	internal static partial class TrackManager
 	{
 		/// <summary>Is called when the in-game fog should be changed</summary>
-		internal class FogChangeEvent : GeneralEvent
+		internal class FogChangeEvent : GeneralEvent<AbstractTrain>
 		{
 			/// <summary>The fog which applies previously to this point</summary>
-			private readonly Game.Fog PreviousFog;
+			private readonly Fog PreviousFog;
 			/// <summary>The fog which applies after this point</summary>
-			private readonly Game.Fog CurrentFog;
+			private readonly Fog CurrentFog;
 			/// <summary>The next upcoming fog (Used for distance based interpolation)</summary>
-			internal Game.Fog NextFog;
+			internal Fog NextFog;
 
-			internal FogChangeEvent(double TrackPositionDelta, Game.Fog PreviousFog, Game.Fog CurrentFog, Game.Fog NextFog)
+			internal FogChangeEvent(double TrackPositionDelta, Fog PreviousFog, Fog CurrentFog, Fog NextFog)
 			{
 				this.TrackPositionDelta = TrackPositionDelta;
 				this.DontTriggerAnymore = false;
@@ -20,19 +24,19 @@
 				this.CurrentFog = CurrentFog;
 				this.NextFog = NextFog;
 			}
-			internal override void Trigger(int Direction, EventTriggerType TriggerType, TrainManager.Train Train, int CarIndex)
+			public override void Trigger(int Direction, EventTriggerType TriggerType, AbstractTrain Train, int CarIndex)
 			{
 				if (TriggerType == EventTriggerType.Camera)
 				{
 					if (Direction < 0)
 					{
-						Game.PreviousFog = this.PreviousFog;
-						Game.NextFog = this.CurrentFog;
+						CurrentRoute.PreviousFog = this.PreviousFog;
+						CurrentRoute.NextFog = this.CurrentFog;
 					}
 					else if (Direction > 0)
 					{
-						Game.PreviousFog = this.CurrentFog;
-						Game.NextFog = this.NextFog;
+						CurrentRoute.PreviousFog = this.CurrentFog;
+						CurrentRoute.NextFog = this.NextFog;
 					}
 				}
 			}

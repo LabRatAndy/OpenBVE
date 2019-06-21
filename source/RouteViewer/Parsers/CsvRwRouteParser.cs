@@ -1,6 +1,9 @@
 using System;
 using System.Globalization;
 using System.Collections.Generic;
+using LibRender;
+using OpenBve.BackgroundManager;
+using OpenBve.RouteManager;
 using OpenBve.SignalManager;
 using OpenBveApi;
 using OpenBveApi.Math;
@@ -34,7 +37,7 @@ namespace OpenBve {
 				}
 				else
 				{
-					this.Add(key, unifiedObject);
+					base.Add(key, unifiedObject);
 				}
 			}
 
@@ -51,7 +54,94 @@ namespace OpenBve {
 				}
 				else
 				{
-					this.Add(key, staticObject);
+					base.Add(key, staticObject);
+				}
+			}
+
+			internal new void Add(int key, UnifiedObject unifiedObject)
+			{
+				if (this.ContainsKey(key))
+				{
+					this[key] = unifiedObject;
+					Interface.AddMessage(MessageType.Warning, false, "The object with an index of " + key + " has been declared twice: The most recent declaration will be used.");
+				}
+				else
+				{
+					base.Add(key, unifiedObject);
+				}
+			}
+
+			internal void Add(int key, StaticObject staticObject)
+			{
+				if (this.ContainsKey(key))
+				{
+					this[key] = staticObject;
+					Interface.AddMessage(MessageType.Warning, false, "The object with an index of " + key + " has been declared twice: The most recent declaration will be used.");
+				}
+				else
+				{
+					base.Add(key, staticObject);
+				}
+			}
+		}
+
+		/// <inheritdoc/>
+		/// <summary>Defines a dictionary of signals</summary>
+		private class SignalDictionary : Dictionary<int, SignalData>
+		{
+			/// <summary>Adds a new signal to the dictionary</summary>
+			/// <param name="key">The signal index</param>
+			/// <param name="signal">The signal object</param>
+			internal new void Add(int key, SignalData signal)
+			{
+				if (this.ContainsKey(key))
+				{
+					this[key] = signal;
+					Interface.AddMessage(MessageType.Warning, false, "The Signal with an index of " + key + " has been declared twice: The most recent declaration will be used.");
+				}
+				else
+				{
+					base.Add(key, signal);
+				}
+			}
+		}
+
+		/// <inheritdoc />
+		/// <summary>Defines a dictionary of backgrounds</summary>
+		private class BackgroundDictionary : Dictionary<int, BackgroundHandle>
+		{
+			/// <summary>Adds a new background to the dictionary</summary>
+			/// <param name="key">The background index</param>
+			/// <param name="handle">The background handle</param>
+			internal new void Add(int key, BackgroundHandle handle)
+			{
+				if (this.ContainsKey(key))
+				{
+					this[key] = handle;
+					Interface.AddMessage(MessageType.Warning, false, "The Background with an index of " + key + " has been declared twice: The most recent declaration will be used.");
+				}
+				else
+				{
+					base.Add(key, handle);
+				}
+			}
+		}
+
+		private class PoleDictionary : Dictionary<int, ObjectDictionary>
+		{
+			/// <summary>Adds a new set of poles to the dictionary</summary>
+			/// <param name="key">The pole index</param>
+			/// <param name="dict">The background handle</param>
+			internal new void Add(int key, ObjectDictionary dict)
+			{
+				if (this.ContainsKey(key))
+				{
+					this[key] = dict;
+					Interface.AddMessage(MessageType.Warning, false, "The Background with an index of " + key + " has been declared twice: The most recent declaration will be used.");
+				}
+				else
+				{
+					base.Add(key, dict);
 				}
 			}
 		}
@@ -200,7 +290,7 @@ namespace OpenBve {
         private class Block {
 			internal int Background;
 			internal Brightness[] Brightness;
-			internal Game.Fog Fog;
+			internal Fog Fog;
 			internal bool FogDefined;
 			internal int[] Cycle;
 			internal RailCycle[] RailCycle;
@@ -233,7 +323,7 @@ namespace OpenBve {
 		private struct StructureData
 		{
 			internal ObjectDictionary RailObjects;
-			internal UnifiedObject[][] Poles;
+			internal PoleDictionary Poles;
 			internal ObjectDictionary Ground;
 			internal ObjectDictionary WallL;
 			internal ObjectDictionary WallR;
@@ -282,11 +372,11 @@ namespace OpenBve {
 			internal bool SignedCant;
 			internal bool FogTransitionMode;
 			internal StructureData Structure;
-			internal SignalData[] SignalData;
+			internal SignalDictionary SignalData;
 			internal CompatibilitySignalData[] CompatibilitySignalData;
 			internal int[] TimetableDaytime;
 			internal int[] TimetableNighttime;
-			internal BackgroundHandle[] Backgrounds;
+			internal BackgroundDictionary Backgrounds;
 			internal double[] SignalSpeeds;
 			internal Block[] Blocks;
 			internal Marker[] Markers;
@@ -316,8 +406,8 @@ namespace OpenBve {
             if (!PreviewOnly) {
                 Data.Blocks[0].Background = 0;
                 Data.Blocks[0].Brightness = new Brightness[] { };
-                Data.Blocks[0].Fog.Start = Game.NoFogStart;
-                Data.Blocks[0].Fog.End = Game.NoFogEnd;
+                Data.Blocks[0].Fog.Start = CurrentRoute.NoFogStart;
+                Data.Blocks[0].Fog.End = CurrentRoute.NoFogEnd;
                 Data.Blocks[0].Fog.Color = Color24.Grey;
                 Data.Blocks[0].Cycle = new int[] { -1 };
                 Data.Blocks[0].RailCycle = new RailCycle[1];
@@ -338,17 +428,15 @@ namespace OpenBve {
 				Data.Blocks[0].PointsOfInterest = new PointOfInterest[] { };
 				Data.Markers = new Marker[] { };
 				string PoleFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Poles");
-				Data.Structure.Poles = new UnifiedObject[][] {
-					new UnifiedObject[] {
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (PoleFolder, "pole_1.csv"), Encoding, false)
-					}, new UnifiedObject[] {
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (PoleFolder, "pole_2.csv"), Encoding, false)
-					}, new UnifiedObject[] {
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (PoleFolder, "pole_3.csv"), Encoding, false)
-					}, new UnifiedObject[] {
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (PoleFolder, "pole_4.csv"), Encoding, false)
-					}
-				};
+				Data.Structure.Poles = new PoleDictionary();
+				Data.Structure.Poles.Add(0, new ObjectDictionary());
+				Data.Structure.Poles[0].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_1.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(1, new ObjectDictionary());
+				Data.Structure.Poles[1].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_2.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(2, new ObjectDictionary());
+				Data.Structure.Poles[2].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_3.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(3, new ObjectDictionary());
+				Data.Structure.Poles[3].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_4.csv"), System.Text.Encoding.UTF8, false));
 				Data.Structure.RailObjects = new ObjectDictionary();
 				Data.Structure.Ground = new ObjectDictionary();
 				Data.Structure.WallL = new ObjectDictionary();
@@ -371,35 +459,35 @@ namespace OpenBve {
 				Data.Structure.RailCycle = new int[][] { };
                 Data.Structure.Run = new int[] { };
 				Data.Structure.Flange = new int[] { };
-				Data.Backgrounds = new BackgroundHandle[] { };
+				Data.Backgrounds = new BackgroundDictionary();
 				Data.TimetableDaytime = new int[] { -1, -1, -1, -1 };
 				Data.TimetableNighttime = new int[] { -1, -1, -1, -1 };
 				// signals
 				string SignalFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Signals");
-				Data.SignalData = new SignalData[7];
-				Data.SignalData[3] = new CompatibilitySignalData(new int[] { 0, 2, 4 }, new StaticObject[] {
+				Data.SignalData = new SignalDictionary();
+				Data.SignalData.Add(3, new CompatibilitySignalData(new int[] { 0, 2, 4 }, new StaticObject[] {
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_3_0.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_3_2.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_3_4.csv"), Encoding, false)
-																 });
-				Data.SignalData[4] = new CompatibilitySignalData(new int[] { 0, 1, 2, 4 }, new StaticObject[] {
+																 }));
+				Data.SignalData.Add(4, new CompatibilitySignalData(new int[] { 0, 1, 2, 4 }, new StaticObject[] {
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_4_0.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_4a_1.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_4a_2.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile (SignalFolder, "signal_4a_4.csv"), Encoding, false)
-																 });
-				Data.SignalData[5] = new CompatibilitySignalData(new int[] { 0, 1, 2, 3, 4 }, new StaticObject[] {
+																 }));
+				Data.SignalData.Add(5, new CompatibilitySignalData(new int[] { 0, 1, 2, 3, 4 }, new StaticObject[] {
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), Encoding, false)
-																 });
-				Data.SignalData[6] = new CompatibilitySignalData(new int[] { 0, 3, 4 }, new StaticObject[] {
+																 }));
+				Data.SignalData.Add(6, new CompatibilitySignalData(new int[] { 0, 3, 4 }, new StaticObject[] {
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_3.csv"), Encoding, false),
 																	ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_4.csv"), Encoding, false)
-																 });
+																 }));
 				// compatibility signals
 				Data.CompatibilitySignalData = new CompatibilitySignalData[9];
 				Data.CompatibilitySignalData[0] = new CompatibilitySignalData(new int[] { 0, 2 }, new StaticObject[] {
@@ -1883,7 +1971,7 @@ namespace OpenBve {
 											Interface.AddMessage(MessageType.Error, false, "BlueValue is required to be within the range from 0 to 255 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											b = b < 0 ? 0 : 255;
 										}
-										Renderer.OptionAmbientColor = new Color24((byte)r, (byte)g, (byte)b);
+										LibRender.Renderer.OptionAmbientColor = new Color24((byte)r, (byte)g, (byte)b);
 									} break;
 								case "route.directionallight":
 									{
@@ -1906,7 +1994,7 @@ namespace OpenBve {
 											Interface.AddMessage(MessageType.Error, false, "BlueValue is required to be within the range from 0 to 255 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											b = b < 0 ? 0 : 255;
 										}
-										Renderer.OptionDiffuseColor = new Color24((byte)r, (byte)g, (byte)b);
+										LibRender.Renderer.OptionDiffuseColor = new Color24((byte)r, (byte)g, (byte)b);
 									}
 									break;
 								case "route.lightdirection":
@@ -1918,12 +2006,12 @@ namespace OpenBve {
 										if (Arguments.Length >= 2 && Arguments[1].Length > 0 && !NumberFormats.TryParseDoubleVb6(Arguments[1], out phi)) {
 											Interface.AddMessage(MessageType.Error, false, "Phi is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 										}
-										theta *= 0.0174532925199433;
-										phi *= 0.0174532925199433;
+										theta = theta.ToRadians();
+										phi = phi.ToRadians();
 										double dx = Math.Cos(theta) * Math.Sin(phi);
 										double dy = -Math.Sin(theta);
 										double dz = Math.Cos(theta) * Math.Cos(phi);
-										Renderer.OptionLightPosition = new Vector3((float)-dx, (float)-dy, (float)-dz);
+										LibRender.Renderer.OptionLightPosition = new Vector3((float)-dx, (float)-dy, (float)-dz);
 									} break;
 									// train
 								case "train.folder":
@@ -2078,19 +2166,14 @@ namespace OpenBve {
 												} else if (Path.ContainsInvalidChars(Arguments[0])) {
 													Interface.AddMessage(MessageType.Error, false, "FileName " + Arguments[0] + " contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													if (CommandIndex1 >= Data.Structure.Poles.Length) {
-														Array.Resize<UnifiedObject[]>(ref Data.Structure.Poles, CommandIndex1 + 1);
-													}
-													if (Data.Structure.Poles[CommandIndex1] == null) {
-														Data.Structure.Poles[CommandIndex1] = new UnifiedObject[CommandIndex2 + 1];
-													} else if (CommandIndex2 >= Data.Structure.Poles[CommandIndex1].Length) {
-														Array.Resize<UnifiedObject>(ref Data.Structure.Poles[CommandIndex1], CommandIndex2 + 1);
-													}
+													if (!Data.Structure.Poles.ContainsKey(CommandIndex1)) {
+														Data.Structure.Poles.Add(CommandIndex1, new ObjectDictionary());
+													} 
 													string f = OpenBveApi.Path.CombineFile(ObjectPath, Arguments[0]);
 													if (!System.IO.File.Exists(f)) {
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														Data.Structure.Poles[CommandIndex1][CommandIndex2] = ObjectManager.LoadObject(f, Encoding, false);
+														Data.Structure.Poles[CommandIndex1].Add(CommandIndex2, ObjectManager.LoadObject(f, Encoding, false));
 													}
 												}
 											}
@@ -2547,9 +2630,6 @@ namespace OpenBve {
 											if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false, Command + " is expected to have between 1 and 2 arguments at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.SignalData.Length) {
-													Array.Resize<SignalData>(ref Data.SignalData, CommandIndex1 + 1);
-												}
 												if (Arguments[0].EndsWith(".animated", StringComparison.OrdinalIgnoreCase)) {
 													if (Path.ContainsInvalidChars(Arguments[0])) {
 														Interface.AddMessage(MessageType.Error, false, "AnimatedObjectFile contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -2652,24 +2732,21 @@ namespace OpenBve {
 												if (Path.ContainsInvalidChars(Arguments[0])) {
 													Interface.AddMessage(MessageType.Error, false, "FileName " + Arguments[0] + " contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													if (CommandIndex1 >= Data.Backgrounds.Length) {
-														int a = Data.Backgrounds.Length;
-														Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-														for (int k = a; k <= CommandIndex1; k++) {
-															Data.Backgrounds[k] = new World.StaticBackground(null, 6, false);
-														}
+													if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+														Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 													}
 													string f = OpenBveApi.Path.CombineFile(ObjectPath, Arguments[0]);
 													if (!System.IO.File.Exists(f)) {
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else
 													{
-														if (Data.Backgrounds[CommandIndex1] is World.StaticBackground)
+														if (Data.Backgrounds[CommandIndex1] is StaticBackground)
 														{
-															World.StaticBackground b = Data.Backgrounds[CommandIndex1] as World.StaticBackground;
+															StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 															if (b != null)
 															{
-																Textures.RegisterTexture(f, out b.Texture);
+																Program.CurrentHost.RegisterTexture(f, new TextureParameters(null, null), out b.Texture);
+
 															}
 
 														}
@@ -2687,12 +2764,8 @@ namespace OpenBve {
 											} else if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false,  Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.Backgrounds.Length) {
-													int a = Data.Backgrounds.Length;
-													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-													for (int k = a; k <= CommandIndex1; k++) {
-														Data.Backgrounds[k] = new World.StaticBackground(null, 6, false);
-													}
+												if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+													Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 												}
 												int x;
 												if (!NumberFormats.TryParseIntVb6(Arguments[0], out x)) {
@@ -2700,7 +2773,7 @@ namespace OpenBve {
 												} else if (x == 0) {
 													Interface.AddMessage(MessageType.Error, false, "RepetitionCount is expected to be non-zero in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													World.StaticBackground b = Data.Backgrounds[CommandIndex1] as World.StaticBackground;
+													StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 													if (b != null)
 													{
 														b.Repetition = x;
@@ -2718,12 +2791,8 @@ namespace OpenBve {
 											} else if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false,  Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.Backgrounds.Length) {
-													int a = Data.Backgrounds.Length;
-													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-													for (int k = a; k <= CommandIndex1; k++) {
-														Data.Backgrounds[k] = new World.StaticBackground(null, 6, false);
-													}
+												if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+													Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 												}
 												int aspect;
 												if (!NumberFormats.TryParseIntVb6(Arguments[0], out aspect)) {
@@ -2731,7 +2800,7 @@ namespace OpenBve {
 												} else if (aspect != 0 & aspect != 1) {
 													Interface.AddMessage(MessageType.Error, false, "Value is expected to be either 0 or 1 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													World.StaticBackground b = Data.Backgrounds[CommandIndex1] as World.StaticBackground;
+													StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 													if (b != null)
 													{
 														b.KeepAspectRatio = aspect == 1;
@@ -3340,8 +3409,8 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Fog.Start = (float)start;
 												Data.Blocks[BlockIndex].Fog.End = (float)end;
 											} else {
-												Data.Blocks[BlockIndex].Fog.Start = Game.NoFogStart;
-												Data.Blocks[BlockIndex].Fog.End = Game.NoFogEnd;
+												Data.Blocks[BlockIndex].Fog.Start = CurrentRoute.NoFogStart;
+												Data.Blocks[BlockIndex].Fog.End = CurrentRoute.NoFogEnd;
 											}
 											Data.Blocks[BlockIndex].Fog.Color = new Color24((byte)r, (byte)g, (byte)b);
 											Data.Blocks[BlockIndex].FogDefined = true;
@@ -3392,7 +3461,7 @@ namespace OpenBve {
 												Interface.AddMessage(MessageType.Error, false, "SignalIndex is invalid in Track.SigF at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												objidx = 0;
 											}
-											if (objidx >= 0 & objidx < Data.SignalData.Length && Data.SignalData[objidx] != null) {
+											if (objidx >= 0 & Data.SignalData.ContainsKey(objidx)) {
 												int section = 0;
 												if (Arguments.Length >= 2 && Arguments[1].Length > 0 && !NumberFormats.TryParseIntVb6(Arguments[1], out section)) {
 													Interface.AddMessage(MessageType.Error, false, "Section is invalid in Track.SigF at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -3428,9 +3497,9 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Signal[n].SignalObjectIndex = objidx;
 												Data.Blocks[BlockIndex].Signal[n].X = x;
 												Data.Blocks[BlockIndex].Signal[n].Y = y < 0.0 ? 4.8 : y;
-												Data.Blocks[BlockIndex].Signal[n].Yaw = 0.0174532925199433 * yaw;
-												Data.Blocks[BlockIndex].Signal[n].Pitch = 0.0174532925199433 * pitch;
-												Data.Blocks[BlockIndex].Signal[n].Roll = 0.0174532925199433 * roll;
+												Data.Blocks[BlockIndex].Signal[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].Signal[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].Signal[n].Roll = roll.ToRadians();
 												Data.Blocks[BlockIndex].Signal[n].ShowObject = true;
 												Data.Blocks[BlockIndex].Signal[n].ShowPost = y < 0.0;
 											} else {
@@ -3514,9 +3583,9 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Signal[n].SignalObjectIndex = -1;
 											Data.Blocks[BlockIndex].Signal[n].X = x;
 											Data.Blocks[BlockIndex].Signal[n].Y = y < 0.0 ? 4.8 : y;
-											Data.Blocks[BlockIndex].Signal[n].Yaw = 0.0174532925199433 * yaw;
-											Data.Blocks[BlockIndex].Signal[n].Pitch = 0.0174532925199433 * pitch;
-											Data.Blocks[BlockIndex].Signal[n].Roll = 0.0174532925199433 * roll;
+											Data.Blocks[BlockIndex].Signal[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Signal[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Signal[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].Signal[n].ShowObject = x != 0.0;
 											Data.Blocks[BlockIndex].Signal[n].ShowPost = x != 0.0 & y < 0.0;
 										}
@@ -3554,9 +3623,9 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Signal[n].SignalObjectIndex = -1;
 											Data.Blocks[BlockIndex].Signal[n].X = x;
 											Data.Blocks[BlockIndex].Signal[n].Y = y < 0.0 ? 4.8 : y;
-											Data.Blocks[BlockIndex].Signal[n].Yaw = yaw * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Signal[n].Pitch = pitch * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Signal[n].Roll = roll * 0.0174532925199433;
+											Data.Blocks[BlockIndex].Signal[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Signal[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Signal[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].Signal[n].ShowObject = x != 0.0;
 											Data.Blocks[BlockIndex].Signal[n].ShowPost = x != 0.0 & y < 0.0;
 										}
@@ -3650,9 +3719,9 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].DestinationChanges[n].NextDestination = nextDestination;
 												Data.Blocks[BlockIndex].DestinationChanges[n].X = x;
 												Data.Blocks[BlockIndex].DestinationChanges[n].Y = y;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Yaw = yaw * 0.0174532925199433;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Pitch = pitch * 0.0174532925199433;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Roll = roll * 0.0174532925199433;
+												Data.Blocks[BlockIndex].DestinationChanges[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].DestinationChanges[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].DestinationChanges[n].Roll = roll.ToRadians();
 											}
 										}
 									}
@@ -3729,9 +3798,9 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Transponder[n].ShowDefaultObject = false;
 												Data.Blocks[BlockIndex].Transponder[n].X = x;
 												Data.Blocks[BlockIndex].Transponder[n].Y = y;
-												Data.Blocks[BlockIndex].Transponder[n].Yaw = yaw * 0.0174532925199433;
-												Data.Blocks[BlockIndex].Transponder[n].Pitch = pitch * 0.0174532925199433;
-												Data.Blocks[BlockIndex].Transponder[n].Roll = roll * 0.0174532925199433;
+												Data.Blocks[BlockIndex].Transponder[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].Transponder[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].Transponder[n].Roll = roll.ToRadians();
 											}
 										}
 									} break;
@@ -3787,9 +3856,9 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Transponder[n].BeaconStructureIndex = -1;
 											Data.Blocks[BlockIndex].Transponder[n].X = x;
 											Data.Blocks[BlockIndex].Transponder[n].Y = y;
-											Data.Blocks[BlockIndex].Transponder[n].Yaw = yaw * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Transponder[n].Pitch = pitch * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Transponder[n].Roll = roll * 0.0174532925199433;
+											Data.Blocks[BlockIndex].Transponder[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Transponder[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Transponder[n].Roll = roll.ToRadians();
 											if (type == 2) {
 												Data.Blocks[BlockIndex].Transponder[n].OptionalInteger = CurrentStop >= 0 ? CurrentStop : 0;
 											} else {
@@ -4379,9 +4448,9 @@ namespace OpenBve {
 														sttype = 0;
 													}
 												}
-												if (typ < 0 || typ >= Data.Structure.Poles.Length || Data.Structure.Poles[typ] == null) {
+												if (typ < 0 || !Data.Structure.Poles.ContainsKey(typ) || Data.Structure.Poles[typ] == null) {
 													Interface.AddMessage(MessageType.Error, false, "PoleStructureIndex " + typ + " references an object not loaded in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-												} else if (sttype < 0 || sttype >= Data.Structure.Poles[typ].Length || Data.Structure.Poles[typ][sttype] == null) {
+												} else if (sttype < 0 || !Data.Structure.Poles[typ].ContainsKey(sttype) || Data.Structure.Poles[typ][sttype] == null) {
 													Interface.AddMessage(MessageType.Error, false, "PoleStructureIndex " + typ + " references an object not loaded in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
 													Data.Blocks[BlockIndex].RailPole[idx].Mode = typ;
@@ -4609,7 +4678,7 @@ namespace OpenBve {
 													Array.Resize<Marker>(ref Data.Markers, n + 1);
 													Data.Markers[n].StartingPosition = start;
 													Data.Markers[n].EndingPosition = end;
-													Textures.RegisterTexture(f, out Data.Markers[n].Texture);
+													TextureManager.RegisterTexture(f, out Data.Markers[n].Texture);
 												}
 											}
 										}
@@ -4739,9 +4808,9 @@ namespace OpenBve {
 														Data.Blocks[BlockIndex].GroundFreeObj[n].Type = sttype;
 														Data.Blocks[BlockIndex].GroundFreeObj[n].X = x;
 														Data.Blocks[BlockIndex].GroundFreeObj[n].Y = y;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].Yaw = yaw * 0.0174532925199433;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].Pitch = pitch * 0.0174532925199433;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].Roll = roll * 0.0174532925199433;
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Yaw = yaw.ToRadians();
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Pitch = pitch.ToRadians();
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Roll = roll.ToRadians();
 													} else {
 														if (idx >= Data.Blocks[BlockIndex].RailFreeObj.Length) {
 															Array.Resize<FreeObj[]>(ref Data.Blocks[BlockIndex].RailFreeObj, idx + 1);
@@ -4758,9 +4827,9 @@ namespace OpenBve {
 														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Type = sttype;
 														Data.Blocks[BlockIndex].RailFreeObj[idx][n].X = x;
 														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Y = y;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Yaw = yaw * 0.0174532925199433;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Pitch = pitch * 0.0174532925199433;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Roll = roll * 0.0174532925199433;
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Yaw = yaw.ToRadians();
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Pitch = pitch.ToRadians();
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Roll = roll.ToRadians();
 													}
 												}
 											}
@@ -4775,10 +4844,10 @@ namespace OpenBve {
 												Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												typ = 0;
 											}
-											if (typ < 0 | typ >= Data.Backgrounds.Length) {
+											if (typ < 0 | !Data.Backgrounds.ContainsKey(typ)) {
 												Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex " + typ + " references a texture not loaded in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											}
-											World.StaticBackground b = Data.Backgrounds[typ] as World.StaticBackground;
+											StaticBackground b = Data.Backgrounds[typ] as StaticBackground;
 											if (b.Texture == null)
 											{
 												Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex " + typ + " has not been loaded via Texture.Background in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -4921,9 +4990,9 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].PointsOfInterest[n].RailIndex = idx;
 											Data.Blocks[BlockIndex].PointsOfInterest[n].X = x;
 											Data.Blocks[BlockIndex].PointsOfInterest[n].Y = y;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Yaw = 0.0174532925199433 * yaw;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Pitch = 0.0174532925199433 * pitch;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Roll = 0.0174532925199433 * roll;
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].PointsOfInterest[n].Text = text;
 										}
 									} break;
@@ -5186,16 +5255,14 @@ namespace OpenBve {
 											{
 												if (texture.BitsPerPixel == 32)
 												{
-													byte[] bytes = texture.Bytes;
-													InvertLightness(bytes);
-													texture = new Texture(texture.Width, texture.Height, 32, bytes, texture.Palette);
+													texture.InvertLightness();
 												}
-												Textures[j] = OpenBve.Textures.RegisterTexture(texture);
+												Textures[j] = TextureManager.RegisterTexture(texture);
 											}
 										}
 										else
 										{
-											OpenBve.Textures.RegisterTexture(Files[i], new TextureParameters(null, Color24.Black), out Textures[j]);
+											TextureManager.RegisterTexture(Files[i], new TextureParameters(null, Color24.Black), out Textures[j]);
 										}
 										break;
 								}
@@ -5205,39 +5272,6 @@ namespace OpenBve {
 				}
 			}
 			return Textures;
-		}
-
-		/// <summary>Inverts the lightness values of a texture used for a glow</summary>
-		/// <param name="bytes">A byte array containing the texture to invert</param>
-		private static void InvertLightness(byte[] bytes)
-		{
-			for (int i = 0; i < bytes.Length; i += 4)
-			{
-				if (bytes[i] != 0 | bytes[i + 1] != 0 | bytes[i + 2] != 0)
-				{
-					int r = bytes[i + 0];
-					int g = bytes[i + 1];
-					int b = bytes[i + 2];
-					if (g <= r & r <= b | b <= r & r <= g)
-					{
-						bytes[i + 0] = (byte)(255 + r - g - b);
-						bytes[i + 1] = (byte)(255 - b);
-						bytes[i + 2] = (byte)(255 - g);
-					}
-					else if (r <= g & g <= b | b <= g & g <= r)
-					{
-						bytes[i + 0] = (byte)(255 - b);
-						bytes[i + 1] = (byte)(255 + g - r - b);
-						bytes[i + 2] = (byte)(255 - r);
-					}
-					else
-					{
-						bytes[i + 0] = (byte)(255 - g);
-						bytes[i + 1] = (byte)(255 - r);
-						bytes[i + 2] = (byte)(255 + b - r - g);
-					}
-				}
-			}
 		}
 
 		// ================================
@@ -5356,12 +5390,12 @@ namespace OpenBve {
 			}
 			// background
 			if (!PreviewOnly) {
-				if (Data.Blocks[0].Background >= 0 & Data.Blocks[0].Background < Data.Backgrounds.Length) {
-					World.CurrentBackground = Data.Backgrounds[Data.Blocks[0].Background];
+				if (Data.Blocks[0].Background >= 0 & Data.Backgrounds.ContainsKey(Data.Blocks[0].Background)) {
+					CurrentRoute.CurrentBackground = Data.Backgrounds[Data.Blocks[0].Background];
 				} else {
-					World.CurrentBackground = new World.StaticBackground(null, 6, false);
+					CurrentRoute.CurrentBackground = new StaticBackground(null, 6, false);
 				}
-				World.TargetBackground = World.CurrentBackground;
+				CurrentRoute.TargetBackground = CurrentRoute.CurrentBackground;
 			}
 			// brightness
 			int CurrentBrightnessElement = -1;
@@ -5390,8 +5424,8 @@ namespace OpenBve {
 			int CurrentTrackLength = 0;
 			int PreviousFogElement = -1;
 			int PreviousFogEvent = -1;
-			Game.Fog PreviousFog = new Game.Fog(Game.NoFogStart, Game.NoFogEnd, Color24.Grey, -Data.BlockInterval);
-			Game.Fog CurrentFog = new Game.Fog(Game.NoFogStart, Game.NoFogEnd, Color24.Grey, 0.0);
+			Fog PreviousFog = new Fog(CurrentRoute.NoFogStart, CurrentRoute.NoFogEnd, Color24.Grey, -Data.BlockInterval);
+			Fog CurrentFog = new Fog(CurrentRoute.NoFogStart, CurrentRoute.NoFogEnd, Color24.Grey, 0.0);
 			// process blocks
 			double progressFactor = Data.Blocks.Length - Data.FirstUsedBlock == 0 ? 0.5 : 0.5 / (double)(Data.Blocks.Length - Data.FirstUsedBlock);
 			for (int i = Data.FirstUsedBlock; i < Data.Blocks.Length; i++) {
@@ -5426,7 +5460,7 @@ namespace OpenBve {
 				TrackManager.CurrentTrack.Elements[n].WorldSide = new Vector3(Direction.Y, 0.0, -Direction.X);
 				TrackManager.CurrentTrack.Elements[n].WorldUp = Vector3.Cross(TrackManager.CurrentTrack.Elements[n].WorldDirection, TrackManager.CurrentTrack.Elements[n].WorldSide);
 				TrackManager.CurrentTrack.Elements[n].StartingTrackPosition = StartingDistance;
-				TrackManager.CurrentTrack.Elements[n].Events = new TrackManager.GeneralEvent[] { };
+				TrackManager.CurrentTrack.Elements[n].Events = new object[] { };
 				TrackManager.CurrentTrack.Elements[n].AdhesionMultiplier = Data.Blocks[i].AdhesionMultiplier;
 				TrackManager.CurrentTrack.Elements[n].CsvRwAccuracyLevel = Data.Blocks[i].Accuracy;
 				// background
@@ -5436,7 +5470,7 @@ namespace OpenBve {
 						if (i == Data.FirstUsedBlock) {
 							typ = Data.Blocks[i].Background;
 						} else {
-							typ = Data.Backgrounds.Length > 0 ? 0 : -1;
+							typ = Data.Backgrounds.Count > 0 ? 0 : -1;
 							for (int j = i - 1; j >= Data.FirstUsedBlock; j--) {
 								if (Data.Blocks[j].Background >= 0) {
 									typ = Data.Blocks[j].Background;
@@ -5444,9 +5478,9 @@ namespace OpenBve {
 								}
 							}
 						}
-						if (typ >= 0 & typ < Data.Backgrounds.Length) {
+						if (typ >= 0 & Data.Backgrounds.ContainsKey(typ)) {
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.BackgroundChangeEvent(0.0, Data.Backgrounds[typ], Data.Backgrounds[Data.Blocks[i].Background]);
 						}
 					}
@@ -5455,7 +5489,7 @@ namespace OpenBve {
 				if (!PreviewOnly) {
 					for (int j = 0; j < Data.Blocks[i].Brightness.Length; j++) {
 						int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 						double d = Data.Blocks[i].Brightness[j].TrackPosition - StartingDistance;
 						TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.BrightnessChangeEvent(d, Data.Blocks[i].Brightness[j].Value, CurrentBrightnessValue, Data.Blocks[i].Brightness[j].TrackPosition - CurrentBrightnessTrackPosition, Data.Blocks[i].Brightness[j].Value, 0.0);
 						if (CurrentBrightnessElement >= 0 & CurrentBrightnessEvent >= 0) {
@@ -5475,15 +5509,15 @@ namespace OpenBve {
 						if (Data.Blocks[i].FogDefined) {
 							Data.Blocks[i].Fog.TrackPosition = StartingDistance;
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.FogChangeEvent(0.0, PreviousFog, Data.Blocks[i].Fog, Data.Blocks[i].Fog);
 							if (PreviousFogElement >= 0 & PreviousFogEvent >= 0) {
 								TrackManager.FogChangeEvent e = (TrackManager.FogChangeEvent)TrackManager.CurrentTrack.Elements[PreviousFogElement].Events[PreviousFogEvent];
 								e.NextFog = Data.Blocks[i].Fog;
 							} else {
-								Game.PreviousFog = PreviousFog;
-								Game.CurrentFog = PreviousFog;
-								Game.NextFog = Data.Blocks[i].Fog;
+								CurrentRoute.PreviousFog = PreviousFog;
+								CurrentRoute.CurrentFog = PreviousFog;
+								CurrentRoute.NextFog = Data.Blocks[i].Fog;
 							}
 							PreviousFog = Data.Blocks[i].Fog;
 							PreviousFogElement = n;
@@ -5492,7 +5526,7 @@ namespace OpenBve {
 					} else {
 						Data.Blocks[i].Fog.TrackPosition = StartingDistance + Data.BlockInterval;
 						int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 						TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.FogChangeEvent(0.0, PreviousFog, CurrentFog, Data.Blocks[i].Fog);
 						PreviousFog = CurrentFog;
 						CurrentFog = Data.Blocks[i].Fog;
@@ -5504,7 +5538,7 @@ namespace OpenBve {
 					int r = j < Data.Structure.Run.Length ? Data.Structure.Run[j] : 0;
 					int f = j < Data.Structure.Flange.Length ? Data.Structure.Flange[j] : 0;
 					int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-					Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+					Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 					TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.RailSoundsChangeEvent(0.0, CurrentRunIndex, CurrentFlangeIndex, r, f);
 					CurrentRunIndex = r;
 					CurrentFlangeIndex = f;
@@ -5525,7 +5559,7 @@ namespace OpenBve {
 						}
 						if (q) {
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.SoundEvent(0.0, null, false, false, true, Vector3.Zero, 12.5);
 						}
 					}
@@ -5535,7 +5569,7 @@ namespace OpenBve {
 					// station
 					int s = Data.Blocks[i].Station;
 					int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-					Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+					Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 					TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.StationStartEvent(0.0, s);
 					double dx, dy = 3.0;
 					if (Game.Stations[s].OpenLeftDoors & !Game.Stations[s].OpenRightDoors) {
@@ -5556,7 +5590,7 @@ namespace OpenBve {
 								int j = b - Data.FirstUsedBlock;
 								if (j >= 0) {
 									m = TrackManager.CurrentTrack.Elements[j].Events.Length;
-									Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[j].Events, m + 1);
+									Array.Resize(ref TrackManager.CurrentTrack.Elements[j].Events, m + 1);
 									TrackManager.CurrentTrack.Elements[j].Events[m] = new TrackManager.StationPassAlarmEvent(0.0);
 								}
 							}
@@ -5587,7 +5621,7 @@ namespace OpenBve {
 				// limit
 				for (int j = 0; j < Data.Blocks[i].Limit.Length; j++) {
 					int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-					Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+					Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 					double d = Data.Blocks[i].Limit[j].TrackPosition - StartingDistance;
 					TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.LimitChangeEvent(d, CurrentSpeedLimit, Data.Blocks[i].Limit[j].Speed);
 					CurrentSpeedLimit = Data.Blocks[i].Limit[j].Speed;
@@ -5597,14 +5631,14 @@ namespace OpenBve {
 					for (int j = 0; j < Data.Markers.Length; j++) {
 						if (Data.Markers[j].StartingPosition >= StartingDistance & Data.Markers[j].StartingPosition < EndingDistance) {
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							double d = Data.Markers[j].StartingPosition - StartingDistance;
 							Texture t = Data.Markers[j].Texture;
 							TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.MarkerStartEvent(d, t);
 						}
 						if (Data.Markers[j].EndingPosition >= StartingDistance & Data.Markers[j].EndingPosition < EndingDistance) {
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							double d = Data.Markers[j].EndingPosition - StartingDistance;
 							Texture t = Data.Markers[j].Texture;
 							TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.MarkerEndEvent(d, t);
@@ -5616,7 +5650,7 @@ namespace OpenBve {
 					for (int j = 0; j < Data.Blocks[i].Sound.Length; j++) {
 						if (Data.Blocks[i].Sound[j].Type == SoundType.TrainStatic | Data.Blocks[i].Sound[j].Type == SoundType.TrainDynamic) {
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							double d = Data.Blocks[i].Sound[j].TrackPosition - StartingDistance;
 							switch (Data.Blocks[i].Sound[j].Type) {
 								case SoundType.TrainStatic:
@@ -6270,7 +6304,7 @@ namespace OpenBve {
 									for (int l = 0; l < Data.Blocks[g].Transponder.Length; l++) {
 										if (Data.Blocks[g].Transponder[l].Type != TrackManager.TransponderType.None & Data.Blocks[g].Transponder[l].Section == m) {
 											int o = TrackManager.CurrentTrack.Elements[n - i + g].Events.Length;
-											Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n - i + g].Events, o + 1);
+											Array.Resize(ref TrackManager.CurrentTrack.Elements[n - i + g].Events, o + 1);
 											double dt = Data.Blocks[g].Transponder[l].TrackPosition - StartingDistance + (double)(i - g) * Data.BlockInterval;
 											TrackManager.CurrentTrack.Elements[n - i + g].Events[o] = new TrackManager.TransponderEvent(dt, Data.Blocks[g].Transponder[l].Type, Data.Blocks[g].Transponder[l].SwitchSubsystem, Data.Blocks[g].Transponder[l].OptionalInteger, Data.Blocks[g].Transponder[l].OptionalFloat, m);
 											Data.Blocks[g].Transponder[l].Type = TrackManager.TransponderType.None;
@@ -6303,7 +6337,7 @@ namespace OpenBve {
 								// create section change event
 								double d = Data.Blocks[i].Section[k].TrackPosition - StartingDistance;
 								int p = TrackManager.CurrentTrack.Elements[n].Events.Length;
-								Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, p + 1);
+								Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, p + 1);
 								TrackManager.CurrentTrack.Elements[n].Events[p] = new TrackManager.SectionChangeEvent(d, m - 1, m);
 							}
 							// transponders introduced after corresponding sections
@@ -6312,7 +6346,7 @@ namespace OpenBve {
 									int t = Data.Blocks[i].Transponder[l].Section;
 									if (t >= 0 & t < CurrentRoute.Sections.Length) {
 										int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-										Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+										Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 										double dt = Data.Blocks[i].Transponder[l].TrackPosition - StartingDistance;
 										TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.TransponderEvent(dt, Data.Blocks[i].Transponder[l].Type, Data.Blocks[i].Transponder[l].SwitchSubsystem, Data.Blocks[i].Transponder[l].OptionalInteger, Data.Blocks[i].Transponder[l].OptionalFloat, t);
 										Data.Blocks[i].Transponder[l].Type = TrackManager.TransponderType.None;
@@ -6347,7 +6381,7 @@ namespace OpenBve {
 											int d0 = (int)Math.Round(lim);
 											int o = ObjectManager.CreateStaticObject(LimitOneDigit, wpos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, Data.BlockInterval, tpos, b);
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 1) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 										} else if (lim < 100.0) {
 											int d1 = (int)Math.Round(lim);
@@ -6355,10 +6389,10 @@ namespace OpenBve {
 											d1 /= 10;
 											int o = ObjectManager.CreateStaticObject(LimitTwoDigits, wpos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, Data.BlockInterval, tpos, b);
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 1) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d1 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d1 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 2) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 										} else {
 											int d2 = (int)Math.Round(lim);
@@ -6367,13 +6401,13 @@ namespace OpenBve {
 											d2 /= 100;
 											int o = ObjectManager.CreateStaticObject(LimitThreeDigits, wpos, RailTransformation, NullTransformation, Data.AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, Data.BlockInterval, tpos, b);
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 1) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d2 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d2 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 2) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d1 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d1 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 											if (ObjectManager.Objects[o].Mesh.Materials.Length >= 3) {
-												Textures.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
+												TextureManager.RegisterTexture(OpenBveApi.Path.CombineFile(LimitGraphicsPath, "limit_" + d0 + ".png"), out ObjectManager.Objects[o].Mesh.Materials[0].DaytimeTexture);
 											}
 										}
 									}
@@ -6413,7 +6447,7 @@ namespace OpenBve {
 						if (Data.Blocks[i].Transponder[j].Type != TrackManager.TransponderType.None) {
 							int n = i - Data.FirstUsedBlock;
 							int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-							Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+							Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 							double d = Data.Blocks[i].Transponder[j].TrackPosition - TrackManager.CurrentTrack.Elements[n].StartingTrackPosition;
 							int s = Data.Blocks[i].Transponder[j].Section;
 							if (s >= 0) s = -1;
@@ -6426,7 +6460,7 @@ namespace OpenBve {
 					{
 						int n = i - Data.FirstUsedBlock;
 						int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 						double d = Data.Blocks[i].DestinationChanges[j].TrackPosition - TrackManager.CurrentTrack.Elements[n].StartingTrackPosition;
 						//Destination events not supported in Route Viewer.....
 						//TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.DestinationEvent(d, Data.Blocks[i].DestinationChanges[j].Type, Data.Blocks[i].DestinationChanges[j].NextDestination, Data.Blocks[i].DestinationChanges[j].PreviousDestination, Data.Blocks[i].DestinationChanges[j].TriggerOnce);
@@ -6442,7 +6476,7 @@ namespace OpenBve {
 					if (k >= 0 & k < Data.Blocks.Length) {
 						double d = p - (double)(k + Data.FirstUsedBlock) * (double)Data.BlockInterval;
 						int m = TrackManager.CurrentTrack.Elements[k].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[k].Events, m + 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[k].Events, m + 1);
 						TrackManager.CurrentTrack.Elements[k].Events[m] = new TrackManager.StationEndEvent(d, i);
 					}
 				}
@@ -6505,7 +6539,7 @@ namespace OpenBve {
 			if (TrackManager.CurrentTrack.Elements.Length != 0) {
 				int n = TrackManager.CurrentTrack.Elements.Length - 1;
 				int m = TrackManager.CurrentTrack.Elements[n].Events.Length;
-				Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
+				Array.Resize(ref TrackManager.CurrentTrack.Elements[n].Events, m + 1);
 				TrackManager.CurrentTrack.Elements[n].Events[m] = new TrackManager.TrackEndEvent(Data.BlockInterval);
 			}
 			if (!PreviewOnly) {
@@ -6599,7 +6633,7 @@ namespace OpenBve {
 					int q = i / subdivisions;
 					int j = q * subdivisions;
 					TrackManager.CurrentTrack.Elements[i] = TrackManager.CurrentTrack.Elements[j];
-					TrackManager.CurrentTrack.Elements[i].Events = new TrackManager.GeneralEvent[] { };
+					TrackManager.CurrentTrack.Elements[i].Events = new object[] { };
 					TrackManager.CurrentTrack.Elements[i].StartingTrackPosition = midpointsTrackPositions[i];
 					TrackManager.CurrentTrack.Elements[i].WorldPosition = midpointsWorldPositions[i];
 					TrackManager.CurrentTrack.Elements[i].WorldDirection = midpointsWorldDirections[i];
@@ -6810,18 +6844,21 @@ namespace OpenBve {
 			for (int i = 0; i < TrackManager.CurrentTrack.Elements.Length - 1; i++) {
 				double startingTrackPosition = TrackManager.CurrentTrack.Elements[i].StartingTrackPosition;
 				double endingTrackPosition = TrackManager.CurrentTrack.Elements[i + 1].StartingTrackPosition;
-				for (int j = 0; j < TrackManager.CurrentTrack.Elements[i].Events.Length; j++) {
-					double p = startingTrackPosition + TrackManager.CurrentTrack.Elements[i].Events[j].TrackPositionDelta;
+				for (int j = 0; j < TrackManager.CurrentTrack.Elements[i].Events.Length; j++)
+				{
+					dynamic e = TrackManager.CurrentTrack.Elements[i].Events[j];
+					double p = startingTrackPosition + e.TrackPositionDelta;
 					if (p >= endingTrackPosition) {
 						int len = TrackManager.CurrentTrack.Elements[i + 1].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[i + 1].Events, len + 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[i + 1].Events, len + 1);
 						TrackManager.CurrentTrack.Elements[i + 1].Events[len] = TrackManager.CurrentTrack.Elements[i].Events[j];
-						TrackManager.CurrentTrack.Elements[i + 1].Events[len].TrackPositionDelta += startingTrackPosition - endingTrackPosition;
+						e = TrackManager.CurrentTrack.Elements[i + 1].Events[len];
+						e.TrackPositionDelta += startingTrackPosition - endingTrackPosition;
 						for (int k = j; k < TrackManager.CurrentTrack.Elements[i].Events.Length - 1; k++) {
 							TrackManager.CurrentTrack.Elements[i].Events[k] = TrackManager.CurrentTrack.Elements[i].Events[k + 1];
 						}
 						len = TrackManager.CurrentTrack.Elements[i].Events.Length;
-						Array.Resize<TrackManager.GeneralEvent>(ref TrackManager.CurrentTrack.Elements[i].Events, len - 1);
+						Array.Resize(ref TrackManager.CurrentTrack.Elements[i].Events, len - 1);
 						j--;
 					}
 				}

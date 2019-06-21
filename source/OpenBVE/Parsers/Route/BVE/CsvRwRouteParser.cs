@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using LibRender;
 using Path = OpenBveApi.Path;
+using OpenBve.BackgroundManager;
 using OpenBveApi.Colors;
 using OpenBveApi.Math;
 using OpenBveApi.Runtime;
@@ -9,7 +11,9 @@ using OpenBveApi.Objects;
 using OpenBveApi.Interface;
 using OpenBveApi.Routes;
 using OpenBveApi.Trains;
+using OpenBve.RouteManager;
 using OpenBve.SignalManager;
+using OpenBveApi.Textures;
 
 namespace OpenBve {
 	internal partial class CsvRwRouteParser {
@@ -48,7 +52,7 @@ namespace OpenBve {
 			};
 			Data.Blocks[0] = new Block();
 			Data.Blocks[0].Rails = new Rail[1];
-			Data.Blocks[0].Rails[0].RailStart = true;
+			Data.Blocks[0].Rails[0].RailStarted = true;
 			Data.Blocks[0].RailType = new int[] { 0 };
 			Data.Blocks[0].Limits = new Limit[] { };
 			Data.Blocks[0].StopPositions = new Stop[] { };
@@ -61,8 +65,8 @@ namespace OpenBve {
 			{
 				Data.Blocks[0].Background = 0;
 				Data.Blocks[0].BrightnessChanges = new Brightness[] {};
-				Data.Blocks[0].Fog.Start = Game.NoFogStart;
-				Data.Blocks[0].Fog.End = Game.NoFogEnd;
+				Data.Blocks[0].Fog.Start = CurrentRoute.NoFogStart;
+				Data.Blocks[0].Fog.End = CurrentRoute.NoFogEnd;
 				Data.Blocks[0].Fog.Color = Color24.Grey;
 				Data.Blocks[0].Cycle = new int[] {-1};
 				Data.Blocks[0].RailCycles = new RailCycle[1];
@@ -84,25 +88,16 @@ namespace OpenBve {
 				Data.Markers = new Marker[] {};
 				Data.RequestStops = new StopRequest[] { };
 				string PoleFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Poles");
-				Data.Structure.Poles = new UnifiedObject[][]
-				{
-					new UnifiedObject[]
-					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_1.csv"), System.Text.Encoding.UTF8, false)
-					},
-					new UnifiedObject[]
-					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_2.csv"), System.Text.Encoding.UTF8, false)
-					},
-					new UnifiedObject[]
-					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_3.csv"), System.Text.Encoding.UTF8, false)
-					},
-					new UnifiedObject[]
-					{
-						ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_4.csv"), System.Text.Encoding.UTF8, false)
-					}
-				};
+				Data.Structure.Poles = new PoleDictionary();
+				Data.Structure.Poles.Add(0, new ObjectDictionary());
+				Data.Structure.Poles[0].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_1.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(1, new ObjectDictionary());
+				Data.Structure.Poles[1].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_2.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(2, new ObjectDictionary());
+				Data.Structure.Poles[2].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_3.csv"), System.Text.Encoding.UTF8, false));
+				Data.Structure.Poles.Add(3, new ObjectDictionary());
+				Data.Structure.Poles[3].Add(0, ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(PoleFolder, "pole_4.csv"), System.Text.Encoding.UTF8, false));
+				
 				Data.Structure.RailObjects = new ObjectDictionary();
 				Data.Structure.RailObjects = new ObjectDictionary();
 				Data.Structure.Ground = new ObjectDictionary();
@@ -126,34 +121,34 @@ namespace OpenBve {
 				Data.Structure.RailCycles = new int[][] { };
 				Data.Structure.Run = new int[] {};
 				Data.Structure.Flange = new int[] {};
-				Data.Backgrounds = new BackgroundHandle[] {};
+				Data.Backgrounds = new BackgroundDictionary();
 				Data.TimetableDaytime = new OpenBveApi.Textures.Texture[] {null, null, null, null};
 				Data.TimetableNighttime = new OpenBveApi.Textures.Texture[] {null, null, null, null};
 				// signals
 				string SignalFolder = OpenBveApi.Path.CombineDirectory(CompatibilityFolder, "Signals");
-				Data.Signals = new SignalData[7];
-				Data.Signals[3] = new CompatibilitySignalData(new int[] {0, 2, 4}, new StaticObject[]
+				Data.Signals = new SignalDictionary();
+				Data.Signals.Add(3, new CompatibilitySignalData(new int[] {0, 2, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_2.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_3_4.csv"), System.Text.Encoding.UTF8, false)
-				});
-				Data.Signals[4] = new CompatibilitySignalData(new int[] {0, 1, 2, 4}, new StaticObject[]
+				}));
+				Data.Signals.Add(4, new CompatibilitySignalData(new int[] {0, 1, 2, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_1.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_2.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_4a_4.csv"), System.Text.Encoding.UTF8, false)
-				});
-				Data.Signals[5] = new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4}, new StaticObject[]
+				}));
+				Data.Signals.Add(5, new CompatibilitySignalData(new int[] {0, 1, 2, 3, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_0.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5a_1.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_2.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_3.csv"), System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "signal_5_4.csv"), System.Text.Encoding.UTF8, false)
-				});
-				Data.Signals[6] = new CompatibilitySignalData(new int[] {0, 3, 4}, new StaticObject[]
+				}));
+				Data.Signals.Add(6, new CompatibilitySignalData(new int[] {0, 3, 4}, new StaticObject[]
 				{
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_0.csv"),
 						System.Text.Encoding.UTF8, false),
@@ -161,7 +156,7 @@ namespace OpenBve {
 						System.Text.Encoding.UTF8, false),
 					ObjectManager.LoadStaticObject(OpenBveApi.Path.CombineFile(SignalFolder, "repeatingsignal_4.csv"),
 						System.Text.Encoding.UTF8, false)
-				});
+				}));
 				// compatibility signals
 				Data.CompatibilitySignals = new CompatibilitySignalData[9];
 				Data.CompatibilitySignals[0] = new CompatibilitySignalData(new int[] {0, 2},
@@ -723,6 +718,10 @@ namespace OpenBve {
 									break;
 								//Sets the route's loading screen texture
 								case "route.loadingscreen":
+									if (PreviewOnly)
+									{
+										continue;
+									}
 									if (Arguments.Length < 1)
 									{
 										Interface.AddMessage(MessageType.Error, false, Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -735,11 +734,15 @@ namespace OpenBve {
 										Interface.AddMessage (MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions [j].Line.ToString (Culture) + ", column " + Expressions [j].Column.ToString (Culture) + " in file " + Expressions [j].File);
 									}
 									else
-										Renderer.SetLoadingBkg(f);
+										LoadingScreen.SetLoadingBkg(f);
 									}
 									break;
 								//Sets a custom unit of speed to to displayed in on-screen messages
 								case "route.displayspeed":
+									if (PreviewOnly)
+									{
+										continue;
+									}
 								   var splitArgument = Arguments[0].Split(',');
 									if (splitArgument.Length != 2)
 									{
@@ -756,6 +759,10 @@ namespace OpenBve {
 									break;
 								//Sets the route's briefing data
 								case "route.briefing":
+									if (PreviewOnly)
+									{
+										continue;
+									}
 									if (Arguments.Length < 1)
 									{
 										Interface.AddMessage(MessageType.Error, false, Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -812,7 +819,7 @@ namespace OpenBve {
 									} break;
 								case "route.ambientlight":
 									{
-										if (Renderer.DynamicLighting == true)
+										if (LibRender.Renderer.DynamicLighting == true)
 										{
 											Interface.AddMessage(MessageType.Warning, false, "Dynamic lighting is enabled- Route.AmbientLight will be ignored");
 											break;
@@ -836,11 +843,11 @@ namespace OpenBve {
 											Interface.AddMessage(MessageType.Error, false, "BlueValue is required to be within the range from 0 to 255 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											b = b < 0 ? 0 : 255;
 										}
-										Renderer.OptionAmbientColor = new Color24((byte)r, (byte)g, (byte)b);
+										LibRender.Renderer.OptionAmbientColor = new Color24((byte)r, (byte)g, (byte)b);
 									} break;
 								case "route.directionallight":
 									{
-										if (Renderer.DynamicLighting == true)
+										if (LibRender.Renderer.DynamicLighting == true)
 										{
 											Interface.AddMessage(MessageType.Warning, false, "Dynamic lighting is enabled- Route.DirectionalLight will be ignored");
 											break;
@@ -864,12 +871,12 @@ namespace OpenBve {
 											Interface.AddMessage(MessageType.Error, false, "BlueValue is required to be within the range from 0 to 255 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											b = b < 0 ? 0 : 255;
 										}
-										Renderer.OptionDiffuseColor = new Color24((byte)r, (byte)g, (byte)b);
+										LibRender.Renderer.OptionDiffuseColor = new Color24((byte)r, (byte)g, (byte)b);
 									}
 									break;
 								case "route.lightdirection":
 									{
-										if (Renderer.DynamicLighting == true)
+										if (LibRender.Renderer.DynamicLighting == true)
 										{
 											Interface.AddMessage(MessageType.Warning, false, "Dynamic lighting is enabled- Route.LightDirection will be ignored");
 											break;
@@ -881,12 +888,12 @@ namespace OpenBve {
 										if (Arguments.Length >= 2 && Arguments[1].Length > 0 && !NumberFormats.TryParseDoubleVb6(Arguments[1], out phi)) {
 											Interface.AddMessage(MessageType.Error, false, "Phi is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 										}
-										theta *= 0.0174532925199433;
-										phi *= 0.0174532925199433;
+										theta = theta.ToRadians();
+										phi = phi.ToRadians();
 										double dx = Math.Cos(theta) * Math.Sin(phi);
 										double dy = -Math.Sin(theta);
 										double dz = Math.Cos(theta) * Math.Cos(phi);
-										Renderer.OptionLightPosition = new Vector3((float)-dx, (float)-dy, (float)-dz);
+										LibRender.Renderer.OptionLightPosition = new Vector3((float)-dx, (float)-dy, (float)-dz);
 									} break;
 								case "route.dynamiclight":
 									//Read the lighting XML file
@@ -895,7 +902,7 @@ namespace OpenBve {
 									{
 										if (DynamicLightParser.ReadLightingXML(path))
 										{
-											Renderer.DynamicLighting = true;
+											LibRender.Renderer.DynamicLighting = true;
 										}
 										else
 										{
@@ -1052,7 +1059,7 @@ namespace OpenBve {
 														f = OpenBveApi.Path.CombineFile(ObjectPath, Arguments[0]);
 													}
 													if (System.IO.File.Exists(f)) {
-														Textures.RegisterTexture(f, out Data.TimetableDaytime[CommandIndex1]);
+														Program.CurrentHost.RegisterTexture(f, new TextureParameters(null, null), out Data.TimetableDaytime[CommandIndex1]);
 													}
 													else {
 														Interface.AddMessage(MessageType.Error, false, "DaytimeTimetable " + CommandIndex1 + " with FileName " + Arguments[0] + " was not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -1084,7 +1091,7 @@ namespace OpenBve {
 														f = OpenBveApi.Path.CombineFile(ObjectPath, Arguments[0]);
 													}
 													if (System.IO.File.Exists(f)) {
-														Textures.RegisterTexture(f, out Data.TimetableNighttime[CommandIndex1]);
+														Program.CurrentHost.RegisterTexture(f, new TextureParameters(null, null), out Data.TimetableNighttime[CommandIndex1]);
 													}
 													else {
 														Interface.AddMessage(MessageType.Error, false, "DaytimeTimetable " + CommandIndex1 + " with FileName " + Arguments[0] + " was not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -1176,20 +1183,16 @@ namespace OpenBve {
 												} else if (Path.ContainsInvalidChars(Arguments[0])) {
 													Interface.AddMessage(MessageType.Error, false, "FileName " + Arguments[0] + " contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													if (CommandIndex1 >= Data.Structure.Poles.Length) {
-														Array.Resize<UnifiedObject[]>(ref Data.Structure.Poles, CommandIndex1 + 1);
-													}
-													if (Data.Structure.Poles[CommandIndex1] == null) {
-														Data.Structure.Poles[CommandIndex1] = new UnifiedObject[CommandIndex2 + 1];
-													} else if (CommandIndex2 >= Data.Structure.Poles[CommandIndex1].Length) {
-														Array.Resize<UnifiedObject>(ref Data.Structure.Poles[CommandIndex1], CommandIndex2 + 1);
-													}
+													
+													if (!Data.Structure.Poles.ContainsKey(CommandIndex1)) {
+														Data.Structure.Poles.Add(CommandIndex1, new ObjectDictionary());
+													} 
 													string f = Arguments[0];
 													if (!LocateObject(ref f, ObjectPath))
 													{
 														Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													} else {
-														Data.Structure.Poles[CommandIndex1][CommandIndex2] = ObjectManager.LoadObject(f, Encoding, false);
+														Data.Structure.Poles[CommandIndex1].Add(CommandIndex2, ObjectManager.LoadObject(f, Encoding, false));
 													}
 												}
 											}
@@ -1666,9 +1669,6 @@ namespace OpenBve {
 											if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false, Command + " is expected to have between 1 and 2 arguments at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.Signals.Length) {
-													Array.Resize<SignalData>(ref Data.Signals, CommandIndex1 + 1);
-												}
 												if (Arguments[0].EndsWith(".animated", StringComparison.OrdinalIgnoreCase)) {
 													if (Path.ContainsInvalidChars(Arguments[0])) {
 														Interface.AddMessage(MessageType.Error, false, "AnimatedObjectFile contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -1828,7 +1828,7 @@ namespace OpenBve {
 																	}
 																}
 															}
-															Data.Signals[CommandIndex1] = Signal;
+															Data.Signals.Add(CommandIndex1, Signal);
 														}
 													}
 												}
@@ -1848,12 +1848,8 @@ namespace OpenBve {
 												if (Path.ContainsInvalidChars(Arguments[0])) {
 													Interface.AddMessage(MessageType.Error, false, "FileName " + Arguments[0] + " contains illegal characters in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													if (CommandIndex1 >= Data.Backgrounds.Length) {
-														int a = Data.Backgrounds.Length;
-														Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-														for (int k = a; k <= CommandIndex1; k++) {
-															Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
-														}
+													if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+														Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 													}
 													string f = OpenBveApi.Path.CombineFile(ObjectPath, Arguments[0]);
 													if (!System.IO.File.Exists(f) && (Arguments[0].ToLowerInvariant() == "back_mt.bmp" || Arguments[0] == "back_mthigh.bmp")) {
@@ -1886,12 +1882,12 @@ namespace OpenBve {
 														}
 														else
 														{
-															if (Data.Backgrounds[CommandIndex1] is BackgroundManager.StaticBackground)
+															if (Data.Backgrounds[CommandIndex1] is StaticBackground)
 															{
-																BackgroundManager.StaticBackground b = Data.Backgrounds[CommandIndex1] as BackgroundManager.StaticBackground;
+																StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 																if (b != null)
 																{
-																	Textures.RegisterTexture(f, out b.Texture);
+																	Program.CurrentHost.RegisterTexture(f, new TextureParameters(null, null), out b.Texture);
 																}
 
 															}
@@ -1910,12 +1906,8 @@ namespace OpenBve {
 											} else if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false,  Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.Backgrounds.Length) {
-													int a = Data.Backgrounds.Length;
-													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-													for (int k = a; k <= CommandIndex1; k++) {
-														Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
-													}
+												if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+													Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 												}
 												int x;
 												if (!NumberFormats.TryParseIntVb6(Arguments[0], out x)) {
@@ -1923,7 +1915,7 @@ namespace OpenBve {
 												} else if (x == 0) {
 													Interface.AddMessage(MessageType.Error, false, "RepetitionCount is expected to be non-zero in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													BackgroundManager.StaticBackground b = Data.Backgrounds[CommandIndex1] as BackgroundManager.StaticBackground;
+													StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 													if (b != null)
 													{
 														b.Repetition = x;
@@ -1941,12 +1933,8 @@ namespace OpenBve {
 											} else if (Arguments.Length < 1) {
 												Interface.AddMessage(MessageType.Error, false,  Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (CommandIndex1 >= Data.Backgrounds.Length) {
-													int a = Data.Backgrounds.Length;
-													Array.Resize(ref Data.Backgrounds, CommandIndex1 + 1);
-													for (int k = a; k <= CommandIndex1; k++) {
-														Data.Backgrounds[k] = new BackgroundManager.StaticBackground(null, 6, false);
-													}
+												if (!Data.Backgrounds.ContainsKey(CommandIndex1)) {
+													Data.Backgrounds.Add(CommandIndex1, new StaticBackground(null, 6, false));
 												}
 												int aspect;
 												if (!NumberFormats.TryParseIntVb6(Arguments[0], out aspect)) {
@@ -1954,7 +1942,7 @@ namespace OpenBve {
 												} else if (aspect != 0 & aspect != 1) {
 													Interface.AddMessage(MessageType.Error, false, "Value is expected to be either 0 or 1 in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													BackgroundManager.StaticBackground b = Data.Backgrounds[CommandIndex1] as BackgroundManager.StaticBackground;
+													StaticBackground b = Data.Backgrounds[CommandIndex1] as StaticBackground;
 													if (b != null)
 													{
 														b.KeepAspectRatio = aspect == 1;
@@ -2259,7 +2247,7 @@ namespace OpenBve {
 										}
 										if (string.Compare(Command, "track.railstart", StringComparison.OrdinalIgnoreCase) == 0)
 										{
-											if (idx < Data.Blocks[BlockIndex].Rails.Length && Data.Blocks[BlockIndex].Rails[idx].RailStart)
+											if (idx < Data.Blocks[BlockIndex].Rails.Length && Data.Blocks[BlockIndex].Rails[idx].RailStarted)
 											{
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " is required to reference a non-existing rail in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											}
@@ -2276,9 +2264,9 @@ namespace OpenBve {
 										}
 										if (Data.Blocks[BlockIndex].Rails[idx].RailStartRefreshed)
 										{
-											Data.Blocks[BlockIndex].Rails[idx].RailEnd = true;
+											Data.Blocks[BlockIndex].Rails[idx].RailEnded = true;
 										}
-										Data.Blocks[BlockIndex].Rails[idx].RailStart = true;
+										Data.Blocks[BlockIndex].Rails[idx].RailStarted = true;
 										Data.Blocks[BlockIndex].Rails[idx].RailStartRefreshed = true;
 										if (Arguments.Length >= 2)
 										{
@@ -2290,11 +2278,11 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "X is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													x = 0.0;
 												}
-												Data.Blocks[BlockIndex].Rails[idx].RailStartX = x;
+												Data.Blocks[BlockIndex].Rails[idx].RailStart.X = x;
 											}
-											if (!Data.Blocks[BlockIndex].Rails[idx].RailEnd)
+											if (!Data.Blocks[BlockIndex].Rails[idx].RailEnded)
 											{
-												Data.Blocks[BlockIndex].Rails[idx].RailEndX = Data.Blocks[BlockIndex].Rails[idx].RailStartX;
+												Data.Blocks[BlockIndex].Rails[idx].RailEnd.X = Data.Blocks[BlockIndex].Rails[idx].RailStart.X;
 											}
 										}
 										if (Arguments.Length >= 3)
@@ -2307,11 +2295,11 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "Y is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													y = 0.0;
 												}
-												Data.Blocks[BlockIndex].Rails[idx].RailStartY = y;
+												Data.Blocks[BlockIndex].Rails[idx].RailStart.Y = y;
 											}
-											if (!Data.Blocks[BlockIndex].Rails[idx].RailEnd)
+											if (!Data.Blocks[BlockIndex].Rails[idx].RailEnded)
 											{
-												Data.Blocks[BlockIndex].Rails[idx].RailEndY = Data.Blocks[BlockIndex].Rails[idx].RailStartY;
+												Data.Blocks[BlockIndex].Rails[idx].RailEnd.Y = Data.Blocks[BlockIndex].Rails[idx].RailStart.Y;
 											}
 										}
 										if (Data.Blocks[BlockIndex].RailType.Length <= idx)
@@ -2376,7 +2364,7 @@ namespace OpenBve {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												break;
 											}
-											if (idx < 0 || idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart)
+											if (idx < 0 || idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted)
 											{
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " references a non-existing rail in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												break;
@@ -2385,9 +2373,9 @@ namespace OpenBve {
 											{
 												Array.Resize<Rail>(ref Data.Blocks[BlockIndex].Rails, idx + 1);
 											}
-											Data.Blocks[BlockIndex].Rails[idx].RailStart = false;
+											Data.Blocks[BlockIndex].Rails[idx].RailStarted = false;
 											Data.Blocks[BlockIndex].Rails[idx].RailStartRefreshed = false;
-											Data.Blocks[BlockIndex].Rails[idx].RailEnd = true;
+											Data.Blocks[BlockIndex].Rails[idx].RailEnded = true;
 											if (Arguments.Length >= 2 && Arguments[1].Length > 0)
 											{
 												double x;
@@ -2396,7 +2384,7 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "X is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													x = 0.0;
 												}
-												Data.Blocks[BlockIndex].Rails[idx].RailEndX = x;
+												Data.Blocks[BlockIndex].Rails[idx].RailEnd.X = x;
 											}
 											if (Arguments.Length >= 3 && Arguments[2].Length > 0)
 											{
@@ -2406,7 +2394,7 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "Y is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													y = 0.0;
 												}
-												Data.Blocks[BlockIndex].Rails[idx].RailEndY = y;
+												Data.Blocks[BlockIndex].Rails[idx].RailEnd.Y = y;
 											}
 										}
 									} break;
@@ -2426,7 +2414,7 @@ namespace OpenBve {
 											if (idx < 0) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex is expected to be non-negative in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart) {
+												if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												if (sttype < 0) {
@@ -2581,8 +2569,8 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Fog.Start = (float)start;
 												Data.Blocks[BlockIndex].Fog.End = (float)end;
 											} else {
-												Data.Blocks[BlockIndex].Fog.Start = Game.NoFogStart;
-												Data.Blocks[BlockIndex].Fog.End = Game.NoFogEnd;
+												Data.Blocks[BlockIndex].Fog.Start = CurrentRoute.NoFogStart;
+												Data.Blocks[BlockIndex].Fog.End = CurrentRoute.NoFogEnd;
 											}
 											Data.Blocks[BlockIndex].Fog.Color = new Color24((byte)r, (byte)g, (byte)b);
 											Data.Blocks[BlockIndex].FogDefined = true;
@@ -2658,7 +2646,7 @@ namespace OpenBve {
 												Interface.AddMessage(MessageType.Error, false, "SignalIndex is invalid in Track.SigF at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												objidx = 0;
 											}
-											if (objidx >= 0 & objidx < Data.Signals.Length && Data.Signals[objidx] != null) {
+											if (objidx >= 0 & Data.Signals.ContainsKey(objidx)) {
 												int section = 0;
 												if (Arguments.Length >= 2 && Arguments[1].Length > 0 && !NumberFormats.TryParseIntVb6(Arguments[1], out section)) {
 													Interface.AddMessage(MessageType.Error, false, "Section is invalid in Track.SigF at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -2692,11 +2680,11 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Signals[n].SectionIndex = CurrentSection + section;
 												Data.Blocks[BlockIndex].Signals[n].SignalCompatibilityObjectIndex = -1;
 												Data.Blocks[BlockIndex].Signals[n].SignalObjectIndex = objidx;
-												Data.Blocks[BlockIndex].Signals[n].X = x;
-												Data.Blocks[BlockIndex].Signals[n].Y = y < 0.0 ? 4.8 : y;
-												Data.Blocks[BlockIndex].Signals[n].Yaw = 0.0174532925199433 * yaw;
-												Data.Blocks[BlockIndex].Signals[n].Pitch = 0.0174532925199433 * pitch;
-												Data.Blocks[BlockIndex].Signals[n].Roll = 0.0174532925199433 * roll;
+												Data.Blocks[BlockIndex].Signals[n].Position.X = x;
+												Data.Blocks[BlockIndex].Signals[n].Position.Y = y < 0.0 ? 4.8 : y;
+												Data.Blocks[BlockIndex].Signals[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].Signals[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].Signals[n].Roll = roll.ToRadians();
 												Data.Blocks[BlockIndex].Signals[n].ShowObject = true;
 												Data.Blocks[BlockIndex].Signals[n].ShowPost = y < 0.0;
 											} else {
@@ -2778,11 +2766,11 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Signals[n].SectionIndex = CurrentSection;
 											Data.Blocks[BlockIndex].Signals[n].SignalCompatibilityObjectIndex = comp;
 											Data.Blocks[BlockIndex].Signals[n].SignalObjectIndex = -1;
-											Data.Blocks[BlockIndex].Signals[n].X = x;
-											Data.Blocks[BlockIndex].Signals[n].Y = y < 0.0 ? 4.8 : y;
-											Data.Blocks[BlockIndex].Signals[n].Yaw = 0.0174532925199433 * yaw;
-											Data.Blocks[BlockIndex].Signals[n].Pitch = 0.0174532925199433 * pitch;
-											Data.Blocks[BlockIndex].Signals[n].Roll = 0.0174532925199433 * roll;
+											Data.Blocks[BlockIndex].Signals[n].Position.X = x;
+											Data.Blocks[BlockIndex].Signals[n].Position.Y = y < 0.0 ? 4.8 : y;
+											Data.Blocks[BlockIndex].Signals[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Signals[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Signals[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].Signals[n].ShowObject = x != 0.0;
 											Data.Blocks[BlockIndex].Signals[n].ShowPost = x != 0.0 & y < 0.0;
 										}
@@ -2818,11 +2806,11 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Signals[n].SectionIndex = CurrentSection + 1;
 											Data.Blocks[BlockIndex].Signals[n].SignalCompatibilityObjectIndex = 8;
 											Data.Blocks[BlockIndex].Signals[n].SignalObjectIndex = -1;
-											Data.Blocks[BlockIndex].Signals[n].X = x;
-											Data.Blocks[BlockIndex].Signals[n].Y = y < 0.0 ? 4.8 : y;
-											Data.Blocks[BlockIndex].Signals[n].Yaw = yaw * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Signals[n].Pitch = pitch * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Signals[n].Roll = roll * 0.0174532925199433;
+											Data.Blocks[BlockIndex].Signals[n].Position.X = x;
+											Data.Blocks[BlockIndex].Signals[n].Position.Y = y < 0.0 ? 4.8 : y;
+											Data.Blocks[BlockIndex].Signals[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Signals[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Signals[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].Signals[n].ShowObject = x != 0.0;
 											Data.Blocks[BlockIndex].Signals[n].ShowPost = x != 0.0 & y < 0.0;
 										}
@@ -2914,11 +2902,11 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].DestinationChanges[n].PreviousDestination = previousDestination;
 												Data.Blocks[BlockIndex].DestinationChanges[n].BeaconStructureIndex = structure;
 												Data.Blocks[BlockIndex].DestinationChanges[n].NextDestination = nextDestination;
-												Data.Blocks[BlockIndex].DestinationChanges[n].X = x;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Y = y;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Yaw = yaw * 0.0174532925199433;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Pitch = pitch * 0.0174532925199433;
-												Data.Blocks[BlockIndex].DestinationChanges[n].Roll = roll * 0.0174532925199433;
+												Data.Blocks[BlockIndex].DestinationChanges[n].Position.X = x;
+												Data.Blocks[BlockIndex].DestinationChanges[n].Position.Y = y;
+												Data.Blocks[BlockIndex].DestinationChanges[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].DestinationChanges[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].DestinationChanges[n].Roll = roll.ToRadians();
 											}
 										}
 									}
@@ -2992,11 +2980,11 @@ namespace OpenBve {
 												Data.Blocks[BlockIndex].Transponders[n].BeaconStructureIndex = structure;
 												Data.Blocks[BlockIndex].Transponders[n].SectionIndex = section;
 												Data.Blocks[BlockIndex].Transponders[n].ShowDefaultObject = false;
-												Data.Blocks[BlockIndex].Transponders[n].X = x;
-												Data.Blocks[BlockIndex].Transponders[n].Y = y;
-												Data.Blocks[BlockIndex].Transponders[n].Yaw = yaw * 0.0174532925199433;
-												Data.Blocks[BlockIndex].Transponders[n].Pitch = pitch * 0.0174532925199433;
-												Data.Blocks[BlockIndex].Transponders[n].Roll = roll * 0.0174532925199433;
+												Data.Blocks[BlockIndex].Transponders[n].Position.X = x;
+												Data.Blocks[BlockIndex].Transponders[n].Position.Y = y;
+												Data.Blocks[BlockIndex].Transponders[n].Yaw = yaw.ToRadians();
+												Data.Blocks[BlockIndex].Transponders[n].Pitch = pitch.ToRadians();
+												Data.Blocks[BlockIndex].Transponders[n].Roll = roll.ToRadians();
 											}
 										}
 									} break;
@@ -3050,11 +3038,11 @@ namespace OpenBve {
 											Data.Blocks[BlockIndex].Transponders[n].Data = work;
 											Data.Blocks[BlockIndex].Transponders[n].ShowDefaultObject = true;
 											Data.Blocks[BlockIndex].Transponders[n].BeaconStructureIndex = -1;
-											Data.Blocks[BlockIndex].Transponders[n].X = x;
-											Data.Blocks[BlockIndex].Transponders[n].Y = y;
-											Data.Blocks[BlockIndex].Transponders[n].Yaw = yaw * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Transponders[n].Pitch = pitch * 0.0174532925199433;
-											Data.Blocks[BlockIndex].Transponders[n].Roll = roll * 0.0174532925199433;
+											Data.Blocks[BlockIndex].Transponders[n].Position.X = x;
+											Data.Blocks[BlockIndex].Transponders[n].Position.Y = y;
+											Data.Blocks[BlockIndex].Transponders[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].Transponders[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].Transponders[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].Transponders[n].SectionIndex = CurrentSection + oversig + 1;
 											Data.Blocks[BlockIndex].Transponders[n].ClipToFirstRedSection = true;
 										}
@@ -3635,10 +3623,10 @@ namespace OpenBve {
 											} else if (idx2 < 0 & idx2 != Form.SecondaryRailStub & idx2 != Form.SecondaryRailL & idx2 != Form.SecondaryRailR) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex2 is expected to be greater or equal to -2 in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx1 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx1].RailStart) {
+												if (idx1 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx1].RailStarted) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex1 could be out of range in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
-												if (idx2 != Form.SecondaryRailStub & idx2 != Form.SecondaryRailL & idx2 != Form.SecondaryRailR && (idx2 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx2].RailStart)) {
+												if (idx2 != Form.SecondaryRailStub & idx2 != Form.SecondaryRailL & idx2 != Form.SecondaryRailR && (idx2 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx2].RailStarted)) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex2 could be out of range in Track.Form at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												int roof = 0, pf = 0;
@@ -3677,7 +3665,7 @@ namespace OpenBve {
 											if (idx < 0) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex is expected to be non-negative in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart) {
+												if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx +" could be out of range in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												if (idx >= Data.Blocks[BlockIndex].RailPole.Length) {
@@ -3717,9 +3705,9 @@ namespace OpenBve {
 														sttype = 0;
 													}
 												}
-												if (typ < 0 || typ >= Data.Structure.Poles.Length || Data.Structure.Poles[typ] == null) {
+												if (typ < 0 || !Data.Structure.Poles.ContainsKey(typ) || Data.Structure.Poles[typ] == null) {
 													Interface.AddMessage(MessageType.Error, false, "PoleStructureIndex " + typ + " references an object not loaded in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-												} else if (sttype < 0 || sttype >= Data.Structure.Poles[typ].Length || Data.Structure.Poles[typ][sttype] == null) {
+												} else if (sttype < 0 || !Data.Structure.Poles[typ].ContainsKey(sttype) || Data.Structure.Poles[typ][sttype] == null) {
 													Interface.AddMessage(MessageType.Error, false, "PoleStructureIndex " + typ + " references an object not loaded in Track.Pole at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
 													Data.Blocks[BlockIndex].RailPole[idx].Mode = typ;
@@ -3740,7 +3728,7 @@ namespace OpenBve {
 											if (idx < 0 | idx >= Data.Blocks[BlockIndex].RailPole.Length) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " does not reference an existing pole in Track.PoleEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStart & !Data.Blocks[BlockIndex].Rails[idx].RailEnd)) {
+												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStarted & !Data.Blocks[BlockIndex].Rails[idx].RailEnded)) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.PoleEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												Data.Blocks[BlockIndex].RailPole[idx].Exists = false;
@@ -3823,7 +3811,7 @@ namespace OpenBve {
 															dir = -1;
 														}
 													}
-													if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart) {
+													if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted) {
 														Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.Wall at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													}
 													if (idx >= Data.Blocks[BlockIndex].RailWall.Length) {
@@ -3847,7 +3835,7 @@ namespace OpenBve {
 											if (idx < 0 | idx >= Data.Blocks[BlockIndex].RailWall.Length) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " does not reference an existing wall in Track.WallEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStart & !Data.Blocks[BlockIndex].Rails[idx].RailEnd)) {
+												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStarted & !Data.Blocks[BlockIndex].Rails[idx].RailEnded)) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.WallEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												Data.Blocks[BlockIndex].RailWall[idx].Exists = false;
@@ -3931,7 +3919,7 @@ namespace OpenBve {
 															dir = -1;
 														}
 													}
-													if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart) {
+													if (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted) {
 														Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.Dike at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													}
 													if (idx >= Data.Blocks[BlockIndex].RailDike.Length) {
@@ -3955,7 +3943,7 @@ namespace OpenBve {
 											if (idx < 0 | idx >= Data.Blocks[BlockIndex].RailDike.Length) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx +" does not reference an existing dike in Track.DikeEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStart & !Data.Blocks[BlockIndex].Rails[idx].RailEnd)) {
+												if (idx >= Data.Blocks[BlockIndex].Rails.Length || (!Data.Blocks[BlockIndex].Rails[idx].RailStarted & !Data.Blocks[BlockIndex].Rails[idx].RailEnded)) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.DikeEnd at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												Data.Blocks[BlockIndex].RailDike[idx].Exists = false;
@@ -4059,7 +4047,7 @@ namespace OpenBve {
 													else
 													{
 														OpenBveApi.Textures.Texture t;
-														Textures.RegisterTexture(f, new OpenBveApi.Textures.TextureParameters(null, new Color24(64, 64, 64)), out t);
+														Program.CurrentHost.RegisterTexture(f, new OpenBveApi.Textures.TextureParameters(null, new Color24(64, 64, 64)), out t);
 														Data.Markers[n].Message = new MessageManager.MarkerImage(t);
 														
 													}
@@ -4125,10 +4113,10 @@ namespace OpenBve {
 												} else if (idx1 == idx2) {
 													Interface.AddMessage(MessageType.Error, false, "RailIndex1 is expected to be unequal to Index2 in Track.Crack at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												} else {
-													if (idx1 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx1].RailStart) {
+													if (idx1 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx1].RailStarted) {
 														Interface.AddMessage(MessageType.Warning, false, "RailIndex1 " + idx1 + " could be out of range in Track.Crack at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													}
-													if (idx2 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx2].RailStart) {
+													if (idx2 >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx2].RailStarted) {
 														Interface.AddMessage(MessageType.Warning, false, "RailIndex2 " + idx2 + " could be out of range in Track.Crack at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													}
 													int n = Data.Blocks[BlockIndex].Cracks.Length;
@@ -4168,7 +4156,7 @@ namespace OpenBve {
 											} else if (sttype < 0) {
 												Interface.AddMessage(MessageType.Error, false, "FreeObjStructureIndex is expected to be non-negative in Track.FreeObj at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											} else {
-												if (idx >= 0 && (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart)) {
+												if (idx >= 0 && (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted)) {
 													Interface.AddMessage(MessageType.Warning, false, "RailIndex " + idx + " could be out of range in Track.FreeObj at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												if (!Data.Structure.FreeObjects.ContainsKey(sttype)) {
@@ -4201,13 +4189,13 @@ namespace OpenBve {
 														Array.Resize<FreeObj>(ref Data.Blocks[BlockIndex].GroundFreeObj, n + 1);
 														Data.Blocks[BlockIndex].GroundFreeObj[n].TrackPosition = Data.TrackPosition;
 														Data.Blocks[BlockIndex].GroundFreeObj[n].Type = sttype;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].X = x;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].Y = y;
-														Data.Blocks[BlockIndex].GroundFreeObj[n].Yaw = yaw * 0.0174532925199433;
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Position.X = x;
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Position.Y = y;
+														Data.Blocks[BlockIndex].GroundFreeObj[n].Yaw = yaw.ToRadians();
 														if (!Data.IgnorePitchRoll)
 														{
-															Data.Blocks[BlockIndex].GroundFreeObj[n].Pitch = pitch * 0.0174532925199433;
-															Data.Blocks[BlockIndex].GroundFreeObj[n].Roll = roll * 0.0174532925199433;
+															Data.Blocks[BlockIndex].GroundFreeObj[n].Pitch = pitch.ToRadians();
+															Data.Blocks[BlockIndex].GroundFreeObj[n].Roll = roll.ToRadians();
 														}
 														else
 														{
@@ -4228,13 +4216,13 @@ namespace OpenBve {
 														}
 														Data.Blocks[BlockIndex].RailFreeObj[idx][n].TrackPosition = Data.TrackPosition;
 														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Type = sttype;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].X = x;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Y = y;
-														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Yaw = yaw * 0.0174532925199433;
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Position.X = x;
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Position.Y = y;
+														Data.Blocks[BlockIndex].RailFreeObj[idx][n].Yaw = yaw.ToRadians();
 														if (!Data.IgnorePitchRoll)
 														{
-															Data.Blocks[BlockIndex].RailFreeObj[idx][n].Pitch = pitch * 0.0174532925199433;
-															Data.Blocks[BlockIndex].RailFreeObj[idx][n].Roll = roll * 0.0174532925199433;
+															Data.Blocks[BlockIndex].RailFreeObj[idx][n].Pitch = pitch.ToRadians();
+															Data.Blocks[BlockIndex].RailFreeObj[idx][n].Roll = roll.ToRadians();
 														}
 														else
 														{
@@ -4252,18 +4240,18 @@ namespace OpenBve {
 										if (!PreviewOnly) {
 											int typ = 0;
 											if (Arguments.Length >= 1 && Arguments[0].Length > 0 && !NumberFormats.TryParseIntVb6(Arguments[0], out typ)) {
-												Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+												Interface.AddMessage(MessageType.Error, false, "BackgroundIndex is invalid in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												typ = 0;
 											}
-											if (typ < 0 | typ >= Data.Backgrounds.Length) {
-												Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex " + typ + " references a texture not loaded in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-											} else if (Data.Backgrounds[typ] is BackgroundManager.StaticBackground) {
-												BackgroundManager.StaticBackground b = Data.Backgrounds[typ] as BackgroundManager.StaticBackground;
+											if (typ < 0 | !Data.Backgrounds.ContainsKey(typ)) {
+												Interface.AddMessage(MessageType.Error, false, "BackgroundIndex " + typ + " references a background not loaded in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+											} else if (Data.Backgrounds[typ] is StaticBackground) {
+												StaticBackground b = Data.Backgrounds[typ] as StaticBackground;
 												if (b.Texture == null)
 												{
 													//There's a possibility that this was loaded via a default BVE command rather than XML
 													//Thus check for the existance of the file and chuck out error if appropriate
-													Interface.AddMessage(MessageType.Error, false, "BackgroundTextureIndex " + typ + " has not been loaded via Texture.Background in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
+													Interface.AddMessage(MessageType.Error, false, "BackgroundIndex " + typ + " has not been loaded via Texture.Background in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												}
 												else
 												{
@@ -4272,20 +4260,19 @@ namespace OpenBve {
 													{
 														//The initial background for block 0 is always set to zero
 														//This handles the case where background idx #0 is not used
-														b = Data.Backgrounds[0] as BackgroundManager.StaticBackground;
+														b = Data.Backgrounds[0] as StaticBackground;
 														if (b.Texture == null)
 														{
 															Data.Blocks[0].Background = typ;
 														}
 													}
 												}
-											} else if (Data.Backgrounds[typ] is BackgroundManager.DynamicBackground)
+											} else if (Data.Backgrounds[typ] is DynamicBackground)
 											{
 												//File existance checks should already have been made when loading the XML
 												Data.Blocks[BlockIndex].Background = typ;
 											}
 											else {
-												//Object based backgrounds not yet implemented
 												Data.Blocks[BlockIndex].Background = typ;
 											}
 										}
@@ -4348,8 +4335,8 @@ namespace OpenBve {
 														const double radius = 15.0;
 														Data.Blocks[BlockIndex].SoundEvents[n].SoundBuffer = Sounds.RegisterBuffer(f, radius);
 														Data.Blocks[BlockIndex].SoundEvents[n].Type = SoundType.World;
-														Data.Blocks[BlockIndex].SoundEvents[n].X = x;
-														Data.Blocks[BlockIndex].SoundEvents[n].Y = y;
+														Data.Blocks[BlockIndex].SoundEvents[n].Position.X = x;
+														Data.Blocks[BlockIndex].SoundEvents[n].Position.Y = y;
 														Data.Blocks[BlockIndex].SoundEvents[n].Radius = radius;
 													}
 												}
@@ -4386,8 +4373,8 @@ namespace OpenBve {
 											Array.Resize<Sound>(ref Data.Blocks[BlockIndex].SoundEvents, n + 1);
 											Data.Blocks[BlockIndex].SoundEvents[n].TrackPosition = Data.TrackPosition;
 											Data.Blocks[BlockIndex].SoundEvents[n].Type = SoundType.World;
-											Data.Blocks[BlockIndex].SoundEvents[n].X = x;
-											Data.Blocks[BlockIndex].SoundEvents[n].Y = y;
+											Data.Blocks[BlockIndex].SoundEvents[n].Position.X = x;
+											Data.Blocks[BlockIndex].SoundEvents[n].Position.Y = y;
 											Data.Blocks[BlockIndex].SoundEvents[n].IsMicSound = true;
 											Data.Blocks[BlockIndex].SoundEvents[n].BackwardTolerance = back;
 											Data.Blocks[BlockIndex].SoundEvents[n].ForwardTolerance = front;
@@ -4427,7 +4414,7 @@ namespace OpenBve {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex is expected to be non-negative in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 												idx = 0;
 											}
-											if (idx >= 0 && (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStart)) {
+											if (idx >= 0 && (idx >= Data.Blocks[BlockIndex].Rails.Length || !Data.Blocks[BlockIndex].Rails[idx].RailStarted)) {
 												Interface.AddMessage(MessageType.Error, false, "RailIndex " + idx + " references a non-existing rail in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 											}
 											double x = 0.0, y = 0.0;
@@ -4460,11 +4447,11 @@ namespace OpenBve {
 											Array.Resize<PointOfInterest>(ref Data.Blocks[BlockIndex].PointsOfInterest, n + 1);
 											Data.Blocks[BlockIndex].PointsOfInterest[n].TrackPosition = Data.TrackPosition;
 											Data.Blocks[BlockIndex].PointsOfInterest[n].RailIndex = idx;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].X = x;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Y = y;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Yaw = 0.0174532925199433 * yaw;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Pitch = 0.0174532925199433 * pitch;
-											Data.Blocks[BlockIndex].PointsOfInterest[n].Roll = 0.0174532925199433 * roll;
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Position.X = x;
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Position.Y = y;
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Yaw = yaw.ToRadians();
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Pitch = pitch.ToRadians();
+											Data.Blocks[BlockIndex].PointsOfInterest[n].Roll = roll.ToRadians();
 											Data.Blocks[BlockIndex].PointsOfInterest[n].Text = text;
 										}
 									} break;

@@ -23,8 +23,7 @@ namespace OpenBve
     {
 
         // screen (output window)
-        internal static int ScreenWidth = 960;
-        internal static int ScreenHeight = 600;
+        
 
         // first frame behavior
         internal enum LoadTextureImmediatelyMode { NotYet, Yes }
@@ -61,21 +60,13 @@ namespace OpenBve
         internal static bool TransparentColorDepthSorting = false;
 
         // options
-        internal static bool OptionLighting = true;
-        internal static Color24 OptionAmbientColor = new Color24(160, 160, 160);
-        internal static Color24 OptionDiffuseColor = new Color24(159, 159, 159);
-        internal static Vector3 OptionLightPosition = new Vector3(0.215920077052065f, 0.875724044222352f, -0.431840154104129f);
-        internal static float OptionLightingResultingAmount = 1.0f;
-        internal static bool OptionNormals = false;
-        internal static bool OptionWireframe = false;
-        internal static bool OptionBackfaceCulling = true;
         internal static bool OptionCoordinateSystem = false;
         internal static bool OptionInterface = true;
 
         // background color
         internal static int BackgroundColor = 0;
 	    internal static Color128 TextColor = Color128.White;
-        internal const int MaxBackgroundColor = 4;
+	    internal const int MaxBackgroundColor = 4;
         internal static string GetBackgroundColorName()
         {
             switch (BackgroundColor)
@@ -134,11 +125,11 @@ namespace OpenBve
             OverlayList = new ObjectFace[256];
             OverlayListDistance = new double[256];
             OverlayListCount = 0;
-            OptionLighting = true;
-            OptionAmbientColor = new Color24(160, 160, 160);
-            OptionDiffuseColor = new Color24(160, 160, 160);
-            OptionLightPosition = new Vector3(0.215920077052065f, 0.875724044222352f, -0.431840154104129f);
-            OptionLightingResultingAmount = 1.0f;
+            LibRender.Renderer.OptionLighting = true;
+            LibRender.Renderer.OptionAmbientColor = new Color24(160, 160, 160);
+            LibRender.Renderer.OptionDiffuseColor = new Color24(160, 160, 160);
+            LibRender.Renderer.OptionLightPosition = new Vector3(0.215920077052065f, 0.875724044222352f, -0.431840154104129f);
+            LibRender.Renderer.OptionLightingResultingAmount = 1.0f;
             GL.Disable(EnableCap.Fog); LibRender.Renderer.FogEnabled = false;
         }
 
@@ -149,36 +140,6 @@ namespace OpenBve
             TransparentColorDepthSorting = Interface.CurrentOptions.TransparencyMode == TransparencyMode.Quality & Interface.CurrentOptions.Interpolation != InterpolationMode.NearestNeighbor & Interface.CurrentOptions.Interpolation != InterpolationMode.Bilinear;
         }
 
-        // initialize lighting
-        internal static void InitializeLighting()
-        {
-            if (OptionAmbientColor.R == 255 & OptionAmbientColor.G == 255 & OptionAmbientColor.B == 255 & OptionDiffuseColor.R == 0 & OptionDiffuseColor.G == 0 & OptionDiffuseColor.B == 0)
-            {
-                OptionLighting = false;
-            }
-            else
-            {
-                OptionLighting = true;
-            }
-            if (OptionLighting)
-            {
-                GL.Light(LightName.Light0, LightParameter.Ambient, new float[] { inv255 * (float)OptionAmbientColor.R, inv255 * (float)OptionAmbientColor.G, inv255 * (float)OptionAmbientColor.B, 1.0f });
-                GL.Light(LightName.Light0, LightParameter.Diffuse, new float[] { inv255 * (float)OptionDiffuseColor.R, inv255 * (float)OptionDiffuseColor.G, inv255 * (float)OptionDiffuseColor.B, 1.0f });
-                GL.LightModel(LightModelParameter.LightModelAmbient, new float[] { 0.0f, 0.0f, 0.0f, 1.0f });
-                GL.Enable(EnableCap.Lighting); LibRender.Renderer.LightingEnabled = true;
-                GL.Enable(EnableCap.Light0);
-                GL.Enable(EnableCap.ColorMaterial);
-                GL.ColorMaterial(MaterialFace.FrontAndBack, ColorMaterialParameter.AmbientAndDiffuse);
-                GL.ShadeModel(ShadingModel.Smooth);
-                OptionLightingResultingAmount = (float)((int)OptionAmbientColor.R + (int)OptionAmbientColor.G + (int)OptionAmbientColor.B) / 480.0f;
-                if (OptionLightingResultingAmount > 1.0f) OptionLightingResultingAmount = 1.0f;
-            }
-            else
-            {
-                GL.Disable(EnableCap.Lighting); LibRender.Renderer.LightingEnabled = false;
-            }
-        }
-		
         internal static void RenderScene()
         {
 	        // initialize
@@ -193,15 +154,15 @@ namespace OpenBve
             }
 	        
             // setup camera
-            var mat = Matrix4d.LookAt(0.0, 0.0, 0.0, World.AbsoluteCameraDirection.X, World.AbsoluteCameraDirection.Y, World.AbsoluteCameraDirection.Z, World.AbsoluteCameraUp.X, World.AbsoluteCameraUp.Y, World.AbsoluteCameraUp.Z);
+            var mat = Matrix4d.LookAt(0.0, 0.0, 0.0, Camera.AbsoluteDirection.X, Camera.AbsoluteDirection.Y, Camera.AbsoluteDirection.Z, Camera.AbsoluteUp.X, Camera.AbsoluteUp.Y, Camera.AbsoluteUp.Z);
             GL.MultMatrix(ref mat);
-            if (OptionLighting)
+            if (LibRender.Renderer.OptionLighting)
             {
-                GL.Light(LightName.Light0, LightParameter.Position, new float[] { (float)OptionLightPosition.X, (float)OptionLightPosition.Y, (float)OptionLightPosition.Z, 0.0f });
+                GL.Light(LightName.Light0, LightParameter.Position, new float[] { (float)LibRender.Renderer.OptionLightPosition.X, (float)LibRender.Renderer.OptionLightPosition.Y, (float)LibRender.Renderer.OptionLightPosition.Z, 0.0f });
             }
             // render polygons
             GL.Disable(EnableCap.DepthTest);
-            if (OptionLighting)
+            if (LibRender.Renderer.OptionLighting)
             {
                 if (!LibRender.Renderer.LightingEnabled)
                 {
@@ -227,11 +188,11 @@ namespace OpenBve
                     GL.Disable(EnableCap.Lighting);
                 }
                 GL.Color3(1.0, 0.0, 0.0);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(100.0, 0.01, 0.01), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(100.0, 0.01, 0.01), Camera.AbsolutePosition, null);
                 GL.Color3(0.0, 1.0, 0.0);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 100.0, 0.01), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 100.0, 0.01), Camera.AbsolutePosition, null);
                 GL.Color3(0.0, 0.0, 1.0);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 0.01, 100.0), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 0.01, 100.0), Camera.AbsolutePosition, null);
                 if (LibRender.Renderer.LightingEnabled)
                 {
                     GL.Enable(EnableCap.Lighting);
@@ -240,7 +201,7 @@ namespace OpenBve
             LibRender.Renderer.ResetOpenGlState();
             for (int i = 0; i < OpaqueListCount; i++)
             {
-                RenderFace(ref OpaqueList[i], World.AbsoluteCameraPosition);
+                RenderFace(ref OpaqueList[i], Camera.AbsolutePosition);
             }
             LibRender.Renderer.ResetOpenGlState();
             // transparent color list
@@ -257,7 +218,7 @@ namespace OpenBve
 					{
 						if (ObjectManager.Objects[TransparentColorList[i].ObjectIndex].Mesh.Materials[r].Color.A == 255)
 						{
-							RenderFace(ref TransparentColorList[i], World.AbsoluteCameraPosition);
+							RenderFace(ref TransparentColorList[i], Camera.AbsolutePosition);
 						}
 					}
 				}
@@ -276,7 +237,7 @@ namespace OpenBve
 							GL.Disable(EnableCap.AlphaTest);
 							additive = true;
 						}
-						RenderFace(ref TransparentColorList[i], World.AbsoluteCameraPosition);
+						RenderFace(ref TransparentColorList[i], Camera.AbsolutePosition);
 					}
 					else
 					{
@@ -285,12 +246,12 @@ namespace OpenBve
 							LibRender.Renderer.SetAlphaFunc(AlphaFunction.Less, 1.0f);
 							additive = false;
 						}
-						RenderFace(ref TransparentColorList[i], World.AbsoluteCameraPosition);
+						RenderFace(ref TransparentColorList[i], Camera.AbsolutePosition);
 					}
 				}
 			} else {
 				for (int i = 0; i < TransparentColorListCount; i++) {
-					RenderFace(ref TransparentColorList[i], World.AbsoluteCameraPosition);
+					RenderFace(ref TransparentColorList[i], Camera.AbsolutePosition);
 				}
 			}
 			LibRender.Renderer.ResetOpenGlState();
@@ -302,7 +263,7 @@ namespace OpenBve
 		        LibRender.Renderer.SetAlphaFunc(AlphaFunction.Greater, 0.0f);
 		        for (int i = 0; i < AlphaListCount; i++)
 		        {
-			        RenderFace(ref AlphaList[i], World.AbsoluteCameraPosition);
+			        RenderFace(ref AlphaList[i], Camera.AbsolutePosition);
 		        }
 	        }
 	        else
@@ -317,7 +278,7 @@ namespace OpenBve
 			        {
 				        if (ObjectManager.Objects[AlphaList[i].ObjectIndex].Mesh.Materials[r].Color.A == 255)
 				        {
-					        RenderFace(ref AlphaList[i], World.AbsoluteCameraPosition);
+					        RenderFace(ref AlphaList[i], Camera.AbsolutePosition);
 				        }
 			        }
 		        }
@@ -336,7 +297,7 @@ namespace OpenBve
 					        GL.Disable(EnableCap.AlphaTest);
 					        additive = true;
 				        }
-				        RenderFace(ref AlphaList[i], World.AbsoluteCameraPosition);
+				        RenderFace(ref AlphaList[i], Camera.AbsolutePosition);
 			        }
 			        else
 			        {
@@ -345,7 +306,7 @@ namespace OpenBve
 					        LibRender.Renderer.SetAlphaFunc(AlphaFunction.Less, 1.0f);
 					        additive = false;
 				        }
-				        RenderFace(ref AlphaList[i], World.AbsoluteCameraPosition);
+				        RenderFace(ref AlphaList[i], Camera.AbsolutePosition);
 			        }
 		        }
 	        }
@@ -359,7 +320,7 @@ namespace OpenBve
             SortPolygons(OverlayList, OverlayListCount, OverlayListDistance, 3, 0.0);
             for (int i = 0; i < OverlayListCount; i++)
             {
-                RenderFace(ref OverlayList[i], World.AbsoluteCameraPosition);
+                RenderFace(ref OverlayList[i], Camera.AbsolutePosition);
             }
 	        
             // render overlays
@@ -377,11 +338,11 @@ namespace OpenBve
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.Enable(EnableCap.Blend);
                 GL.Color4(1.0, 0.0, 0.0, 0.2);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(100.0, 0.01, 0.01), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(100.0, 0.01, 0.01), Camera.AbsolutePosition, null);
                 GL.Color4(0.0, 1.0, 0.0, 0.2);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 100.0, 0.01), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 100.0, 0.01), Camera.AbsolutePosition, null);
                 GL.Color4(0.0, 0.0, 1.0, 0.2);
-                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 0.01, 100.0), World.AbsoluteCameraPosition, null);
+                LibRender.Renderer.DrawCube(Vector3.Zero, Vector3.Forward, Vector3.Down, Vector3.Right, new Vector3(0.01, 0.01, 100.0), Camera.AbsolutePosition, null);
             }
 	        RenderOverlays();
 	        LibRender.Renderer.LastBoundTexture = null; //We bind the character texture, so must reset it at the end of the render sequence
@@ -393,13 +354,13 @@ namespace OpenBve
 	    {
 		    if (LibRender.Renderer.CullEnabled)
 		    {
-			    if (!OptionBackfaceCulling || (ObjectManager.Objects[Face.ObjectIndex].Mesh.Faces[Face.FaceIndex].Flags & MeshFace.Face2Mask) != 0)
+			    if (!LibRender.Renderer.OptionBackfaceCulling || (ObjectManager.Objects[Face.ObjectIndex].Mesh.Faces[Face.FaceIndex].Flags & MeshFace.Face2Mask) != 0)
 			    {
 				    GL.Disable(EnableCap.CullFace);
 				    LibRender.Renderer.CullEnabled = false;
 			    }
 		    }
-		    else if (OptionBackfaceCulling)
+		    else if (LibRender.Renderer.OptionBackfaceCulling)
 		    {
 			    if ((ObjectManager.Objects[Face.ObjectIndex].Mesh.Faces[Face.FaceIndex].Flags & MeshFace.Face2Mask) == 0)
 			    {
@@ -419,7 +380,7 @@ namespace OpenBve
 	        GL.MatrixMode(MatrixMode.Projection);
 	        GL.PushMatrix();
 	        GL.LoadIdentity();
-	        GL.Ortho(0.0, (double)ScreenWidth, (double)ScreenHeight, 0.0, -1.0, 1.0);
+	        GL.Ortho(0.0, (double) Screen.Width, (double) Screen.Height, 0.0, -1.0, 1.0);
 	        GL.MatrixMode(MatrixMode.Modelview);
 	        GL.PushMatrix();
 	        GL.LoadIdentity();
@@ -435,11 +396,11 @@ namespace OpenBve
                     LibRender.Renderer.DrawString(Fonts.SmallFont, "Open one or more objects", new Point(32,4),TextAlignment.TopLeft, TextColor);
                     LibRender.Renderer.DrawString(Fonts.SmallFont, "Display the options window", new Point(32,24),TextAlignment.TopLeft, TextColor);
                     LibRender.Renderer.DrawString(Fonts.SmallFont, "Display the train settings window", new Point(32, 44), TextAlignment.TopLeft, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "v" + System.Windows.Forms.Application.ProductVersion, new Point(ScreenWidth - 8, ScreenHeight - 20), TextAlignment.TopLeft, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "v" + System.Windows.Forms.Application.ProductVersion, new Point(Screen.Width - 8, Screen.Height - 20), TextAlignment.TopLeft, TextColor);
                 }
                 else
                 {
-	                LibRender.Renderer.DrawString(Fonts.SmallFont, "Position: " + World.AbsoluteCameraPosition.X.ToString("0.00", Culture) + ", " + World.AbsoluteCameraPosition.Y.ToString("0.00", Culture) + ", " + World.AbsoluteCameraPosition.Z.ToString("0.00", Culture), new Point((int)(0.5 * ScreenWidth -88),4),TextAlignment.TopLeft, TextColor);
+	                LibRender.Renderer.DrawString(Fonts.SmallFont, "Position: " + Camera.AbsolutePosition.X.ToString("0.00", Culture) + ", " + Camera.AbsolutePosition.Y.ToString("0.00", Culture) + ", " + Camera.AbsolutePosition.Z.ToString("0.00", Culture), new Point((int)(0.5 * Screen.Width -88),4),TextAlignment.TopLeft, TextColor);
                     string[][] Keys;
                     Keys = new string[][] { new string[] { "F5" }, new string[] { "F7" }, new string[] { "del" }, new string[] { "F8" }, new string[] { "F10" } };
                     LibRender.Renderer.RenderKeys(4, 4, 24, Fonts.SmallFont, Keys);
@@ -449,19 +410,19 @@ namespace OpenBve
                     LibRender.Renderer.DrawString(Fonts.SmallFont, "Display the options window", new Point(32,64),TextAlignment.TopLeft, TextColor);
                     LibRender.Renderer.DrawString(Fonts.SmallFont, "Display the train settings window", new Point(32, 84), TextAlignment.TopLeft, TextColor);
 					Keys = new string[][] { new string[] { "F" }, new string[] { "N" }, new string[] { "L" }, new string[] { "G" }, new string[] { "B" }, new string[] { "I" } };
-                    LibRender.Renderer.RenderKeys(ScreenWidth - 20, 4, 16, Fonts.SmallFont, Keys);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Wireframe: " + (Renderer.OptionWireframe ? "on" : "off"), new Point(ScreenWidth - 28,4),TextAlignment.TopRight, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Normals: " + (Renderer.OptionNormals ? "on" : "off"), new Point(ScreenWidth - 28,24),TextAlignment.TopRight, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Lighting: " + (Program.LightingTarget == 0 ? "night" : "day"), new Point(ScreenWidth - 28,44),TextAlignment.TopRight, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Grid: " + (Renderer.OptionCoordinateSystem ? "on" : "off"), new Point(ScreenWidth - 28,64),TextAlignment.TopRight, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Background: " + GetBackgroundColorName(), new Point(ScreenWidth - 28,84),TextAlignment.TopRight, TextColor);
-                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Hide interface", new Point(ScreenWidth - 28,104),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.RenderKeys(Screen.Width - 20, 4, 16, Fonts.SmallFont, Keys);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Wireframe: " + (LibRender.Renderer.OptionWireframe ? "on" : "off"), new Point(Screen.Width - 28,4),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Normals: " + (LibRender.Renderer.OptionNormals ? "on" : "off"), new Point(Screen.Width - 28,24),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Lighting: " + (Program.LightingTarget == 0 ? "night" : "day"), new Point(Screen.Width - 28,44),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Grid: " + (Renderer.OptionCoordinateSystem ? "on" : "off"), new Point(Screen.Width - 28,64),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Background: " + GetBackgroundColorName(), new Point(Screen.Width - 28,84),TextAlignment.TopRight, TextColor);
+                    LibRender.Renderer.DrawString(Fonts.SmallFont, "Hide interface", new Point(Screen.Width - 28,104),TextAlignment.TopRight, TextColor);
                     Keys = new string[][] { new string[] { null, "W", null }, new string[] { "A", "S", "D" } };
-                    LibRender.Renderer.RenderKeys(4, ScreenHeight - 40, 16, Fonts.SmallFont, Keys);
+                    LibRender.Renderer.RenderKeys(4, Screen.Height - 40, 16, Fonts.SmallFont, Keys);
                     Keys = new string[][] { new string[] { null, "↑", null }, new string[] { "←", "↓", "→" } };
-                    LibRender.Renderer.RenderKeys((int)(0.5 * (double)ScreenWidth - 28), ScreenHeight - 40, 16, Fonts.SmallFont, Keys);
+                    LibRender.Renderer.RenderKeys((int)(0.5 * (double) Screen.Width - 28), Screen.Height - 40, 16, Fonts.SmallFont, Keys);
                     Keys = new string[][] { new string[] { null, "8", "9" }, new string[] { "4", "5", "6" }, new string[] { null, "2", "3" } };
-                    LibRender.Renderer.RenderKeys(ScreenWidth - 60, ScreenHeight - 60, 16, Fonts.SmallFont, Keys);
+                    LibRender.Renderer.RenderKeys(Screen.Width - 60, Screen.Height - 60, 16, Fonts.SmallFont, Keys);
                     if (Interface.MessageCount == 1)
                     {
 	                    LibRender.Renderer.RenderKeys(4, 112, 20, Fonts.SmallFont, new string[][] { new string[] { "F9" } });
@@ -508,7 +469,7 @@ namespace OpenBve
             GL.MatrixMode(MatrixMode.Modelview);
             GL.Disable(EnableCap.Blend);
             GL.Enable(EnableCap.DepthTest);
-	        GL.Ortho(0.0, (double)ScreenWidth, 0.0, (double)ScreenHeight, -1.0, 1.0);
+	        GL.Ortho(0.0, (double) Screen.Width, 0.0, (double) Screen.Height, -1.0, 1.0);
         }
 		
         // readd objects
@@ -606,7 +567,7 @@ namespace OpenBve
 		                            //Yuck cast, but we need the null, as otherwise requires rewriting the texture indexer
 		                            wrap = (OpenGlTextureWrapMode)ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].WrapMode;
 	                            }
-	                            Textures.LoadTexture(ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].DaytimeTexture, (OpenGlTextureWrapMode)ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].WrapMode);
+	                            Program.CurrentHost.LoadTexture(ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].DaytimeTexture, (OpenGlTextureWrapMode)ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].WrapMode);
                                 if (ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].DaytimeTexture.Transparency == TextureTransparencyType.Alpha)
                                 {
                                     alpha = true;
@@ -618,7 +579,7 @@ namespace OpenBve
                             }
                             if (ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].NighttimeTexture != null)
                             {
-	                            Textures.LoadTexture(ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].NighttimeTexture, (OpenGlTextureWrapMode)ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].WrapMode);
+	                            Program.CurrentHost.LoadTexture(ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].NighttimeTexture, (OpenGlTextureWrapMode)ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].WrapMode);
                                 if (ObjectManager.Objects[ObjectIndex].Mesh.Materials[k].NighttimeTexture.Transparency == TextureTransparencyType.Alpha)
                                 {
                                     alpha = true;
@@ -762,9 +723,9 @@ namespace OpenBve
         private static void SortPolygons(ObjectFace[] List, int ListCount, double[] ListDistance, int ListOffset, double TimeElapsed)
         {
             // calculate distance
-            double cx = World.AbsoluteCameraPosition.X;
-            double cy = World.AbsoluteCameraPosition.Y;
-            double cz = World.AbsoluteCameraPosition.Z;
+            double cx = Camera.AbsolutePosition.X;
+            double cy = Camera.AbsolutePosition.Y;
+            double cz = Camera.AbsolutePosition.Z;
             for (int i = 0; i < ListCount; i++)
             {
                 int o = List[i].ObjectIndex;
