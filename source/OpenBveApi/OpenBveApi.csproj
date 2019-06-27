@@ -79,6 +79,8 @@
     <Compile Include="Interface\Logging\LogMessage.MessageType.cs" />
     <Compile Include="Interface\Time.cs" />
     <Compile Include="Interface\Translations\Language.cs" />
+    <Compile Include="LibRender\EBO.cs" />
+    <Compile Include="LibRender\VBO.cs" />
     <Compile Include="Math\Matrix4.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector4.cs" />
@@ -161,9 +163,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\assets\Languages\en-US.cfg" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LibRender\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <PreBuildEvent Condition=" '$(OS)' != 'Unix' ">echo Resoloving dependencies
       xcopy /E /Y "$(SolutionDir)dependencies" "$(TargetDir)"

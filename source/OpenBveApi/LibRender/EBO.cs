@@ -1,8 +1,11 @@
 ﻿using System;
 using OpenTK.Graphics.OpenGL;
 
-namespace LibRender
+namespace OpenBveApi.LibRender
 {
+    /// <summary>
+    /// Class to represent an openGL Element Buffer Object
+    /// </summary>
     public class ElementBufferObject : IDisposable
     {
         /// <summary>
