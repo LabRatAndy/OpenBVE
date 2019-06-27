@@ -161,7 +161,9 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\assets\Languages\en-US.cfg" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="LibRender\" />
+  </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent Condition=" '$(OS)' != 'Unix' ">echo Resoloving dependencies
       xcopy /E /Y "$(SolutionDir)dependencies" "$(TargetDir)"
