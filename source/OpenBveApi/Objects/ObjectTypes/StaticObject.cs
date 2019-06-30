@@ -25,6 +25,8 @@ namespace OpenBveApi.Objects
 		public string Author;
 		/// <summary> Stores the copyright information for this object.</summary>
 		public string Copyright;
+        /// <summary>ShaderMesh version of the object's mesh struct </summary>
+        public ShaderMesh ShaderMesh;
 
 		private readonly Hosts.HostInterface currentHost;
 
