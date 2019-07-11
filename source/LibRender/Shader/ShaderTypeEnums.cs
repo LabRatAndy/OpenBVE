@@ -1,6 +1,9 @@
 ﻿
 namespace LibRender
 {
+    /// <summary>
+    /// Enumerates the different types of shader that can be used / loaded.
+    /// </summary>
     public enum ShaderType
     {
         DefaultShader = 0,
