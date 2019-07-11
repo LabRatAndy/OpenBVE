@@ -4,7 +4,7 @@ namespace LibRender
     /// <summary>
     /// Enumerates the different types of shader that can be used / loaded.
     /// </summary>
-    public enum ShaderType
+    public enum ShaderTypeEnum
     {
         DefaultShader = 0,
         ColouredFaceShader = 1,
