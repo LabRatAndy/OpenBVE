@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTK.Graphics.OpenGL;
+using OpenBveApi.LibRender;
 
 namespace LibRender
 {
@@ -43,6 +44,11 @@ namespace LibRender
             {
                 ibo.Bind();
             }
+        }
+        public VertexArrayObject(List<Attribute>attributes)
+        {
+            GL.GenVertexArrays(1, out handle);
+            attributeList = attributes;
         }
 
         /// <summary>
