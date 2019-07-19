@@ -9,7 +9,7 @@ namespace LibRender
     /// struct layout sequential tells compiler to make the data sequentially organised as required by a VBO
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vertex
+    public struct LibRenderVertex
     {
         /// <summary>
         /// The XYZ coordinates of the vertex
@@ -29,7 +29,7 @@ namespace LibRender
         /// <param name="Coordinates">Vector3 containing the XYZ coordinates of the vertex</param>
         /// <param name="Normals">Vector3 containing the normal for the Vertex</param>
         /// <param name="TexCoords">Vector 2 containing the texture coordinates for the vertex</param>
-        public Vertex(Vector3 Coordinates, Vector3 Normals, Vector2 TexCoords)
+        public LibRenderVertex(Vector3 Coordinates, Vector3 Normals, Vector2 TexCoords)
         {
             this.coordinates = Coordinates;
             this.normals = Normals;
@@ -65,7 +65,7 @@ namespace LibRender
         /// <param name="a">First vertex to compare</param>
         /// <param name="b">Second Vertex to compare </param>
         /// <returns>True if they are the equal false if not</returns>
-        public static bool operator ==(Vertex a, Vertex b)
+        public static bool operator ==(LibRenderVertex a, LibRenderVertex b)
         {
             if (a.coordinates != b.coordinates) return false;
             if (a.normals != b.normals) return false;
@@ -78,7 +78,7 @@ namespace LibRender
         /// <param name="a">First vertex to compare</param>
         /// <param name="b">Second vertex to compare</param>
         /// <returns>True if they are different, false if they are the same</returns>
-        public static bool operator !=(Vertex a, Vertex b)
+        public static bool operator !=(LibRenderVertex a, LibRenderVertex b)
         {
             if (a.coordinates != b.coordinates) return true;
             if (a.normals != b.normals) return true;
@@ -92,15 +92,15 @@ namespace LibRender
         /// <returns>True if the object is the same as the vertex, false if they are different</returns>
         public override bool Equals(object obj)
         {
-            if (!(obj is Vertex)) return false;
-            return this.Equals((Vertex)obj);
+            if (!(obj is LibRenderVertex)) return false;
+            return this.Equals((LibRenderVertex)obj);
         }
         /// <summary>
         /// Equals method compares the supplied vertex with the vertex
         /// </summary>
         /// <param name="b">Vertex to compare with the vertex</param>
         /// <returns>True if the vertices match, false if they are differnt</returns>
-        private bool Equals(Vertex b)
+        private bool Equals(LibRenderVertex b)
         {
             if (this.coordinates != b.coordinates) return false;
             if (this.normals != b.normals) return false;
