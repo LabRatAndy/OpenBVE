@@ -59,6 +59,11 @@ namespace LibRender
             GL.BindVertexArray(handle);
         }
 
+        public void UnBind()
+        {
+            GL.BindVertexArray(0);
+        }
+
         /// <summary>
         /// Sets the attached attributes in openGL
         /// </summary>
