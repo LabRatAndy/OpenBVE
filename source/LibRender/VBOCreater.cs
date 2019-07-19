@@ -3,6 +3,7 @@ using OpenBveApi.Colors;
 using OpenBveApi.Objects;
 using OpenBveApi.Hosts;
 using OpenBveApi.Math;
+using OpenBveApi.LibRender;
 
 namespace LibRender
 {
@@ -10,7 +11,7 @@ namespace LibRender
     {
         private HostInterface currenthost;
 
-        private Vertex[] verticies;
+        private LibRenderVertex[] verticies;
         private int[][] faces;
         private int[] materials;
 
@@ -21,7 +22,7 @@ namespace LibRender
 
         public void CreateVBO(StaticObject Object, out VertexBufferObject vbo)
         {
-            verticies = new Vertex[Object.Mesh.Vertices.Length];
+            verticies = new LibRenderVertex[Object.Mesh.Vertices.Length];
             GetVertexData(Object);
             GetFacesandMaterials(Object);
             GetNormals(Object);
