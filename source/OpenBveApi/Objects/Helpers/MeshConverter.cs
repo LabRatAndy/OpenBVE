@@ -11,7 +11,7 @@ namespace OpenBveApi.Objects
         /// <summary>
         /// Helper struct used to gather the vertex data prior to conversion to a double array and vbo.
         /// </summary>
-        private struct Vertex
+        private struct MeshConverterVertex
         {
            public Vector3 coordinates;
            public Vector3 normals;
@@ -24,7 +24,7 @@ namespace OpenBveApi.Objects
         /// <returns>The ShaderMesh version of the supplied Mesh struct</returns>
         public static ShaderMesh ConvertMesh(Mesh mesh)
         {
-            Vertex[] vertices = new Vertex[mesh.Vertices.Length];
+            MeshConverterVertex[] vertices = new MeshConverterVertex[mesh.Vertices.Length];
             int[][] faces = null;
             ushort[] materials = null;
             double[] vertexData = null;
@@ -48,7 +48,7 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="mesh">The mesh being converted</param>
         /// <param name="Vertices">The array of Vertex structs that contains the data for the vertices associated with the mesh </param>
-        private static void GetVertexData(Mesh mesh, ref Vertex[] Vertices)
+        private static void GetVertexData(Mesh mesh, ref MeshConverterVertex[] Vertices)
         {
             for (int n = 0; n < mesh.Vertices.Length; n++)
             {
@@ -79,7 +79,7 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="mesh">The mesh to convert</param>
         /// <param name="Verticies">The array of vertex structs that the normals should be added to</param>
-        private static void GetNormalsData(Mesh mesh, ref Vertex[] Verticies)
+        private static void GetNormalsData(Mesh mesh, ref MeshConverterVertex[] Verticies)
         {
             for (int face = 0; face < mesh.Faces.Length; face++)
             {
@@ -107,7 +107,7 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="vertices">Array of Vertex helper structs that is to be converted to a double array</param>
         /// <param name="VertexData">The double array representing the vertex data contained by the mesh. Used to create the VBO</param>
-        private static void GetVertexDataAsDoubleArray(Vertex[] vertices, out double[]VertexData)
+        private static void GetVertexDataAsDoubleArray(MeshConverterVertex[] vertices, out double[]VertexData)
         {
             VertexData = new double[vertices.Length * 8];
             for (int n = 0; n < vertices.Length; n++)
