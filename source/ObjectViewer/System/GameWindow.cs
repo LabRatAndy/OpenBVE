@@ -305,6 +305,14 @@ namespace OpenBve
             Program.ResetCamera();
             Renderer.Initialize();
             LibRender.Renderer.InitializeLighting();
+            // load the shaders and iniitalise the LibRender for shader use
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.DefaultShader,"assets\\shaders\\default.vert","\\assets\\shaders\\default");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.ColouredFaceShader,"assets\\shaders\\colouredface.vert","assets\\shaders\\colouredface.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedFaceShader,"assets\\shaders\\texturedface.vert","assets\\shaders\\texturedface.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedTransparentShader,"assets\\shaders\\texturedtransparent.vert","assets\\shaders\\texturedtransparent.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TextShader,"assets\\shaders\\text.vert","assets\\shaders\\text.frag");
+            LibRender.Renderer.FieldOfView = MathHelper.DegreesToRadians(100.0d);
+            LibRender.Renderer.InitialiseRenderer();
             //SwapBuffers();
             //Fonts.Initialize();
             Program.UpdateViewport();
