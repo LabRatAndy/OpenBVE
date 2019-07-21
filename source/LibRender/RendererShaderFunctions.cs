@@ -86,6 +86,10 @@ namespace LibRender
             }
             return string.Empty;
         }
+        public static void RenderObject()
+        {
+
+        }
     }
 
 }
