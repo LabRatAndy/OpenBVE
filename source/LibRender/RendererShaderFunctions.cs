@@ -70,6 +70,22 @@ namespace LibRender
         {
 
         }
+
+        public static string GetDefaultShader(int shader)
+        {
+            // vertex shader == 0, fragment shader == 1
+            if (shader == 0)
+            {
+                string shadersource = "";
+                return shadersource;
+            }
+            if (shader == 1)
+            {
+                string shadersource = "";
+                return shadersource;
+            }
+            return string.Empty;
+        }
     }
 
 }
