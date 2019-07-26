@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using OpenBveApi.Objects;
 namespace LibRender
 {
     /// <summary>
@@ -35,7 +36,16 @@ namespace LibRender
         /// </summary>
         internal static double fieldOfView;
 
+        /// <summary>
+        /// has renderer sucessfully initialised ?
+        /// </summary>
         internal static bool initialised = false;
+
+        /// <summary>
+        /// Array of objects to draw and count
+        /// </summary>
+        internal static ShaderMesh[] Objs;
+        internal static int objcount;
      
     }
 
