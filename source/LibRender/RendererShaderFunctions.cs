@@ -12,6 +12,8 @@ namespace LibRender
         {
             shaderList = new Shader[10];
             ShadersLoaded = new bool[10];
+            Objs = new ShaderMesh[10];
+            objcount = 0;
             for (int n = 0; n < 10; n++)
             {
                 shaderList[n] = null;
@@ -88,7 +90,17 @@ namespace LibRender
         }
         public static void RenderObject()
         {
-
+            // check initialisation is sucessful
+            if (initialised == false) return;
+        }
+        public static void AddObject(ShaderMesh obj)
+        {
+            Objs[objcount] = obj;
+            if (objcount > Objs.Length)
+            {
+                System.Array.Resize<ShaderMesh>(ref Objs, objcount++);
+            }
+            else objcount++;           
         }
     }
 
