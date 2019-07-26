@@ -409,6 +409,7 @@ namespace OpenBve {
 	                ObjectManager.InitializeVisibility();
 	                ObjectManager.UpdateVisibility(0.0, true);
 	                ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
+                    ObjectManager.ConvertMeshes();
 	                break;
 	            case Key.F7:
 	            {
@@ -506,6 +507,7 @@ namespace OpenBve {
 			            ObjectManager.FinishCreatingObjects();
 			            ObjectManager.UpdateVisibility(0.0, true);
 			            ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
+                            ObjectManager.ConvertMeshes();
 		            }
 		            else
 		            {
