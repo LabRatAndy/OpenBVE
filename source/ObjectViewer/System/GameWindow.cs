@@ -286,6 +286,10 @@ namespace OpenBve
             Renderer.RenderScene();
             SwapBuffers();
         }
+        protected override void OnUpdateFrame(FrameEventArgs e)
+        {
+            LibRender.Renderer.UpdateFrame();
+        }
 
         protected override void OnResize(EventArgs e)
         {
