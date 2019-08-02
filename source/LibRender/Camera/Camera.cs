@@ -76,6 +76,17 @@ namespace LibRender
 			}
 			return true;
 		}
+        /// <summary>
+        /// Gets the view matrix for what the camera is looking at
+        /// </summary>
+        /// <returns>opentk matrix4D representing the view matrix</returns>
+        public static OpenTK.Matrix4d GetViewMatrix()
+        {
+            OpenTK.Vector3d camerapos = new OpenTK.Vector3d(AbsolutePosition.X, AbsolutePosition.Y, AbsolutePosition.Z);
+            OpenTK.Vector3d target = new OpenTK.Vector3d(AbsoluteDirection.X, AbsoluteDirection.Y, AbsoluteDirection.Z);
+            OpenTK.Vector3d up = new OpenTK.Vector3d(AbsoluteUp.X, AbsoluteUp.Y, AbsoluteUp.Z);
+            return OpenTK.Matrix4d.LookAt(camerapos, target, up);
+        }
 
 
 	}
