@@ -2,6 +2,7 @@
 using OpenBveApi.Objects;
 using OpenBveApi.Hosts;
 using OpenTK.Graphics.OpenGL;
+using OpenTK;
 using System.Collections.Generic;
 
 namespace LibRender
@@ -19,6 +20,10 @@ namespace LibRender
                 shaderList[n] = null;
                 ShadersLoaded[n] = false;
             }
+            //create the default FOV and clip distances
+            fieldOfView = MathHelper.DegreesToRadians(100.0d);
+            nearDrawDistance = 0.001d; // 1 mm
+            farDrawDistance = 600.00d; // 600 metres
         }
 
         public static void LoadShader(ShaderTypeEnum shadertype, string vertexfilename, string fragmentfilename)
@@ -59,6 +64,10 @@ namespace LibRender
             VAO.Bind();
             VAO.SetAttributes();
             VAO.UnBind();
+            // create projection matrix
+            ProjectionTransform = Matrix4d.CreatePerspectiveFieldOfView(fieldOfView, Screen.AspectRatio, nearDrawDistance, farDrawDistance);
+            //get view matrix
+            ViewTransform = Camera.GetViewMatrix();
             initialised = true;
         }
 
@@ -68,9 +77,22 @@ namespace LibRender
             set { fieldOfView = value; }
         }
 
+        public static double NearDrawDistance
+        {
+            get { return nearDrawDistance; }
+            set { nearDrawDistance = value; }
+        }
+        public static double FarDrawDistance
+        {
+            get { return farDrawDistance; }
+            set { farDrawDistance = value; }
+        }
+
+
         public static void UpdateFrame()
         {
-
+            ViewTransform = Camera.GetViewMatrix();
+            ProjectionTransform = Matrix4d.CreatePerspectiveFieldOfView(fieldOfView, Screen.AspectRatio, nearDrawDistance, farDrawDistance);
         }
 
         public static string GetDefaultShader(int shader)

@@ -35,6 +35,14 @@ namespace LibRender
         /// The fied of view in radians for the scene. 
         /// </summary>
         internal static double fieldOfView;
+        /// <summary>
+        /// 
+        /// </summary>
+        internal static double nearDrawDistance;
+        /// <summary>
+        /// 
+        /// </summary>
+        internal static double farDrawDistance;
 
         /// <summary>
         /// has renderer sucessfully initialised ?
