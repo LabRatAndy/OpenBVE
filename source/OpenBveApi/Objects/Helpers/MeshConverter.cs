@@ -41,6 +41,7 @@ namespace OpenBveApi.Objects
             GetFacesasEBOArray(faces, out ebos);
             faces = null;
             GetMeshMaterialsArray(mesh, materials, out materiallist);
+            SetEBOMaterialType(materiallist, ref ebos);
             return new ShaderMesh(vbo, ebos, materiallist);
         }
         /// <summary>
@@ -150,6 +151,36 @@ namespace OpenBveApi.Objects
             for (int n = 0; n < materialindex.Length; n++)
             {
                 materials[n] = mesh.Materials[materialindex[n]];
+            }
+        }
+        /// <summary>
+        /// Sets the material type for each of the ebos either type coloured, textured or transparent textured
+        /// </summary>
+        /// <param name="materials">materials array</param>
+        /// <param name="ebos"> EBO array passed by reference</param>
+        private static void SetEBOMaterialType(MeshMaterial[] materials, ref ElementBufferObject[] ebos)
+        {
+            for (int n = 0; n < ebos.Length; n++)
+            {
+                if(materials[n].DaytimeTexture != null || materials[n].NighttimeTexture != null)
+                {
+                    // textured
+                    if((materials[n].Flags & MeshMaterial.TransparentColorMask)== 1)
+                    {
+                        // transparnecy used
+                        ebos[n].Type = (int)EBOType.Transparent;
+                    }
+                    else
+                    {
+                        // just plain textured
+                        ebos[n].Type = (int)EBOType.Textured;
+                    }
+                }
+                else
+                {
+                    // plain coloured 
+                    ebos[n].Type = (int)EBOType.Coloured;
+                }
             }
         }
     }
