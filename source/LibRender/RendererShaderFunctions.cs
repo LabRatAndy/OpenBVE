@@ -114,6 +114,7 @@ namespace LibRender
         {
             // check initialisation is sucessful
             if (initialised == false) return;
+            
         }
         public static void AddObject(ShaderMesh obj)
         {
