@@ -48,11 +48,21 @@ namespace OpenBveApi.LibRender
             this.type = (int)type;
         }
         /// <summary>
+        /// Constructor using the supplied array of int representing the index of the vertex in the VBO
+        /// </summary>
+        /// <param name="IBO">Array of ints containing the vertex indices for the EBO</param>
+        public ElementBufferObject(int[] IBO)
+        {
+            GL.GenBuffers(1, out handle);
+            ibo = IBO;
+        }
+        /// <summary>
         /// The EBO face type 
         /// </summary>
         public int Type
         {
             get { return type; }
+            set { type = value; }
         }
 
         /// <summary>
