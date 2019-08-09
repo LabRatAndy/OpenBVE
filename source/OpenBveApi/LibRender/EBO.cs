@@ -4,6 +4,19 @@ using OpenTK.Graphics.OpenGL;
 namespace OpenBveApi.LibRender
 {
     /// <summary>
+    /// What type of face does the EBO represent. ie which shader to use.
+    /// </summary>
+    public enum EBOType
+    {
+        /// <summary> Plain RGBA coloured face</summary>
+        Coloured = 1,
+        /// <summary> Textured face no transparency</summary>
+        Textured = 2,
+        /// <summary>Textured face with a transparency</summary>
+        Transparent = 3,
+    }
+
+    /// <summary>
     /// Class to represent an openGL Element Buffer Object
     /// </summary>
     public class ElementBufferObject : IDisposable
