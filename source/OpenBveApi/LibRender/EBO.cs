@@ -32,13 +32,27 @@ namespace OpenBveApi.LibRender
         private int[] ibo = null;
 
         /// <summary>
+        /// The EBO face type set from the EBOType enum so we know which shader to use
+        /// </summary>
+        private int type;
+
+        /// <summary>
         /// Constructor using the supplied array of int representing the index of the vertex in the VBO
         /// </summary>
         /// <param name="IBO">Array of ints containing the vertex indices for the EBO</param>
-        public ElementBufferObject(int[] IBO)
+        /// <param name="type"> The face type of the EBO </param>
+        public ElementBufferObject(int[] IBO, EBOType type)
         {
             GL.GenBuffers(1, out handle);
             ibo = IBO;
+            this.type = (int)type;
+        }
+        /// <summary>
+        /// The EBO face type 
+        /// </summary>
+        public int Type
+        {
+            get { return type; }
         }
 
         /// <summary>
