@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Backgrounds\Backgrounds.cs" />
+    <Compile Include="Buffers\EBOTypes.cs" />
     <Compile Include="Buffers\MaterialStruct.cs" />
     <Compile Include="Camera\Camera.cs" />
     <Compile Include="Buffers\Attribute.cs" />
