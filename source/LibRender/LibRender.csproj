@@ -82,6 +82,13 @@
     <Compile Include="Text\OpenGlFontChar.cs" />
     <Compile Include="Text\OpenGlFontTable.cs" />
     <Compile Include="Text\Strings.cs" />
+    <Compile Include="Uniforms\Colour24Uniform.cs" />
+    <Compile Include="Uniforms\Colour32Uniform.cs" />
+    <Compile Include="Uniforms\MatrixUniform.cs" />
+    <Compile Include="Uniforms\TextureUniform.cs" />
+    <Compile Include="Uniforms\Vector2Uniform.cs" />
+    <Compile Include="Uniforms\Vector3Uniform.cs" />
+    <Compile Include="Uniforms\Vector4Uniform.cs" />
     <Compile Include="VBOCreater.cs" />
     <Compile Include="Viewport\ViewportChangeModes.cs" />
     <Compile Include="Viewport\ViewportModes.cs" />
