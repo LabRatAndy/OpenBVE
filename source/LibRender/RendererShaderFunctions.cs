@@ -1,6 +1,7 @@
 ﻿using OpenBveApi.Textures;
 using OpenBveApi.Objects;
 using OpenBveApi.Hosts;
+using OpenBveApi.LibRender;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using System.Collections.Generic;
@@ -114,7 +115,14 @@ namespace LibRender
         {
             // check initialisation is sucessful
             if (initialised == false) return;
-            
+            // check objects to render
+            if (objcount == 0) return;
+            VAO.Bind();
+            for (int n = 0; n < objcount; n++)
+            {
+                RenderShaderMesh(Objs[n]);
+            }
+            VAO.UnBind();
         }
         public static void AddObject(ShaderMesh obj)
         {
@@ -124,6 +132,38 @@ namespace LibRender
                 System.Array.Resize<ShaderMesh>(ref Objs, objcount++);
             }
             else objcount++;           
+        }
+
+        private static void RenderShaderMesh(ShaderMesh mesh)
+        {
+            mesh.Vertices.Bind();
+            for (int n = 0; n < mesh.Faces.Length; n++)
+            {
+                if(mesh.Faces[n].Type == (int)EBOFaceType.ColouredFace)
+                {
+                    RenderColouredFace(mesh.Faces[n], mesh.Materials[n]);
+                }
+                else if(mesh.Faces[n].Type == (int)EBOFaceType.TexturedFace)
+                {
+
+                }
+                else if(mesh.Faces[n].Type == (int)EBOFaceType.Transparent)
+                {
+
+                }
+            }
+            mesh.Vertices.UnBind();
+        }
+
+        private static void RenderColouredFace(ElementBufferObject face, MeshMaterial material)
+        {
+            Shader shader = shaderList[(int)ShaderTypeEnum.ColouredFaceShader];
+            Colour32Uniform facecolouruniform = new Colour32Uniform(shader.GetUniformHandle("FaceColour"));
+            facecolouruniform.Data = new OpenTK.Graphics.Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A);
+            facecolouruniform.TransferData();
+            face.Bind();
+            face.Draw(PrimitiveType.Triangles);
+            face.Unbind();
         }
     }
 
