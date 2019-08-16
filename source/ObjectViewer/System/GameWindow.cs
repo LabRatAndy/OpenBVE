@@ -283,7 +283,8 @@ namespace OpenBve
 				LibRender.Renderer.OptionDiffuseColor.B = (byte)Math.Round(32.0 + 128.0 * Math.Sqrt(Program.LightingRelative));
 				LibRender.Renderer.InitializeLighting();
             }
-            Renderer.RenderScene();
+            //Renderer.RenderScene();
+            LibRender.Renderer.RenderObject();
             SwapBuffers();
         }
         protected override void OnUpdateFrame(FrameEventArgs e)
