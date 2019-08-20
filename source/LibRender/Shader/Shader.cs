@@ -104,6 +104,7 @@ namespace LibRender
         /// <exception cref="">Throws ShaderCompileException</exception>
         private void LoadShader(string filename, ShaderType shadertype)
         {
+            if (!System.IO.File.Exists(filename)) throw new ShaderCompileException("Shader Source file missing", filename);
             string shadersource = System.IO.File.ReadAllText(filename, System.Text.Encoding.UTF8);
             if(shadertype == ShaderType.VertexShader)
             {
