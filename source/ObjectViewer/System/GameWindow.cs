@@ -311,11 +311,11 @@ namespace OpenBve
             Renderer.Initialize();
             LibRender.Renderer.InitializeLighting();
             // load the shaders and iniitalise the LibRender for shader use
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.DefaultShader,"assets\\shaders\\default.vert","\\assets\\shaders\\default");
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.ColouredFaceShader,"assets\\shaders\\colouredface.vert","assets\\shaders\\colouredface.frag");
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedFaceShader,"assets\\shaders\\texturedface.vert","assets\\shaders\\texturedface.frag");
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedTransparentShader,"assets\\shaders\\texturedtransparent.vert","assets\\shaders\\texturedtransparent.frag");
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.TextShader,"assets\\shaders\\text.vert","assets\\shaders\\text.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.DefaultShader,"Data\\shaders\\default.vert","Data\\shaders\\default");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.ColouredFaceShader,"Data\\shaders\\colouredface.vert","Data\\shaders\\colouredface.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedFaceShader,"Data\\shaders\\texturedface.vert","Data\\shaders\\texturedface.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedTransparentShader,"Data\\shaders\\texturedtransparent.vert","Data\\shaders\\texturedtransparent.frag");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.TextShader,"Data\\shaders\\text.vert","Data\\shaders\\text.frag");
             LibRender.Renderer.FieldOfView = MathHelper.DegreesToRadians(100.0d);
             LibRender.Renderer.InitialiseRenderer();
             //SwapBuffers();
