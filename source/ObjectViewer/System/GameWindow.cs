@@ -311,7 +311,7 @@ namespace OpenBve
             Renderer.Initialize();
             LibRender.Renderer.InitializeLighting();
             // load the shaders and iniitalise the LibRender for shader use
-            LibRender.Renderer.LoadShader(ShaderTypeEnum.DefaultShader,"Data\\shaders\\default.vert","Data\\shaders\\default");
+            LibRender.Renderer.LoadShader(ShaderTypeEnum.DefaultShader,"Data\\shaders\\default.vert","Data\\shaders\\default.frag");
             LibRender.Renderer.LoadShader(ShaderTypeEnum.ColouredFaceShader,"Data\\shaders\\colouredface.vert","Data\\shaders\\colouredface.frag");
             LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedFaceShader,"Data\\shaders\\texturedface.vert","Data\\shaders\\texturedface.frag");
             LibRender.Renderer.LoadShader(ShaderTypeEnum.TexturedTransparentShader,"Data\\shaders\\texturedtransparent.vert","Data\\shaders\\texturedtransparent.frag");
