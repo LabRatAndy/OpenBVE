@@ -46,7 +46,7 @@ namespace LibRender
         public static void InitialiseRenderer()
         {
             // check shaders have been loaded 0 to 4 mandatory will throw exception and refuse to run
-            if (ShadersLoaded[0] && ShadersLoaded[1] && ShadersLoaded[2] && ShadersLoaded[3] && ShadersLoaded[4])
+            if (ShadersLoaded[0] == true && ShadersLoaded[1] == true && ShadersLoaded[2] == true && ShadersLoaded[3] == true && ShadersLoaded[4] == true)
             {
                 currentHost.ReportProblem(ProblemType.UnexpectedException, "Shaders not loaded cannot initalise renderer");
                 initialised = false;
