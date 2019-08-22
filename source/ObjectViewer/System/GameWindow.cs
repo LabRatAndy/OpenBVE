@@ -350,5 +350,10 @@ namespace OpenBve
             ObjectManager.UpdateVisibility(0.0, true);
             ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
         }
+        protected override void Dispose(bool manual)
+        {
+            LibRender.Renderer.Cleanup();
+            base.Dispose(manual);
+        }
     }
 }

@@ -53,6 +53,19 @@ namespace OpenBveApi.Objects
         {
             get { return materials; }
         }
+        /// <summary>
+        /// Cleans up the shader mesh releasing openGL resources.
+        /// </summary>
+        public void Dispose()
+        {
+            //ebos
+            for (int n = 0; n < faces.Length; n++)
+            {
+                faces[n].Dispose();
+            }
+            //vbo
+            vertices.Dispose();
+        }
 
 
     }

@@ -165,6 +165,20 @@ namespace LibRender
             face.Draw(PrimitiveType.Triangles);
             face.Unbind();
         }
+        /// <summary>
+        /// Cleanup the openGL resources shaders vbos etc.
+        /// </summary>
+        public static void Cleanup()
+        {
+            for (int n = 0; n < objcount; n++)
+            {
+                Objs[n].Dispose();
+            }
+            for (int n = 0; n < 10; n++)
+            {
+                if (ShadersLoaded[n] == true) shaderList[n].Dispose();
+            }
+        }
     }
 
 }
