@@ -44,6 +44,7 @@ namespace LibRender
                 GL.DetachShader(handle, fragmentshaderhandle);
                 GL.DeleteShader(vertexshaderhandle);
                 GL.DeleteShader(fragmentshaderhandle);
+                Dispose();
                 throw new ShaderCompileException(error, "Linking error");
             }
             GL.DetachShader(handle, vertexshaderhandle);
@@ -115,6 +116,10 @@ namespace LibRender
                 error = GL.GetShaderInfoLog(vertexshaderhandle);
                 if(!string.IsNullOrEmpty(error))
                 {
+                    //clean up first to avoid problems later
+                    GL.DeleteShader(vertexshaderhandle);
+                    GL.DeleteShader(fragmentshaderhandle);
+                    Dispose();
                     throw new ShaderCompileException(error, filename); 
                 }
             }
@@ -127,6 +132,10 @@ namespace LibRender
                 error = GL.GetShaderInfoLog(fragmentshaderhandle);
                 if(!string.IsNullOrEmpty(error))
                 {
+                    //clean up 
+                    GL.DeleteShader(vertexshaderhandle);
+                    GL.DeleteShader(fragmentshaderhandle);
+                    Dispose();
                     throw new ShaderCompileException(error, filename);
                 }
             }

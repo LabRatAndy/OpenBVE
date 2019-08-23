@@ -355,5 +355,11 @@ namespace OpenBve
             LibRender.Renderer.Cleanup();
             base.Dispose(manual);
         }
+
+        protected override void OnUnload(EventArgs e)
+        {
+            Dispose(true);
+            base.OnUnload(e);
+        }
     }
 }

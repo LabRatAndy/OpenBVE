@@ -176,7 +176,7 @@ namespace LibRender
             }
             for (int n = 0; n < 10; n++)
             {
-                if (ShadersLoaded[n] == true) shaderList[n].Dispose();
+               if(shaderList[n] != null) shaderList[n].Dispose();
             }
         }
     }
