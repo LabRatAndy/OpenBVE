@@ -1,6 +1,6 @@
 #version 400 core
 
-in dvec2 TexCoords;
+in flat dvec2 TexCoords;
 out vec4 Colour;
 
 uniform vec4 faceColour;
