@@ -98,6 +98,7 @@ namespace OpenBveApi.Objects
         /// <param name="materials">The ushort array storeing the index to the material used for each face in the order they are retreived by GetFaceData</param>
         private static void GetFacesMaterials(Mesh mesh, ref ushort[] materials)
         {
+			materials = new ushort[mesh.Faces.Length];
             for (int face = 0; face < mesh.Faces.Length; face++)
             {
                 materials[face] = mesh.Faces[face].Material;
