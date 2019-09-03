@@ -65,8 +65,9 @@ namespace LibRender
             VAO.Bind();
             VAO.SetAttributes();
             VAO.UnBind();
-            // create projection matrix
-            ProjectionTransform = Matrix4d.CreatePerspectiveFieldOfView(fieldOfView, Screen.AspectRatio, nearDrawDistance, farDrawDistance);
+            // create projection matrix 
+			//TODO aspect ratio not set when running initialise ? when is screen set up
+            //ProjectionTransform = Matrix4d.CreatePerspectiveFieldOfView(fieldOfView, Screen.AspectRatio, nearDrawDistance, farDrawDistance);
             //get view matrix
             ViewTransform = Camera.GetViewMatrix();
             initialised = true;
