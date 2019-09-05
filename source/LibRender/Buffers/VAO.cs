@@ -105,7 +105,7 @@ namespace LibRender
         public void Dispose()
         {
             if (vbo != null) vbo.Dispose();
-            iboList.Clear();
+            if (iboList != null) iboList.Clear();
             iboList = null;
             attributeList.Clear();
             attributeList = null;
@@ -119,7 +119,7 @@ namespace LibRender
         ~VertexArrayObject()
         {
             if (vbo != null) vbo.Dispose();
-            iboList.Clear();
+            if(ibolist != null) iboList.Clear();
             iboList = null;
             attributeList.Clear();
             attributeList = null;
