@@ -22,7 +22,7 @@ namespace LibRender
         /// <summary>
         /// The model matrix passed to the shader
         /// </summary>
-        internal static Matrix4d modelTransform;
+        internal static Matrix4d modelTransform = Matrix4d.Identity;
         /// <summary>
         /// The view matrix passed to the shader
         /// </summary>
