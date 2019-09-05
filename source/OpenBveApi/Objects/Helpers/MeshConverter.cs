@@ -40,6 +40,7 @@ namespace OpenBveApi.Objects
             VertexBufferObject vbo = new VertexBufferObject(vertexData);
             GetFacesasEBOArray(faces, out ebos);
             faces = null;
+			BufferData(ref vbo, ref ebos, dynamic);
             GetMeshMaterialsArray(mesh, materials, out materiallist);
             SetEBOMaterialType(materiallist, ref ebos);
             return new ShaderMesh(vbo, ebos, materiallist);
@@ -184,6 +185,12 @@ namespace OpenBveApi.Objects
                 }
             }
         }
+		/// <summary>
+        /// Calls the bufferdata methods for the VBO and EBOS attached to the shadermesh
+        /// </summary>
+        /// <param name="vbo">Vertex buffer object that needs the data buffering</param>
+        /// <param name="ebos">Element buffer object array that needs the data buffering</param>
+        /// <param name="dynamic">bool whether the object is marked as dynamic or not</param>
 		private static void BufferData(ref VertexBufferObject vbo, ref ElementBufferObject[] ebos, bool dynamic)
 		{
 			OpenTK.Graphics.OpenGL.BufferUsageHint hint;
