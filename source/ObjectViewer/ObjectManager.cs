@@ -1225,6 +1225,7 @@ namespace OpenBve
 				if(Objects[n] != null)
 				{
 					Objects[n].ShaderMesh = MeshConverter.ConvertMesh(Objects[n].Mesh);
+					LibRender.Renderer.AddObject(Objects[n].ShaderMesh);
 				}
             }
         }
