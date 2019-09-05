@@ -22,7 +22,7 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="mesh">The Mesh to convert</param>
         /// <returns>The ShaderMesh version of the supplied Mesh struct</returns>
-        public static ShaderMesh ConvertMesh(Mesh mesh)
+        public static ShaderMesh ConvertMesh(Mesh mesh, bool dynamic)
         {
             MeshConverterVertex[] vertices = new MeshConverterVertex[mesh.Vertices.Length];
             int[][] faces = null;
@@ -184,6 +184,26 @@ namespace OpenBveApi.Objects
                 }
             }
         }
+		private static void BufferData(ref VertexBufferObject vbo, ref ElementBufferObject[] ebos, bool dynamic)
+		{
+			OpenTK.Graphics.OpenGL.BufferUsageHint hint;
+			if(dynamic==true)
+			{
+				hint = OpenTK.Graphics.OpenGL.BufferUsageHint.DynamicDraw;
+			}	
+			else
+			{
+				hint = OpenTK.Graphics.OpenGL.BufferUsageHint.StaticDraw;
+			}
+			vbo.BufferData(hint);
+			foreach(ElementBufferObject ebo in ebos)
+			{
+				ebo.BufferData(hint);
+				ebo.Unbind();
+			}
+			vbo.UnBind();
+
+		}
     }
 
 }
