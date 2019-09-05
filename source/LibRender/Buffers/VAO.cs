@@ -119,7 +119,7 @@ namespace LibRender
         ~VertexArrayObject()
         {
             if (vbo != null) vbo.Dispose();
-            if(ibolist != null) iboList.Clear();
+            if (iboList != null) iboList.Clear();
             iboList = null;
             attributeList.Clear();
             attributeList = null;
