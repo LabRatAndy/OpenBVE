@@ -193,6 +193,7 @@ namespace LibRender
             {
                if(shaderList[n] != null) shaderList[n].Dispose();
             }
+			if (VAO != null) VAO.Dispose();
         }
     }
 
