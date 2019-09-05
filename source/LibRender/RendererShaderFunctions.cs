@@ -71,6 +71,7 @@ namespace LibRender
             //get view matrix
             ViewTransform = Camera.GetViewMatrix();
             initialised = true;
+			GL.ClearColor(OpenTK.Graphics.Color4.DarkGreen);
         }
 
         public static double FieldOfView
@@ -114,6 +115,9 @@ namespace LibRender
         }
         public static void RenderObject()
         {
+			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+			GL.Enable(EnableCap.DepthTest);
+			GL.DepthFunc(DepthFunction.Less);
             // check initialisation is sucessful
             if (initialised == false) return;
             // check objects to render
