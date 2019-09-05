@@ -159,6 +159,7 @@ namespace LibRender
         private static void RenderColouredFace(ElementBufferObject face, MeshMaterial material)
         {
             Shader shader = shaderList[(int)ShaderTypeEnum.ColouredFaceShader];
+			shader.Use();
             Colour32Uniform facecolouruniform = new Colour32Uniform(shader.GetUniformHandle("FaceColour"));
             facecolouruniform.Data = new OpenTK.Graphics.Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A);
             facecolouruniform.TransferData();
