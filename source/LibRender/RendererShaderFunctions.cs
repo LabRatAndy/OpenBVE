@@ -160,9 +160,18 @@ namespace LibRender
         {
             Shader shader = shaderList[(int)ShaderTypeEnum.ColouredFaceShader];
 			shader.Use();
-            Colour32Uniform facecolouruniform = new Colour32Uniform(shader.GetUniformHandle("FaceColour"));
+			Matrix4dUniform modelUniform = new Matrix4dUniform(shader.GetUniformHandle("model"));
+			Matrix4dUniform viewUniform = new Matrix4dUniform(shader.GetUniformHandle("view"));
+			Matrix4dUniform projectionUniform = new Matrix4dUniform(shader.GetUniformHandle("projection")); 
+            Colour32Uniform facecolouruniform = new Colour32Uniform(shader.GetUniformHandle("faceColour"));
             facecolouruniform.Data = new OpenTK.Graphics.Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A);
             facecolouruniform.TransferData();
+			modelUniform.Data = modelTransform;
+			viewUniform.Data = ViewTransform;
+			projectionUniform.Data = ProjectionTransform;
+			modelUniform.TransferData();
+			viewUniform.TransferData();
+			projectionUniform.TransferData();
             face.Bind();
             face.Draw(PrimitiveType.Triangles);
             face.Unbind();
