@@ -30,17 +30,22 @@ namespace OpenBveApi.Objects
             double[] vertexData = null;
             MeshMaterial[] materiallist = null;
             ElementBufferObject[] ebos = null;
+			int[] faceType = null;
 
             GetVertexData(mesh, ref vertices);
-            GetFaceData(mesh, ref faces);
+            GetFaceData(mesh, ref faces,ref faceType);
             GetNormalsData(mesh, ref vertices);
             GetFacesMaterials(mesh, ref materials);
             GetVertexDataAsDoubleArray(vertices, out vertexData);
             vertices = null;
             VertexBufferObject vbo = new VertexBufferObject(vertexData);
-            GetFacesasEBOArray(faces, out ebos);
+			vbo.Bind();
+			if(dynamic == true) vbo.BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.DynamicDraw);
+			else vbo.BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.StaticDraw);
+            GetFacesasEBOArray(faces, out ebos, dynamic);
+			vbo.UnBind();
             faces = null;
-			BufferData(ref vbo, ref ebos, dynamic);
+			//BufferData(ref vbo, ref ebos, dynamic);
             GetMeshMaterialsArray(mesh, materials, out materiallist);
             SetEBOMaterialType(materiallist, ref ebos);
             return new ShaderMesh(vbo, ebos, materiallist);
@@ -64,12 +69,31 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="mesh">Teh mesh being converted</param>
         /// <param name="faces">The multidimensional int array containing the facedata associated with the mesh</param>
-        private static void GetFaceData(Mesh mesh, ref int[][] faces)
+        private static void GetFaceData(Mesh mesh, ref int[][] faces, ref int[] faceType)
         {
+			faceType = new int[mesh.Faces.Length];
             faces = new int[mesh.Faces.Length][];
             for (int face = 0; face < mesh.Faces.Length; face++)
             {
-                faces[face] = new int[mesh.Faces[face].Vertices.Length];
+				switch(mesh.Faces[face].Flags&MeshFace.FaceTypeMask)
+				{
+					case MeshFace.FaceTypePolygon:
+						faceType[face] = MeshFace.FaceTypePolygon;
+						break;
+					case MeshFace.FaceTypeTriangles:
+						faceType[face] = MeshFace.FaceTypeTriangles;
+						break;
+					case MeshFace.FaceTypeTriangleStrip:
+						faceType[face] = MeshFace.FaceTypeTriangleStrip;
+						break;
+					case MeshFace.FaceTypeQuads:
+						faceType[face] = MeshFace.FaceTypeQuads;
+						break;
+					case MeshFace.FaceTypeQuadStrip:
+						faceType[face] = MeshFace.FaceTypeQuadStrip;
+						break;
+				}
+				faces[face] = new int[mesh.Faces[face].Vertices.Length];
                 for (int vertex = 0; vertex < mesh.Faces[face].Vertices.Length; vertex++)
                 {
                     faces[face][vertex] = mesh.Faces[face].Vertices[vertex].Index;
@@ -131,13 +155,17 @@ namespace OpenBveApi.Objects
         /// </summary>
         /// <param name="faces">int[face][vertiices that make up face] array, containing the face data to make the EBO array</param>
         /// <param name="ebos">Array of EBOs that represent the faces one for each face</param>
-        private static void GetFacesasEBOArray(int[][] faces, out ElementBufferObject[] ebos)
+        private static void GetFacesasEBOArray(int[][] faces, out ElementBufferObject[] ebos, bool dynamic)
         {
             int facecount = faces.GetLength(0);
             ebos = new ElementBufferObject[facecount];
             for (int n = 0; n < facecount; n++)
             {
                 ebos[n] = new ElementBufferObject(faces[n]);
+				ebos[n].Bind();
+				if(dynamic == true) ebos[n].BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.DynamicDraw);
+				else ebos[n].BufferData(OpenTK.Graphics.OpenGL.BufferUsageHint.StaticDraw);
+				ebos[n].Unbind();
             }
         }
         /// <summary>
