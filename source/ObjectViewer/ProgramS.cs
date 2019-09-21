@@ -7,6 +7,8 @@
 
 using System;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using LibRender;
 using OpenBveApi.World;
 using OpenBveApi.FileSystem;
@@ -23,7 +25,10 @@ using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace OpenBve {
 	internal static class Program {
-
+		//debug stuff
+		#if DEBUG
+			internal static DebugProc openGLerrorDelegate;
+		#endif
 
 		internal static bool CurrentlyRunOnMono = false;
 		internal static FileSystem FileSystem = null;
@@ -62,6 +67,9 @@ namespace OpenBve {
 	    [STAThread]
 	    internal static void Main(string[] args)
 	    {
+			#if DEBUG
+			SetUpDebugOutput();
+			#endif
 			CurrentlyRunOnMono = Type.GetType("Mono.Runtime") != null;
 			CurrentHost = new Host();
 			LibRender.Renderer.currentHost = CurrentHost;
@@ -681,5 +689,24 @@ namespace OpenBve {
 	                break;
 	        }
 	    }
+		internal static void SetUpDebugOutput()
+		{
+			#if !DEBUG
+				return;
+			#endif
+			Trace.WriteLine("\n Enabling Debug Messages");
+			GL.Enable(EnableCap.DebugOutput);
+			GL.Enable(EnableCap.DebugOutputSynchronous);
+			openGLerrorDelegate = new DebugProc(DebugLogger);
+			GL.DebugMessageCallback(openGLerrorDelegate,IntPtr.Zero);
+			GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
+			GL.DebugMessageInsert(DebugSourceExternal.DebugSourceApplication, DebugType.DebugTypeMarker, 0, DebugSeverity.DebugSeverityNotification, -1, "Debug output enabled");
+		}
+		internal static void DebugLogger(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam)
+		{
+			Trace.WriteLine(source == DebugSource.DebugSourceApplication ? 
+				$"OpenGL - {Marshal.PtrToStringAnsi(message, length)}":
+				$"OpenGL - {Marshal.PtrToStringAnsi(message,length)}\n\tid:{id} Severity:{severity} Type:{type} Source:{source}\n");
+		}
 	}
 }
