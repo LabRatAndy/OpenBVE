@@ -67,9 +67,6 @@ namespace OpenBve {
 	    [STAThread]
 	    internal static void Main(string[] args)
 	    {
-			#if DEBUG
-			SetUpDebugOutput();
-			#endif
 			CurrentlyRunOnMono = Type.GetType("Mono.Runtime") != null;
 			CurrentHost = new Host();
 			LibRender.Renderer.currentHost = CurrentHost;
@@ -132,6 +129,9 @@ namespace OpenBve {
 	        currentGameWindow.TargetUpdateFrequency = 0;
 	        currentGameWindow.TargetRenderFrequency = 0;
 	        currentGameWindow.Title = "Object Viewer";
+			#if DEBUG
+			SetUpDebugOutput();
+			#endif
 	        currentGameWindow.Run();
 	        // quit
 	        LibRender.TextureManager.UnloadAllTextures();
