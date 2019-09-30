@@ -44,7 +44,7 @@ namespace OpenBve {
 					this.Sound.Load(Program.CurrentHost);
 				}
 				if (this.Object != null) {
-					this.Object.Load(Program.CurrentHost, Program.FileSystem.GetDataFolder("Compatibility"));
+					this.Object.Load(Program.CurrentHost, Program.FileSystem);
 					this.Object.SetObjectParser(Interface.CurrentOptions.CurrentXParser);
 					this.Object.SetObjectParser(Interface.CurrentOptions.CurrentObjParser);
 				}
@@ -147,7 +147,7 @@ namespace OpenBve {
 				                " Please re-download openBVE.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
 				return false;
 			}
-			string message = builder.ToString().Trim();
+			string message = builder.ToString().Trim(new char[] { });
 			if (message.Length != 0) {
 				return MessageBox.Show(message, Application.ProductName, MessageBoxButtons.OKCancel, MessageBoxIcon.Hand, MessageBoxDefaultButton.Button2) == DialogResult.OK;
 			} else {
@@ -173,7 +173,7 @@ namespace OpenBve {
 				}
 				LoadedPlugins = null;
 			}
-			string message = builder.ToString().Trim();
+			string message = builder.ToString().Trim(new char[] { });
 			if (message.Length != 0) {
 				MessageBox.Show(message, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
 			}

@@ -51,7 +51,7 @@ namespace OpenBve
 				}
 				if (this.Object != null)
 				{
-					this.Object.Load(Program.CurrentHost, Program.FileSystem.GetDataFolder("Compatibility"));
+					this.Object.Load(Program.CurrentHost, Program.FileSystem);
 				}
 			}
 			/// <summary>Unloads all interfaces this plugin supports.</summary>
@@ -165,7 +165,7 @@ namespace OpenBve
 								" Please re-download openBVE.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
 				return false;
 			}
-			string message = builder.ToString().Trim();
+			string message = builder.ToString().Trim(new char[] { });
 			if (message.Length != 0)
 			{
 				return MessageBox.Show(message, Application.ProductName, MessageBoxButtons.OKCancel, MessageBoxIcon.Hand, MessageBoxDefaultButton.Button2) == DialogResult.OK;
@@ -197,7 +197,7 @@ namespace OpenBve
 				}
 				LoadedPlugins = null;
 			}
-			string message = builder.ToString().Trim();
+			string message = builder.ToString().Trim(new char[] { });
 			if (message.Length != 0)
 			{
 				MessageBox.Show(message, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Hand);

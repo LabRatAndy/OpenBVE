@@ -2,15 +2,18 @@
 using OpenBveApi.Colors;
 using OpenBveApi.Textures;
 using OpenBveApi.Trains;
-using OpenBve.RouteManager;
-using OpenBve.SignalManager;
+using OpenBveApi.Routes;
+using RouteManager2;
+using RouteManager2.Climate;
+using RouteManager2.SignalManager;
+using RouteManager2.SignalManager.PreTrain;
+using RouteManager2.Stations;
 
 namespace OpenBve {
 	internal static partial class Game {
 
 		// date and time
-        /// <summary>The current in game time, expressed as the number of seconds since midnight on the first day</summary>
-		internal static double SecondsSinceMidnight = 0.0;
+        
         /// <summary>The time at which the current game started, expressed as the number of seconds since midnight on the first day</summary>
 		internal static double StartupTime = 0.0;
 		/// <summary>Whether the game is in minimal simulation mode: 
@@ -41,13 +44,14 @@ namespace OpenBve {
 
 		// ================================
 
-        /// <summary>Call this function to reset the game</summary>
-        /// <param name="ResetLogs">Whether the logs should be reset</param>
-		internal static void Reset(bool ResetLogs) {
+		/// <summary>Call this function to reset the game</summary>
+		/// <param name="ResetLogs">Whether the logs should be reset</param>
+		/// <param name="ResetRenderer">Whether the renderer should be reset</param>
+		internal static void Reset(bool ResetLogs, bool ResetRenderer) {
 			// track manager
-			for (int i = 0; i < TrackManager.Tracks.Length; i++)
+			for (int i = 0; i < Program.CurrentRoute.Tracks.Length; i++)
 			{
-				TrackManager.Tracks[i] = new TrackManager.Track();
+				Program.CurrentRoute.Tracks[i] = new Track();
 			}
 			// train manager
 			TrainManager.Trains = new TrainManager.Train[] { };
@@ -56,35 +60,28 @@ namespace OpenBve {
 			CurrentInterface = InterfaceType.Normal;
 			RouteComment = "";
 			RouteImage = "";
-			RouteAccelerationDueToGravity = 9.80665;
-			RouteRailGauge = 1.435;
-			RouteInitialAirPressure = 101325.0;
-			RouteInitialAirTemperature = 293.15;
-			RouteInitialElevation = 0.0;
-			RouteSeaLevelAirPressure = 101325.0;
-			RouteSeaLevelAirTemperature = 293.15;
-			Stations = new Station[] { };
-			CurrentRoute.Sections = new Section[] { };
+			Program.CurrentRoute.Atmosphere.AccelerationDueToGravity = 9.80665;
+			Program.CurrentRoute.Atmosphere.InitialAirPressure = 101325.0;
+			Program.CurrentRoute.Atmosphere.InitialAirTemperature = 293.15;
+			Program.CurrentRoute.Atmosphere.InitialElevation = 0.0;
+			Program.CurrentRoute.Atmosphere.SeaLevelAirPressure = 101325.0;
+			Program.CurrentRoute.Atmosphere.SeaLevelAirTemperature = 293.15;
+			Program.CurrentRoute.Stations = new RouteStation[] { };
+			Program.CurrentRoute.Sections = new Section[] { };
 			BufferTrackPositions = new double[] { };
 			//Messages = new Message[] { };
-			MarkerTextures = new Texture[] { };
-			PointsOfInterest = new PointOfInterest[] { };
+			Program.Renderer.Marker.MarkerTextures = new Texture[] { };
+			Program.CurrentRoute.PointsOfInterest = new PointOfInterest[] { };
 			PrecedingTrainTimeDeltas = new double[] { };
 			PrecedingTrainSpeedLimit = double.PositiveInfinity;
-			CurrentRoute.BogusPretrainInstructions = new BogusPretrainInstruction[] { };
+			Program.CurrentRoute.BogusPreTrainInstructions = new BogusPreTrainInstruction[] { };
 			TrainName = "";
 			TrainStart = TrainStartMode.EmergencyBrakesNoAts;
-			CurrentRoute.NoFogStart = (float)Math.Max(1.33333333333333 * Interface.CurrentOptions.ViewingDistance, 800.0);
-			CurrentRoute.NoFogEnd = (float)Math.Max(2.66666666666667 * Interface.CurrentOptions.ViewingDistance, 1600.0);
-			CurrentRoute.PreviousFog = new Fog(CurrentRoute.NoFogStart, CurrentRoute.NoFogEnd, Color24.Grey, 0.0);
-			CurrentRoute.CurrentFog = new Fog(CurrentRoute.NoFogStart, CurrentRoute.NoFogEnd, Color24.Grey, 0.5);
-			CurrentRoute.NextFog = new Fog(CurrentRoute.NoFogStart, CurrentRoute.NoFogEnd, Color24.Grey, 1.0);
-			InfoTotalTriangles = 0;
-			InfoTotalTriangleStrip = 0;
-			InfoTotalQuads = 0;
-			InfoTotalQuadStrip = 0;
-			InfoTotalPolygon = 0;
-			InfoStaticOpaqueFaceCount = 0;
+			Program.CurrentRoute.NoFogStart = (float)Math.Max(1.33333333333333 * Interface.CurrentOptions.ViewingDistance, 800.0);
+			Program.CurrentRoute.NoFogEnd = (float)Math.Max(2.66666666666667 * Interface.CurrentOptions.ViewingDistance, 1600.0);
+			Program.CurrentRoute.PreviousFog = new Fog(Program.CurrentRoute.NoFogStart, Program.CurrentRoute.NoFogEnd, Color24.Grey, 0.0);
+			Program.CurrentRoute.CurrentFog = new Fog(Program.CurrentRoute.NoFogStart, Program.CurrentRoute.NoFogEnd, Color24.Grey, 0.5);
+			Program.CurrentRoute.NextFog = new Fog(Program.CurrentRoute.NoFogStart, Program.CurrentRoute.NoFogEnd, Color24.Grey, 1.0);
 			if (ResetLogs) {
 				LogRouteName = "";
 				LogTrainName = "";
@@ -98,7 +95,16 @@ namespace OpenBve {
 				BlackBoxNextUpdate = 0.0;
 			}
 			// renderer
-			Renderer.Reset();
+			if (ResetRenderer)
+			{
+				Program.Renderer.InfoTotalTriangles = 0;
+				Program.Renderer.InfoTotalTriangleStrip = 0;
+				Program.Renderer.InfoTotalQuads = 0;
+				Program.Renderer.InfoTotalQuadStrip = 0;
+				Program.Renderer.InfoTotalPolygon = 0;
+				Program.Renderer.Reset();
+			}
+			
 		}
 
 		// ================================
@@ -135,9 +141,9 @@ namespace OpenBve {
 		internal static int BlackBoxEntryCount = 0;
 		private static double BlackBoxNextUpdate = 0.0;
 		internal static void UpdateBlackBox() {
-			if (SecondsSinceMidnight >= BlackBoxNextUpdate) {
+			if (Program.CurrentRoute.SecondsSinceMidnight >= BlackBoxNextUpdate) {
 				AddBlackBoxEntry(BlackBoxEventToken.None);
-				BlackBoxNextUpdate = SecondsSinceMidnight + 1.0;
+				BlackBoxNextUpdate = Program.CurrentRoute.SecondsSinceMidnight + 1.0;
 			}
 		}
 		internal static void AddBlackBoxEntry(BlackBoxEventToken EventToken) {
@@ -145,8 +151,8 @@ namespace OpenBve {
 				if (BlackBoxEntryCount >= BlackBoxEntries.Length) {
 					Array.Resize<BlackBoxEntry>(ref BlackBoxEntries, BlackBoxEntries.Length << 1);
 				}
-				BlackBoxEntries[BlackBoxEntryCount].Time = SecondsSinceMidnight;
-				BlackBoxEntries[BlackBoxEntryCount].Position = TrainManager.PlayerTrain.Cars[0].FrontAxle.Follower.TrackPosition;
+				BlackBoxEntries[BlackBoxEntryCount].Time = Program.CurrentRoute.SecondsSinceMidnight;
+				BlackBoxEntries[BlackBoxEntryCount].Position = TrainManager.PlayerTrain.Cars[0].TrackPosition;
 				BlackBoxEntries[BlackBoxEntryCount].Speed = (float)TrainManager.PlayerTrain.CurrentSpeed;
 				BlackBoxEntries[BlackBoxEntryCount].Acceleration = (float)TrainManager.PlayerTrain.Specs.CurrentAverageAcceleration;
 				BlackBoxEntries[BlackBoxEntryCount].ReverserDriver = (short)TrainManager.PlayerTrain.Handles.Reverser.Driver;

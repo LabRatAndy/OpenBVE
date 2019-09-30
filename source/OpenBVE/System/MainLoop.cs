@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
-using LibRender;
 using OpenBveApi.Interface;
 using OpenBveApi.Runtime;
 using OpenTK;
@@ -45,8 +44,7 @@ namespace OpenBve
 
 		internal static void StartLoopEx(formMain.MainDialogResult result)
 		{
-			LibRender.Renderer.currentHost = Program.CurrentHost;
-			Sounds.Initialize();
+			Program.Sounds.Initialize(Program.CurrentHost, Interface.CurrentOptions.SoundRange);
 			//Process extra command line arguments supplied
 			if (result.InitialStation != null)
 			{
@@ -139,7 +137,7 @@ namespace OpenBve
 				}
 				else if (Game.CurrentInterface == Game.InterfaceType.Normal)
 				{
-					Renderer.TouchCheck(new Vector2(e.X, e.Y));
+					Program.Renderer.Touch.TouchCheck(new Vector2(e.X, e.Y));
 				}
 			}
 		}
@@ -150,7 +148,7 @@ namespace OpenBve
 			{
 				if (Game.CurrentInterface == Game.InterfaceType.Normal)
 				{
-					Renderer.LeaveCheck(new Vector2(e.X, e.Y));
+					Program.Renderer.Touch.LeaveCheck(new Vector2(e.X, e.Y));
 				}
 			}
 		}
@@ -414,19 +412,19 @@ namespace OpenBve
 		// save camera setting
 		internal static void SaveCameraSettings()
 		{
-			switch (Camera.CurrentMode)
+			switch (Program.Renderer.Camera.CurrentMode)
 			{
 				case CameraViewMode.Interior:
 				case CameraViewMode.InteriorLookAhead:
-					TrainManager.PlayerTrain.Cars[World.CameraCar].InteriorCamera = Camera.CurrentAlignment;
+					TrainManager.PlayerTrain.Cars[World.CameraCar].InteriorCamera = Program.Renderer.Camera.Alignment;
 					break;
 				case CameraViewMode.Exterior:
-					World.CameraSavedExterior = Camera.CurrentAlignment;
+					World.CameraSavedExterior = Program.Renderer.Camera.Alignment;
 					break;
 				case CameraViewMode.Track:
 				case CameraViewMode.FlyBy:
 				case CameraViewMode.FlyByZooming:
-					World.CameraSavedTrack = Camera.CurrentAlignment;
+					World.CameraSavedTrack = Program.Renderer.Camera.Alignment;
 					break;
 			}
 		}
@@ -434,25 +432,25 @@ namespace OpenBve
 		// restore camera setting
 		internal static void RestoreCameraSettings()
 		{
-			switch (Camera.CurrentMode)
+			switch (Program.Renderer.Camera.CurrentMode)
 			{
 				case CameraViewMode.Interior:
 				case CameraViewMode.InteriorLookAhead:
-					Camera.CurrentAlignment = TrainManager.PlayerTrain.Cars[World.CameraCar].InteriorCamera;
+					Program.Renderer.Camera.Alignment = TrainManager.PlayerTrain.Cars[World.CameraCar].InteriorCamera;
 					break;
 				case CameraViewMode.Exterior:
-					Camera.CurrentAlignment = World.CameraSavedExterior;
+					Program.Renderer.Camera.Alignment = World.CameraSavedExterior;
 					break;
 				case CameraViewMode.Track:
 				case CameraViewMode.FlyBy:
 				case CameraViewMode.FlyByZooming:
-					Camera.CurrentAlignment = World.CameraSavedTrack;
-					World.CameraTrackFollower.Update(World.CameraSavedTrack.TrackPosition, true, false);
-					Camera.CurrentAlignment.TrackPosition = World.CameraTrackFollower.TrackPosition;
+					Program.Renderer.Camera.Alignment = World.CameraSavedTrack;
+					World.CameraTrackFollower.UpdateAbsolute(World.CameraSavedTrack.TrackPosition, true, false);
+					Program.Renderer.Camera.Alignment.TrackPosition = World.CameraTrackFollower.TrackPosition;
 					break;
 			}
-			Camera.CurrentAlignment.Zoom = 0.0;
-			Camera.VerticalViewingAngle = Camera.OriginalVerticalViewingAngle;
+			Program.Renderer.Camera.Alignment.Zoom = 0.0;
+			Program.Renderer.Camera.VerticalViewingAngle = Program.Renderer.Camera.OriginalVerticalViewingAngle;
 		}
 
 		

@@ -28,9 +28,9 @@ namespace OpenBve
 			{
 				if (Enabled & Deceleration == 0.0)
 				{
-					if (Game.SecondsSinceMidnight >= NextUpdateTime)
+					if (Program.CurrentRoute.SecondsSinceMidnight >= NextUpdateTime)
 					{
-						NextUpdateTime = Game.SecondsSinceMidnight + UpdateInterval;
+						NextUpdateTime = Program.CurrentRoute.SecondsSinceMidnight + UpdateInterval;
 						this.CurrentDecelerationOutput += 0.8 * Car.Specs.CurrentAcceleration * (double)Math.Sign(Car.Specs.CurrentPerceivedSpeed);
 						if (this.CurrentDecelerationOutput < 0.0)
 						{

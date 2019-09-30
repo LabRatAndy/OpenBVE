@@ -6,21 +6,23 @@ using System.Linq;
 using OpenBveApi.Runtime;
 using OpenBveApi.Textures;
 using OpenBveApi.Interface;
-using OpenBve.SignalManager;
+using OpenBveApi.Trains;
+using RouteManager2.SignalManager;
+using RouteManager2.Stations;
 
 namespace OpenBve
 {
 	class StationXMLParser
 	{
-		public static Game.Station ReadStationXML(string fileName, bool PreviewOnly, Texture[] daytimeTimetableTextures, Texture[] nighttimeTimetableTextures, int CurrentStation, ref bool passAlarm, ref CsvRwRouteParser.StopRequest stopRequest)
+		public static RouteStation ReadStationXML(string fileName, bool PreviewOnly, Texture[] daytimeTimetableTextures, Texture[] nighttimeTimetableTextures, int CurrentStation, ref bool passAlarm, ref CsvRwRouteParser.StopRequest stopRequest)
 		{
-			Game.Station station = new Game.Station
+			RouteStation station = new RouteStation
 			{
-				Stops = new Game.StationStop[] { }
+				Stops = new StationStop[] { }
 			};
-			stopRequest.Early = new TrackManager.RequestStop();
-			stopRequest.OnTime = new TrackManager.RequestStop();
-			stopRequest.Late = new TrackManager.RequestStop();
+			stopRequest.Early = new RequestStop();
+			stopRequest.OnTime = new RequestStop();
+			stopRequest.Late = new RequestStop();
 			stopRequest.OnTime.Probability = 75;
 			//The current XML file to load
 			XmlDocument currentXML = new XmlDocument();
@@ -31,7 +33,7 @@ namespace OpenBve
 			if (currentXML.DocumentElement != null)
 			{
 				XmlNodeList DocumentNodes = currentXML.DocumentElement.SelectNodes("/openBVE/Station");
-				//Check this file actually contains OpenBVE light definition nodes
+				//Check this file actually contains OpenBVE station nodes
 				if (DocumentNodes != null)
 				{
 					foreach (XmlNode n in DocumentNodes)
@@ -41,7 +43,7 @@ namespace OpenBve
 							foreach (XmlNode c in n.ChildNodes)
 							{
 
-								//string[] Arguments = c.InnerText.Split(',');
+								//string[] Arguments = c.InnerText.Split(new char[] { ',' });
 								switch (c.Name.ToLowerInvariant())
 								{
 									case "name":
@@ -209,7 +211,7 @@ namespace OpenBve
 										}
 										if (File.Exists(arrSound))
 										{
-											station.ArrivalSoundBuffer = Sounds.RegisterBuffer(arrSound, arrRadius);
+											station.ArrivalSoundBuffer = Program.Sounds.RegisterBuffer(arrSound, arrRadius);
 										}
 										else
 										{
@@ -289,7 +291,7 @@ namespace OpenBve
 										}
 										if (File.Exists(depSound))
 										{
-											station.DepartureSoundBuffer = Sounds.RegisterBuffer(depSound, depRadius);
+											station.DepartureSoundBuffer = Program.Sounds.RegisterBuffer(depSound, depRadius);
 										}
 										else
 										{
@@ -323,8 +325,8 @@ namespace OpenBve
 											{
 												if (CurrentStation > 0)
 												{
-													station.TimetableDaytimeTexture = Game.Stations[CurrentStation - 1].TimetableDaytimeTexture;
-													station.TimetableNighttimeTexture = Game.Stations[CurrentStation - 1].TimetableNighttimeTexture;
+													station.TimetableDaytimeTexture = Program.CurrentRoute.Stations[CurrentStation - 1].TimetableDaytimeTexture;
+													station.TimetableNighttimeTexture = Program.CurrentRoute.Stations[CurrentStation - 1].TimetableNighttimeTexture;
 												}
 												else if (daytimeTimetableTextures.Length > 0 & nighttimeTimetableTextures.Length > 0)
 												{

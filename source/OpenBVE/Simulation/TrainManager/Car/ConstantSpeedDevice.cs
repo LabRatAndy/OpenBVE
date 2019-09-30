@@ -30,9 +30,9 @@
 					this.CurrentAccelerationOutput = Acceleration;
 					return;
 				}
-				if (Game.SecondsSinceMidnight >= this.NextUpdateTime)
+				if (Program.CurrentRoute.SecondsSinceMidnight >= this.NextUpdateTime)
 				{
-					this.NextUpdateTime = Game.SecondsSinceMidnight + UpdateInterval;
+					this.NextUpdateTime = Program.CurrentRoute.SecondsSinceMidnight + UpdateInterval;
 					this.CurrentAccelerationOutput -= 0.8 * this.Car.Specs.CurrentAcceleration * (double)ReverserPosition;
 					if (this.CurrentAccelerationOutput < 0.0)
 					{

@@ -1,5 +1,5 @@
 ﻿using System;
-using LibRender;
+using OpenBveApi.Graphics;
 using OpenBveApi.Objects;
 
 namespace OpenBve
@@ -24,7 +24,7 @@ namespace OpenBve
 
 		internal void Update(double TimeElapsed)
 		{
-			if (Camera.CurrentRestriction == CameraRestrictionMode.NotAvailable)
+			if (Program.Renderer.Camera.CurrentRestriction == CameraRestrictionMode.NotAvailable)
 			{
 				{
 					// pitch
@@ -113,7 +113,7 @@ namespace OpenBve
 					double targetX;
 					if (radius != 0.0)
 					{
-						double speed = Train.Cars[c].Specs.CurrentSpeed;
+						double speed = Train.Cars[c].CurrentSpeed;
 						targetX = speed * speed / radius;
 					}
 					else

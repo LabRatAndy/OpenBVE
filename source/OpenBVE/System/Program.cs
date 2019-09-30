@@ -5,11 +5,13 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using LibRender;
+using OpenBve.Graphics;
 using OpenTK;
 using OpenBveApi.FileSystem;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
+using RouteManager2;
 
 namespace OpenBve {
 	/// <summary>Provides methods for starting the program, including the Main procedure.</summary>
@@ -52,7 +54,13 @@ namespace OpenBve {
 		public static GameWindow currentGameWindow;
 
 		internal static JoystickManager Joysticks;
-		
+
+		internal static NewRenderer Renderer;
+
+		internal static Sounds Sounds;
+
+		internal static CurrentRoute CurrentRoute;
+
 		// --- functions ---
 		
 		/// <summary>Is executed when the program starts.</summary>
@@ -90,6 +98,10 @@ namespace OpenBve {
 				MessageBox.Show(Translations.GetInterfaceString("errors_filesystem_invalid") + Environment.NewLine + Environment.NewLine + ex.Message, Translations.GetInterfaceString("program_title"), MessageBoxButtons.OK, MessageBoxIcon.Hand);
 				return;
 			}
+
+			Renderer = new NewRenderer();
+			Sounds = new Sounds();
+			CurrentRoute = new CurrentRoute(Renderer);
 
 			//Platform specific startup checks
 			if (CurrentlyRunningOnMono && !CurrentlyRunningOnWindows)
@@ -190,7 +202,17 @@ namespace OpenBve {
 					while (true) {
 						string trainFolder = OpenBveApi.Path.CombineDirectory(folder, "Train");
 						if (System.IO.Directory.Exists(trainFolder)) {
-							folder = OpenBveApi.Path.CombineDirectory(trainFolder, Game.TrainName);
+							try
+							{
+								folder = OpenBveApi.Path.CombineDirectory(trainFolder, Game.TrainName);
+							}
+							catch (Exception ex)
+							{
+								if (ex is ArgumentException)
+								{
+									break;
+								}
+							}
 							if (System.IO.Directory.Exists(folder)) {
 								file = OpenBveApi.Path.CombineFile(folder, "train.dat");
 								if (System.IO.File.Exists(file)) {
@@ -214,7 +236,7 @@ namespace OpenBve {
 						}
 					}
 				}
-				Game.Reset(false);
+				Game.Reset(false, false);
 			}
 			// --- show the main menu if necessary ---
 			if (result.RouteFile == null | result.TrainFolder == null) {
@@ -301,15 +323,13 @@ namespace OpenBve {
 			
 			Joysticks.RefreshJoysticks();
 			// begin HACK //
-			
-			//One degree in radians
-			Camera.VerticalViewingAngle = 45.0.ToRadians();
-			Camera.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * Camera.VerticalViewingAngle) * LibRender.Screen.AspectRatio);
-			Camera.OriginalVerticalViewingAngle = Camera.VerticalViewingAngle;
-			World.ExtraViewingDistance = 50.0;
-			World.ForwardViewingDistance = (double)Interface.CurrentOptions.ViewingDistance;
-			World.BackwardViewingDistance = 0.0;
-			Backgrounds.BackgroundImageDistance = (double)Interface.CurrentOptions.ViewingDistance;
+			Renderer.Camera.VerticalViewingAngle = 45.0.ToRadians();
+			Renderer.Camera.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * Renderer.Camera.VerticalViewingAngle) * Renderer.Screen.AspectRatio);
+			Renderer.Camera.OriginalVerticalViewingAngle = Renderer.Camera.VerticalViewingAngle;
+			Renderer.Camera.ExtraViewingDistance = 50.0;
+			Renderer.Camera.ForwardViewingDistance = (double)Interface.CurrentOptions.ViewingDistance;
+			Renderer.Camera.BackwardViewingDistance = 0.0;
+			BackgroundHandle.BackgroundImageDistance = (double)Interface.CurrentOptions.ViewingDistance;
 			// end HACK //
 			FileSystem.ClearLogFile();
 			return true;

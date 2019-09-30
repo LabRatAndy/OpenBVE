@@ -12,7 +12,7 @@ namespace OpenBve.UserInterface
 		public formRaildriverCalibration()
 		{
 			InitializeComponent();
-			main = (Bitmap)Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\raildriver.png"));
+			main = (Bitmap)ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\raildriver.png"));
 			pictureBox1.Image = main;
 			buttonCalibrationPrevious.Enabled = false;
 			labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_start");
@@ -150,107 +150,107 @@ namespace OpenBve.UserInterface
 					break;
 				case 1:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(210, 130, 80, 145));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 234, 284);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 234, 284);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_a");
 					break;
 				case 2:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(210, 130, 80, 145));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 234, 84);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 234, 84);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_b");
 					break;
 				case 3:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(290, 130, 90, 145));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 314, 284);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 314, 284);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_c");
 					break;
 				case 4:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(290, 130, 90, 145));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 314, 84);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 314, 84);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_d");
 					break;
 				case 5:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(450, 130, 80, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 470, 304);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 470, 304);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_e");
 					break;
 				case 6:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(450, 130, 80, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 470, 79);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 470, 79);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_f");
 					break;
 				case 7:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(610, 130, 75, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 630, 304);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_down.png")), 630, 304);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_g");
 					break;
 				case 8:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(610, 130, 75, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 630, 79);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_up.png")), 630, 79);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_h");
 					break;
 				case 9:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(610, 130, 75, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_left.png")), 560, 175);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_left.png")), 560, 175);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_i");
 					break;
 				case 10:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(610, 130, 75, 165));
-						graphics.DrawImage(Image.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_right.png")), 690, 175);
+						graphics.DrawImage(ImageExtensions.FromFile(OpenBveApi.Path.CombineFile(Program.FileSystem.DataFolder, "Menu\\arrow_right.png")), 690, 175);
 					}
 					pictureBox1.Image = Modified;
 					labelCalibrationText.Text = Translations.GetInterfaceString("raildriver_calibration_j");
 					break;
 				case 11:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(715, 100, 55, 75));
 					}
@@ -259,7 +259,7 @@ namespace OpenBve.UserInterface
 					break;
 				case 12:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(715, 100, 55, 75));
 					}
@@ -268,7 +268,7 @@ namespace OpenBve.UserInterface
 					break;
 				case 13:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(715, 210, 55, 75));
 					}
@@ -277,7 +277,7 @@ namespace OpenBve.UserInterface
 					break;
 				case 14:
 					Modified = new Bitmap(main);
-					using (var graphics = Graphics.FromImage(Modified))
+					using (var graphics = System.Drawing.Graphics.FromImage(Modified))
 					{
 						graphics.DrawRectangle(new Pen(Color.Blue, 3.0f), new Rectangle(715, 210, 55, 75));
 					}
@@ -290,6 +290,24 @@ namespace OpenBve.UserInterface
 					buttonCalibrationNext.Text = Translations.GetInterfaceString("packages_success");
 					break;
 			}
+		}
+
+		/// <summary>
+		/// Clean up any resources being used.
+		/// </summary>
+		/// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				if(components != null)
+				{
+					components.Dispose();
+				}
+				main.Dispose();
+				Modified.Dispose();
+			}
+			base.Dispose(disposing);
 		}
 	}
 }

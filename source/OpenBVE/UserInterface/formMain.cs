@@ -4,8 +4,9 @@ using System.Drawing;
 using System.Net;
 using System.Windows.Forms;
 using System.Xml;
-using LibRender;
+using LibRender2.MotionBlurs;
 using OpenBve.UserInterface;
+using OpenBveApi;
 using OpenBveApi.Graphics;
 using OpenBveApi.Packages;
 using OpenBveApi.Interface;
@@ -268,7 +269,7 @@ namespace OpenBve {
 			// modes
 			comboboxMode.Items.Clear();
 			comboboxMode.Items.AddRange(new object[] { "", "", "" });
-			comboboxMode.SelectedIndex = Interface.CurrentOptions.GameMode == Interface.GameMode.Arcade ? 0 : Interface.CurrentOptions.GameMode == Interface.GameMode.Expert ? 2 : 1;
+			comboboxMode.SelectedIndex = Interface.CurrentOptions.GameMode == GameMode.Arcade ? 0 : Interface.CurrentOptions.GameMode == GameMode.Expert ? 2 : 1;
 			// review last game
 			{
 				if (Game.LogRouteName.Length == 0 | Game.LogTrainName.Length == 0)
@@ -287,9 +288,9 @@ namespace OpenBve {
 					labelReviewTimeValue.Text = Game.LogDateTime.ToString("HH:mm:ss", Culture);
 					switch (Interface.CurrentOptions.GameMode)
 					{
-						case Interface.GameMode.Arcade: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_arcade"); break;
-						case Interface.GameMode.Normal: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_normal"); break;
-						case Interface.GameMode.Expert: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_expert"); break;
+						case GameMode.Arcade: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_arcade"); break;
+						case GameMode.Normal: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_normal"); break;
+						case GameMode.Expert: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_expert"); break;
 						default: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_unknown"); break;
 					}
 					if (Game.CurrentScore.Maximum == 0)
@@ -413,7 +414,7 @@ namespace OpenBve {
 			checkboxDerailments.Checked = Interface.CurrentOptions.Derailments;
 			checkBoxLoadInAdvance.Checked = Interface.CurrentOptions.LoadInAdvance;
 			checkBoxUnloadTextures.Checked = Interface.CurrentOptions.UnloadUnusedTextures;
-			checkBoxDisableDisplayLists.Checked = Interface.CurrentOptions.DisableDisplayLists;
+			checkBoxIsUseNewRenderer.Checked = Interface.CurrentOptions.IsUseNewRenderer;
 			checkboxBlackBox.Checked = Interface.CurrentOptions.BlackBox;
 			checkBoxLoadingSway.Checked = Interface.CurrentOptions.LoadingSway;
 			checkBoxTransparencyFix.Checked = Interface.CurrentOptions.OldTransparencyMode;
@@ -551,7 +552,7 @@ namespace OpenBve {
 			groupBoxAdvancedOptions.Text = Translations.GetInterfaceString("options_advanced");
 			checkBoxLoadInAdvance.Text = Translations.GetInterfaceString("options_advanced_load_advance");
 			checkBoxUnloadTextures.Text = Translations.GetInterfaceString("options_advanced_unload_textures");
-			checkBoxDisableDisplayLists.Text = Translations.GetInterfaceString("options_advanced_disable_displaylists");
+			checkBoxIsUseNewRenderer.Text = Translations.GetInterfaceString("options_advanced_is_use_new_renderer");
 			labelTimeAcceleration.Text = Translations.GetInterfaceString("options_advanced_timefactor");
 			//Other Options
 			groupBoxOther.Text = Translations.GetInterfaceString("options_other");
@@ -660,9 +661,9 @@ namespace OpenBve {
 			labelRatingModeCaption.Text = Translations.GetInterfaceString("review_score_rating_mode");
 			switch (Interface.CurrentOptions.GameMode)
 			{
-				case Interface.GameMode.Arcade: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_arcade"); break;
-				case Interface.GameMode.Normal: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_normal"); break;
-				case Interface.GameMode.Expert: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_expert"); break;
+				case GameMode.Arcade: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_arcade"); break;
+				case GameMode.Normal: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_normal"); break;
+				case GameMode.Expert: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_expert"); break;
 				default: labelRatingModeValue.Text = Translations.GetInterfaceString("mode_unkown"); break;
 			}
 			{
@@ -917,8 +918,8 @@ namespace OpenBve {
 			Interface.CurrentOptions.UnloadUnusedTextures = checkBoxUnloadTextures.Checked;
 			Interface.CurrentOptions.OldTransparencyMode = checkBoxTransparencyFix.Checked;
 			Interface.CurrentOptions.EnableBveTsHacks = checkBoxHacks.Checked;
-			Interface.CurrentOptions.DisableDisplayLists = checkBoxDisableDisplayLists.Checked;
-			Interface.CurrentOptions.GameMode = (Interface.GameMode)comboboxMode.SelectedIndex;
+			Interface.CurrentOptions.IsUseNewRenderer = checkBoxIsUseNewRenderer.Checked;
+			Interface.CurrentOptions.GameMode = (GameMode)comboboxMode.SelectedIndex;
 			Interface.CurrentOptions.BlackBox = checkboxBlackBox.Checked;
 			Interface.CurrentOptions.LoadingSway = checkBoxLoadingSway.Checked;
 			Interface.CurrentOptions.UseJoysticks = checkboxJoysticksUsed.Checked;
@@ -1082,7 +1083,7 @@ namespace OpenBve {
 				Array.Resize<string>(ref a, n);
 				Interface.CurrentOptions.EnableInputDevicePlugins = a;
 			}
-			Sounds.Deinitialize();
+			Program.Sounds.Deinitialize();
 			routeWorkerThread.Dispose();
 			if (!OpenTK.Configuration.RunningOnMacOS)
 			{
@@ -1508,7 +1509,7 @@ namespace OpenBve {
 				{
 					try
 					{
-						return Image.FromFile(File);
+						return ImageExtensions.FromFile(File);
 					}
 					catch
 					{
@@ -1542,7 +1543,7 @@ namespace OpenBve {
 					}
 					try
 					{
-						Box.Image = Image.FromFile(File);
+						Box.Image = ImageExtensions.FromFile(File);
 						return;
 					}
 					catch
@@ -1570,7 +1571,7 @@ namespace OpenBve {
 			else
 			{
 				checkBoxUnloadTextures.Enabled = true;
-				checkBoxDisableDisplayLists.Enabled = true;
+				checkBoxIsUseNewRenderer.Enabled = true;
 			}
 		}
 
@@ -1579,13 +1580,13 @@ namespace OpenBve {
 			if (checkBoxUnloadTextures.Checked)
 			{
 				//If we use display lists, a stale texture reference may remain in the GPU, resulting in untextured faces
-				checkBoxDisableDisplayLists.Checked = true;
-				checkBoxDisableDisplayLists.Enabled = false;
+				checkBoxIsUseNewRenderer.Checked = true;
+				checkBoxIsUseNewRenderer.Enabled = false;
 			}
 			else
 			{
-				checkBoxDisableDisplayLists.Enabled = true;
-				checkBoxDisableDisplayLists.Checked = false;
+				checkBoxIsUseNewRenderer.Enabled = true;
+				checkBoxIsUseNewRenderer.Checked = false;
 			}
 		}
 

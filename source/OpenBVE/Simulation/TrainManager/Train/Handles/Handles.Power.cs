@@ -47,7 +47,7 @@
 				}
 				if (DelayedChanges.Length >= 1)
 				{
-					if (DelayedChanges[0].Time <= Game.SecondsSinceMidnight)
+					if (DelayedChanges[0].Time <= Program.CurrentRoute.SecondsSinceMidnight)
 					{
 						Actual = DelayedChanges[0].Value;
 						RemoveChanges(1);

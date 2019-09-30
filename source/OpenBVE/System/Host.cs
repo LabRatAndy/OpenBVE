@@ -1,11 +1,15 @@
 ﻿using System;
-using LibRender;
+using System.Drawing;
+using OpenBveApi.Hosts;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
+using OpenBveApi.Routes;
+using OpenBveApi.Sounds;
 using OpenBveApi.Textures;
 using OpenBveApi.Trains;
 using OpenBveApi.World;
+using RouteManager2.MessageManager;
 
 namespace OpenBve {
 	/// <summary>Represents the host application.</summary>
@@ -19,7 +23,16 @@ namespace OpenBve {
 		public override void ReportProblem(OpenBveApi.Hosts.ProblemType type, string text) {
 			Interface.AddMessage(MessageType.Error, false, text);
 		}
-		
+
+		public override void AddMessage(MessageType type, bool FileNotFound, string text)
+		{
+			Interface.AddMessage(type, FileNotFound, text);
+		}
+
+		public override void AddMessage(object Message)
+		{
+			MessageManager.AddMessage((AbstractMessage)Message);
+		}
 		
 		// --- texture ---
 		
@@ -102,7 +115,7 @@ namespace OpenBve {
 
 		public override bool LoadTexture(Texture Texture, OpenGlTextureWrapMode wrapMode)
 		{
-			return TextureManager.LoadTexture(Texture, wrapMode, CPreciseTimer.GetClockTicks(), Interface.CurrentOptions.Interpolation, Interface.CurrentOptions.AnisotropicFilteringLevel);
+			return Program.Renderer.TextureManager.LoadTexture(Texture, wrapMode, CPreciseTimer.GetClockTicks(), Interface.CurrentOptions.Interpolation, Interface.CurrentOptions.AnisotropicFilteringLevel);
 		}
 		
 		/// <summary>Registers a texture and returns a handle to the texture.</summary>
@@ -113,7 +126,7 @@ namespace OpenBve {
 		public override bool RegisterTexture(string path, TextureParameters parameters, out Texture handle) {
 			if (System.IO.File.Exists(path) || System.IO.Directory.Exists(path)) {
 				Texture data;
-				if (TextureManager.RegisterTexture(path, parameters, out data)) {
+				if (Program.Renderer.TextureManager.RegisterTexture(path, parameters, out data)) {
 					handle = data;
 					return true;
 				}
@@ -131,10 +144,15 @@ namespace OpenBve {
 		/// <returns>Whether loading the texture was successful.</returns>
 		public override bool RegisterTexture(Texture texture, TextureParameters parameters, out Texture handle) {
 			texture = texture.ApplyParameters(parameters);
-			handle = TextureManager.RegisterTexture(texture);
+			handle = Program.Renderer.TextureManager.RegisterTexture(texture);
 			return true;
 		}
 		
+		public override bool RegisterTexture(Bitmap texture, TextureParameters parameters, out OpenBveApi.Textures.Texture handle)
+		{
+			handle = new Texture(texture, parameters);
+			return true;
+		}
 		
 		// --- sound ---
 		
@@ -179,7 +197,7 @@ namespace OpenBve {
 		{
 			if (System.IO.File.Exists(path) || System.IO.Directory.Exists(path))
 			{
-				handle = Sounds.RegisterBuffer(path, 0.0);
+				handle = Program.Sounds.RegisterBuffer(path, 0.0);
 			}
 			else
 			{
@@ -198,7 +216,7 @@ namespace OpenBve {
 		{
 			if (System.IO.File.Exists(path) || System.IO.Directory.Exists(path))
 			{
-				handle = Sounds.RegisterBuffer(path, radius);
+				handle = Program.Sounds.RegisterBuffer(path, radius);
 				return true;
 			}
 			ReportProblem(OpenBveApi.Hosts.ProblemType.PathNotFound, path);
@@ -212,7 +230,7 @@ namespace OpenBve {
 		/// <returns>Whether loading the sound was successful.</returns>
 		public override bool RegisterSound(OpenBveApi.Sounds.Sound sound, out OpenBveApi.Sounds.SoundHandle handle)
 		{
-			handle = Sounds.RegisterBuffer(sound, 0.0);
+			handle = Program.Sounds.RegisterBuffer(sound, 0.0);
 			return true;
 		}
 
@@ -252,9 +270,100 @@ namespace OpenBve {
 
 		public override int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
 		{
-			return ObjectManager.CreateStaticObject(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
+			return Program.Renderer.CreateStaticObject(Prototype, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
 		}
 
-		
+		public override void CreateDynamicObject(ref ObjectState internalObject)
+		{
+			Program.Renderer.CreateDynamicObject(ref internalObject);
+		}
+
+		public override void AddObjectForCustomTimeTable(AnimatedObject animatedObject)
+		{
+			Timetable.AddObjectForCustomTimetable(animatedObject);
+		}
+
+		public override void ShowObject(ObjectState objectToShow, ObjectType objectType)
+		{
+			Program.Renderer.VisibleObjects.ShowObject(objectToShow, objectType);
+		}
+
+		public override void HideObject(ObjectState objectToHide)
+		{
+			Program.Renderer.VisibleObjects.HideObject(objectToHide);
+		}
+
+		public override bool SoundIsPlaying(object SoundSource)
+		{
+			return Program.Sounds.IsPlaying(SoundSource);
+		}
+
+		public override object PlaySound(SoundHandle buffer, double pitch, double volume, Vector3 position, object parent, bool looped)
+		{
+			return Program.Sounds.PlaySound(buffer, pitch, volume, position, parent, looped);
+		}
+
+		public override void StopSound(object SoundSource)
+		{
+			Program.Sounds.StopSound(SoundSource);
+		}
+
+		public override bool SimulationSetup
+		{
+			get
+			{
+				return Loading.SimulationSetup;
+			}
+		}
+
+		public override int AnimatedWorldObjectsUsed
+		{
+			get
+			{
+				return ObjectManager.AnimatedWorldObjectsUsed;
+			}
+			set
+			{
+				int a = ObjectManager.AnimatedWorldObjectsUsed;
+				if (ObjectManager.AnimatedWorldObjects.Length -1 == a)
+				{
+					/*
+					 * HACK: We cannot resize an array via an accessor property
+					 *       With this in mind, resize it via the indexer instead
+					 */
+					Array.Resize(ref ObjectManager.AnimatedWorldObjects, ObjectManager.AnimatedWorldObjects.Length << 1);
+				}
+
+				ObjectManager.AnimatedWorldObjectsUsed = value;
+			}
+		}
+
+		public override WorldObject[] AnimatedWorldObjects
+		{
+			get
+			{
+				return ObjectManager.AnimatedWorldObjects;
+			}
+			set
+			{
+				ObjectManager.AnimatedWorldObjects = value;
+			}
+		}
+
+		public override Track[] Tracks
+		{
+			get
+			{
+				return Program.CurrentRoute.Tracks;
+			}
+			set
+			{
+				Program.CurrentRoute.Tracks = value;
+			}
+		}
+
+		public Host() : base(HostApplication.OpenBve)
+		{
+		}
 	}
 }

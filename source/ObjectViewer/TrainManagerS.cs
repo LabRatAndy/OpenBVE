@@ -6,6 +6,7 @@
 // ╚═════════════════════════════════════════════════════════════╝
 
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
 using OpenBveApi.Trains;
 
 namespace OpenBve {
@@ -16,7 +17,7 @@ namespace OpenBve {
 
 		// structures
 		internal struct Axle {
-			internal TrackManager.TrackFollower Follower;
+			internal TrackFollower Follower;
 		}
 
 		// cars
@@ -143,13 +144,6 @@ namespace OpenBve {
 			internal double CurrentPitchDueToAccelerationTrackPosition;
 			internal double CurrentPitchDueToAccelerationSpeed;
 		}
-		internal struct CarBrightness {
-			internal float PreviousBrightness;
-			internal double PreviousTrackPosition;
-			internal float NextBrightness;
-			internal double NextTrackPosition;
-		}
-		
 
 		internal class Car : AbstractCar {
 			internal Axle FrontAxle;
@@ -161,7 +155,12 @@ namespace OpenBve {
 			internal bool CurrentlyVisible;
 			internal bool Derailed;
 			internal bool Topples;
-			internal CarBrightness Brightness;
+
+			internal Car(Train train)
+			{
+				FrontAxle.Follower = new TrackFollower(Program.CurrentHost, train, this);
+				RearAxle.Follower = new TrackFollower(Program.CurrentHost, train, this);
+			}
 		}
 
 		// train
@@ -288,9 +287,6 @@ namespace OpenBve {
 			internal PassAlarmType PassAlarm;
 		}
 		// train
-		internal enum TrainStopState {
-			Pending = 0, Boarding = 1, Completed = 2
-		}
 		internal class Train : AbstractTrain {
 			internal Car[] Cars;
 			internal TrainSpecs Specs;

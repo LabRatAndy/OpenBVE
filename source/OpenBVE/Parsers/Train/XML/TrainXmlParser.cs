@@ -2,7 +2,7 @@
 using System.Xml;
 using System.Drawing;
 using System.Linq;
-using LibRender;
+using OpenBveApi.Graphics;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
 using OpenBveApi.Objects;
@@ -15,7 +15,7 @@ namespace OpenBve.Parsers.Train
 		private static bool[] CarObjectsReversed;
 		private static bool[] BogieObjectsReversed;
 		private static TrainManager.BveAccelerationCurve[] AccelerationCurves;
-		internal static void Parse(string fileName, TrainManager.Train Train, ref UnifiedObject[] CarObjects, ref UnifiedObject[] BogieObjects)
+		internal static void Parse(string fileName, TrainManager.Train Train, ref UnifiedObject[] CarObjects, ref UnifiedObject[] BogieObjects, ref UnifiedObject[] CouplerObjects)
 		{
 			//The current XML file to load
 			XmlDocument currentXML = new XmlDocument();
@@ -66,7 +66,7 @@ namespace OpenBve.Parsers.Train
 						}
 						else
 						{
-							if (carIndex - 1 > Train.Couplers.Length - 1)
+							if (carIndex - 1 > Train.Cars.Length - 2)
 							{
 								Interface.AddMessage(MessageType.Error, false, "Unexpected extra coupler encountered in XML file " + fileName);
 								continue;
@@ -76,15 +76,27 @@ namespace OpenBve.Parsers.Train
 								switch (c.Name.ToLowerInvariant())
 								{
 									case "minimum":
-										if (!NumberFormats.TryParseDoubleVb6(c.InnerText, out Train.Couplers[carIndex - 1].MinimumDistanceBetweenCars))
+										if (!NumberFormats.TryParseDoubleVb6(c.InnerText, out Train.Cars[carIndex - 1].Coupler.MinimumDistanceBetweenCars))
 										{
 											Interface.AddMessage(MessageType.Error, false, "MinimumDistanceBetweenCars is invalid for coupler " + carIndex + "in XML file " + fileName);
 										}
 										break;
 									case "maximum":
-										if (!NumberFormats.TryParseDoubleVb6(c.InnerText, out Train.Couplers[carIndex - 1].MaximumDistanceBetweenCars))
+										if (!NumberFormats.TryParseDoubleVb6(c.InnerText, out Train.Cars[carIndex - 1].Coupler.MaximumDistanceBetweenCars))
 										{
 											Interface.AddMessage(MessageType.Error, false, "MaximumDistanceBetweenCars is invalid for coupler " + carIndex + "in XML file " + fileName);
+										}
+										break;
+									case "object":
+										if (string.IsNullOrEmpty(c.InnerText))
+										{
+											Interface.AddMessage(MessageType.Warning, false, "Invalid object path for Coupler " + (carIndex - 1) + " in XML file " + fileName);
+											break;
+										}
+										string f = OpenBveApi.Path.CombineFile(currentPath, c.InnerText);
+										if (System.IO.File.Exists(f))
+										{
+											CouplerObjects[carIndex - 1] = ObjectManager.LoadObject(f, System.Text.Encoding.Default, false);
 										}
 										break;
 								}
@@ -124,7 +136,7 @@ namespace OpenBve.Parsers.Train
 				}
 				if (Train.Cars[Train.DriverCar].CameraRestrictionMode != CameraRestrictionMode.NotSpecified)
 				{
-					Camera.CurrentRestriction = Train.Cars[Train.DriverCar].CameraRestrictionMode;
+					Program.Renderer.Camera.CurrentRestriction = Train.Cars[Train.DriverCar].CameraRestrictionMode;
 					World.UpdateViewingDistances();
 				}
 				DocumentNodes = currentXML.DocumentElement.SelectNodes("/openBVE/Train/NotchDescriptions");
@@ -140,7 +152,7 @@ namespace OpenBve.Parsers.Train
 								switch (c.Name.ToLowerInvariant())
 								{
 									case "power":
-										Train.PowerNotchDescriptions = c.InnerText.Split(';');
+										Train.PowerNotchDescriptions = c.InnerText.Split(new char[] { ';' });
 										for (int j = 0; j < Train.PowerNotchDescriptions.Length; j++)
 										{
 											Size s = Fonts.NormalFont.MeasureString(Train.PowerNotchDescriptions[j]);
@@ -151,7 +163,7 @@ namespace OpenBve.Parsers.Train
 										}
 										break;
 									case "brake":
-										Train.BrakeNotchDescriptions = c.InnerText.Split(';');
+										Train.BrakeNotchDescriptions = c.InnerText.Split(new char[] { ';' });
 										for (int j = 0; j < Train.BrakeNotchDescriptions.Length; j++)
 										{
 											Size s = Fonts.NormalFont.MeasureString(Train.BrakeNotchDescriptions[j]);
@@ -161,8 +173,19 @@ namespace OpenBve.Parsers.Train
 											}
 										}
 										break;
+									case "locobrake":
+										Train.LocoBrakeNotchDescriptions = c.InnerText.Split(new char[] { ';' });
+										for (int j = 0; j < Train.LocoBrakeNotchDescriptions.Length; j++)
+										{
+											Size s = Fonts.NormalFont.MeasureString(Train.LocoBrakeNotchDescriptions[j]);
+											if (s.Width > Train.MaxLocoBrakeNotchWidth)
+											{
+												Train.MaxLocoBrakeNotchWidth = s.Width;
+											}
+										}
+										break;
 									case "reverser":
-										Train.ReverserDescriptions = c.InnerText.Split(';');
+										Train.ReverserDescriptions = c.InnerText.Split(new char[] { ';' });
 										for (int j = 0; j < Train.ReverserDescriptions.Length; j++)
 										{
 											Size s = Fonts.NormalFont.MeasureString(Train.ReverserDescriptions[j]);
@@ -195,16 +218,16 @@ namespace OpenBve.Parsers.Train
 								StaticObject obj = (StaticObject)CarObjects[i];
 								obj.ApplyScale(-1.0, 1.0, -1.0);
 							}
-							else if (CarObjects[i] is ObjectManager.AnimatedObjectCollection)
+							else if (CarObjects[i] is AnimatedObjectCollection)
 							{
-								ObjectManager.AnimatedObjectCollection obj = (ObjectManager.AnimatedObjectCollection)CarObjects[i];
+								AnimatedObjectCollection obj = (AnimatedObjectCollection)CarObjects[i];
 								for (int j = 0; j < obj.Objects.Length; j++)
 								{
 									for (int h = 0; h < obj.Objects[j].States.Length; h++)
 									{
-										obj.Objects[j].States[h].Object.ApplyScale(-1.0, 1.0, -1.0);
-										obj.Objects[j].States[h].Position.X *= -1.0;
-										obj.Objects[j].States[h].Position.Z *= -1.0;
+										obj.Objects[j].States[h].Prototype.ApplyScale(-1.0, 1.0, -1.0);
+										obj.Objects[j].States[h].Translation.Row3.X *= -1.0f;
+										obj.Objects[j].States[h].Translation.Row3.Z *= -1.0f;
 									}
 									obj.Objects[j].TranslateXDirection.X *= -1.0;
 									obj.Objects[j].TranslateXDirection.Z *= -1.0;
@@ -253,16 +276,16 @@ namespace OpenBve.Parsers.Train
 								StaticObject obj = (StaticObject)BogieObjects[i];
 								obj.ApplyScale(-1.0, 1.0, -1.0);
 							}
-							else if (BogieObjects[i] is ObjectManager.AnimatedObjectCollection)
+							else if (BogieObjects[i] is AnimatedObjectCollection)
 							{
-								ObjectManager.AnimatedObjectCollection obj = (ObjectManager.AnimatedObjectCollection)BogieObjects[i];
+								AnimatedObjectCollection obj = (AnimatedObjectCollection)BogieObjects[i];
 								for (int j = 0; j < obj.Objects.Length; j++)
 								{
 									for (int h = 0; h < obj.Objects[j].States.Length; h++)
 									{
-										obj.Objects[j].States[h].Object.ApplyScale(-1.0, 1.0, -1.0);
-										obj.Objects[j].States[h].Position.X *= -1.0;
-										obj.Objects[j].States[h].Position.Z *= -1.0;
+										obj.Objects[j].States[h].Prototype.ApplyScale(-1.0, 1.0, -1.0);
+										obj.Objects[j].States[h].Translation.Row3.X *= -1.0f;
+										obj.Objects[j].States[h].Translation.Row3.Z *= -1.0f;
 									}
 									obj.Objects[j].TranslateXDirection.X *= -1.0;
 									obj.Objects[j].TranslateXDirection.Z *= -1.0;

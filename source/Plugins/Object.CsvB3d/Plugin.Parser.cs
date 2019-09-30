@@ -17,7 +17,7 @@ namespace Plugin
 	{
 		private static bool IsCommand(string Text)
 		{
-			switch (Text.Trim().ToLowerInvariant())
+			switch (Text.Trim(new char[] { }).ToLowerInvariant())
 			{
 				case "rotate":
 				case "translate":
@@ -72,7 +72,7 @@ namespace Plugin
 		/// <param name="FileName">The text file to load the animated object from. Must be an absolute file name.</param>
 		/// <param name="Encoding">The encoding the file is saved in. If the file uses a byte order mark, the encoding indicated by the byte order mark is used and the Encoding parameter is ignored.</param>
 		/// <returns>The object loaded.</returns>
-		internal static StaticObject ReadObject(string FileName, Encoding Encoding) {
+		private static StaticObject ReadObject(string FileName, Encoding Encoding) {
 			System.Globalization.CultureInfo Culture = System.Globalization.CultureInfo.InvariantCulture;
 			bool IsB3D = string.Equals(System.IO.Path.GetExtension(FileName), ".b3d", StringComparison.OrdinalIgnoreCase);
 			// initialize object
@@ -160,7 +160,7 @@ namespace Plugin
 				// collect arguments
 				string[] Arguments = Lines[i].Split(new char[] { ',' }, StringSplitOptions.None);
 				for (int j = 0; j < Arguments.Length; j++) {
-					Arguments[j] = Arguments[j].Trim();
+					Arguments[j] = Arguments[j].Trim(new char[] { });
 				}
 				{
 					// remove unused arguments at the end of the chain
@@ -175,9 +175,10 @@ namespace Plugin
 				if (IsB3D & Arguments.Length != 0) {
 					// b3d
 					int j = Arguments[0].IndexOf(' ');
-					if (j >= 0) {
-						Command = Arguments[0].Substring(0, j).TrimEnd();
-						Arguments[0] = Arguments[0].Substring(j + 1).TrimStart();
+					if (j >= 0)
+					{
+						Command = Arguments[0].Substring(0, j).TrimEnd(new char[] { });
+						Arguments[0] = Arguments[0].Substring(j + 1).TrimStart(new char[] { });
 					} else {
 						Command = Arguments[0];
 						bool resetArguments = true;
@@ -221,7 +222,8 @@ namespace Plugin
 					Command = null;
 				}
 				// parse terms
-				if (Command != null) {
+				if (Command != null)
+				{
 					string cmd = Command.ToLowerInvariant();
 					switch(cmd) {
 						case "createmeshbuilder":
@@ -426,7 +428,7 @@ namespace Plugin
 									currentHost.AddMessage(MessageType.Error, false, "Invalid argument Z in " + Command + " at line " + (i + 1).ToString(Culture) + " in file " + FileName);
 									z = 0.0;
 								}
-								ApplyTranslation(Builder, x, y, z);
+								Builder.ApplyTranslation(x, y, z);
 								if (cmd == "translateall") {
 									Object.ApplyTranslation(x, y, z);
 								}
@@ -459,7 +461,7 @@ namespace Plugin
 									currentHost.AddMessage(MessageType.Error, false, "Z is required to be different from zero in " + Command + " at line " + (i + 1).ToString(Culture) + " in file " + FileName);
 									z = 1.0;
 								}
-								ApplyScale(Builder, x, y, z);
+								Builder.ApplyScale(x, y, z);
 								if (cmd == "scaleall") {
 									Object.ApplyScale(x, y, z);
 								}
@@ -498,7 +500,7 @@ namespace Plugin
 									t = 1.0 / Math.Sqrt(t);
 									r *= t;
 									a = a.ToRadians();
-									ApplyRotation(Builder, r, a);
+									Builder.ApplyRotation(r, a);
 									if (cmd == "rotateall") {
 										Object.ApplyRotation(r, a);
 									}
@@ -537,7 +539,7 @@ namespace Plugin
 								}
 								d.Normalize();
 								s.Normalize();
-								ApplyShear(Builder, d, s, r);
+								Builder.ApplyShear(d, s, r);
 								if (cmd == "shearall") {
 									Object.ApplyShear(d, s, r);
 								}
@@ -589,7 +591,7 @@ namespace Plugin
 									ny = vy;
 									nz = vz;
 								}
-								ApplyMirror(Builder, vx != 0, vy != 0, vz != 0, nx != 0, ny != 0, nz != 0);
+								Builder.ApplyMirror(vx != 0, vy != 0, vz != 0, nx != 0, ny != 0, nz != 0);
 								if (cmd == "mirrorall")
 								{
 									Object.ApplyMirror(vx != 0, vy != 0, vz != 0, nx != 0, ny != 0, nz != 0);
@@ -860,7 +862,15 @@ namespace Plugin
 									if (Path.ContainsInvalidChars(Arguments[0])) {
 										currentHost.AddMessage(MessageType.Error, false, "DaytimeTexture contains illegal characters in " + Command + " at line " + (i + 1).ToString(Culture) + " in file " + FileName);
 									} else {
-										tday = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[0]);
+										try
+										{
+											tday = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[0]);
+										}
+										catch
+										{
+											tday = null;
+										}
+										
 										if (!System.IO.File.Exists(tday))
 										{
 											bool hackFound = false;
@@ -873,6 +883,16 @@ namespace Plugin
 													string s = "Signals\\Static\\" + m.Groups[0].Value.Replace(".bmp", ".png");
 													tday = Path.CombineFile(CompatibilityFolder, s);
 													hackFound = true;
+												}
+
+												if (Arguments[0].StartsWith("swiss1/", StringComparison.InvariantCultureIgnoreCase))
+												{
+													Arguments[0] = Arguments[0].Substring(7);
+													tday = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[0]);
+													if (System.IO.File.Exists(tday))
+													{
+														hackFound = true;
+													}
 												}
 											}
 											if (!hackFound)
@@ -890,12 +910,30 @@ namespace Plugin
 									} else {
 										if (Path.ContainsInvalidChars(Arguments[1])) {
 											currentHost.AddMessage(MessageType.Error, false, "NighttimeTexture contains illegal characters in " + Command + " at line " + (i + 1).ToString(Culture) + " in file " + FileName);
-										} else {
-											tnight = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[1]);
-											if (!System.IO.File.Exists(tnight)) {
+										} else
+										{
+											bool ignoreAsInvalid = false;
+											try
+											{
+												tnight = OpenBveApi.Path.CombineFile(System.IO.Path.GetDirectoryName(FileName), Arguments[1]);
+											}
+											catch
+											{
+												tnight = null;
+												switch (Arguments[1])
+												{
+													case ".":
+														// Meguro route - Misplaced period in several platform objects
+														ignoreAsInvalid = true;
+														break;
+												}
+											}
+											
+											if (!System.IO.File.Exists(tnight) && !ignoreAsInvalid) {
 												currentHost.AddMessage(MessageType.Error, true, "The NighttimeTexture " + tnight + " could not be found in " + Command + " at line " + (i + 1).ToString(Culture) + " in file " + FileName);
 												tnight = null;
 											}
+											
 										}
 									}
 								}
@@ -1250,148 +1288,14 @@ namespace Plugin
 				}
 			}
 		}
-
-		// apply translation
-		private static void ApplyTranslation(MeshBuilder Builder, double x, double y, double z) {
-			for (int i = 0; i < Builder.Vertices.Length; i++) {
-				Builder.Vertices[i].Coordinates.X += x;
-				Builder.Vertices[i].Coordinates.Y += y;
-				Builder.Vertices[i].Coordinates.Z += z;
-			}
-		}
-		
-		// apply scale
-		private static void ApplyScale(MeshBuilder Builder, double x, double y, double z) {
-			float rx = (float)(1.0 / x);
-			float ry = (float)(1.0 / y);
-			float rz = (float)(1.0 / z);
-			float rx2 = rx * rx;
-			float ry2 = ry * ry;
-			float rz2 = rz * rz;
-			for (int i = 0; i < Builder.Vertices.Length; i++) {
-				Builder.Vertices[i].Coordinates.X *= x;
-				Builder.Vertices[i].Coordinates.Y *= y;
-				Builder.Vertices[i].Coordinates.Z *= z;
-			}
-			for (int i = 0; i < Builder.Faces.Length; i++) {
-				for (int j = 0; j < Builder.Faces[i].Vertices.Length; j++) {
-					double nx2 = Builder.Faces[i].Vertices[j].Normal.X * Builder.Faces[i].Vertices[j].Normal.X;
-					double ny2 = Builder.Faces[i].Vertices[j].Normal.Y * Builder.Faces[i].Vertices[j].Normal.Y;
-					double nz2 = Builder.Faces[i].Vertices[j].Normal.Z * Builder.Faces[i].Vertices[j].Normal.Z;
-					double u = nx2 * rx2 + ny2 * ry2 + nz2 * rz2;
-					if (u != 0.0) {
-						u = (float)Math.Sqrt((double)((nx2 + ny2 + nz2) / u));
-						Builder.Faces[i].Vertices[j].Normal.X *= rx * u;
-						Builder.Faces[i].Vertices[j].Normal.Y *= ry * u;
-						Builder.Faces[i].Vertices[j].Normal.Z *= rz * u;
-					}
-				}
-			}
-			if (x * y * z < 0.0) {
-				for (int i = 0; i < Builder.Faces.Length; i++) {
-					Builder.Faces[i].Flip();
-				}
-			}
-		}
-		
-
-		// apply rotation
-		private static void ApplyRotation(MeshBuilder Builder, Vector3 Rotation, double Angle) {
-			double cosa = Math.Cos(Angle);
-			double sina = Math.Sin(Angle);
-			for (int i = 0; i < Builder.Vertices.Length; i++) {
-				Builder.Vertices[i].Coordinates.Rotate(Rotation, cosa, sina);
-			}
-			for (int i = 0; i < Builder.Faces.Length; i++) {
-				for (int j = 0; j < Builder.Faces[i].Vertices.Length; j++) {
-					Builder.Faces[i].Vertices[j].Normal.Rotate(Rotation, cosa, sina);
-				}
-			}
-		}
-		
-
-		private static void ApplyMirror(MeshBuilder Builder, bool vX, bool vY, bool vZ, bool nX, bool nY, bool nZ)
-		{
-			for (int i = 0; i < Builder.Vertices.Length; i++)
-			{
-				if (vX)
-				{
-					Builder.Vertices[i].Coordinates.X *= -1;
-				}
-				if (vY)
-				{
-					Builder.Vertices[i].Coordinates.Y *= -1;
-				}
-				if (vZ)
-				{
-					Builder.Vertices[i].Coordinates.Z *= -1;
-				}
-			}
-			for (int i = 0; i < Builder.Faces.Length; i++)
-			{
-				for (int j = 0; j < Builder.Faces[i].Vertices.Length; j++)
-				{
-					if (nX)
-					{
-						Builder.Faces[i].Vertices[j].Normal.X *= -1;
-					}
-					if (nY)
-					{
-						Builder.Faces[i].Vertices[j].Normal.Y *= -1;
-					}
-					if (nZ)
-					{
-						Builder.Faces[i].Vertices[j].Normal.X *= -1;
-					}
-				}
-			}
-			int numFlips = 0;
-			if (vX)
-			{
-				numFlips++;
-			}
-			if (vY)
-			{
-				numFlips++;
-			}
-			if (vZ)
-			{
-				numFlips++;
-			}
-
-			if (numFlips % 2 != 0)
-			{
-				for (int i = 0; i < Builder.Faces.Length; i++)
-				{
-					Array.Reverse(Builder.Faces[i].Vertices);
-				}
-			}
-		}
-
 		
 
 		// apply shear
-		private static void ApplyShear(MeshBuilder Builder, Vector3 d, Vector3 s, double r) {
-			for (int j = 0; j < Builder.Vertices.Length; j++) {
-				double n = r * (d.X * Builder.Vertices[j].Coordinates.X + d.Y * Builder.Vertices[j].Coordinates.Y + d.Z * Builder.Vertices[j].Coordinates.Z);
-				Builder.Vertices[j].Coordinates.X += s.X * n;
-				Builder.Vertices[j].Coordinates.Y += s.Y * n;
-				Builder.Vertices[j].Coordinates.Z += s.Z * n;
-			}
-			for (int j = 0; j < Builder.Faces.Length; j++) {
-				for (int k = 0; k < Builder.Faces[j].Vertices.Length; k++) {
-					if (Builder.Faces[j].Vertices[k].Normal.X != 0.0f | Builder.Faces[j].Vertices[k].Normal.Y != 0.0f | Builder.Faces[j].Vertices[k].Normal.Z != 0.0f) {
-						double n = r * (s.X * Builder.Faces[j].Vertices[k].Normal.X + s.Y * Builder.Faces[j].Vertices[k].Normal.Y + s.Z * Builder.Faces[j].Vertices[k].Normal.Z);
-						Builder.Faces[j].Vertices[k].Normal -= d * n;
-						Builder.Faces[j].Vertices[k].Normal.Normalize();
-					}
-				}
-			}
-		}
+		
 
 		/// <summary>Checks whether the specified System.Text.Encoding is Unicode</summary>
 		/// <param name="Encoding">The Encoding</param>
-		internal static bool IsUtf(System.Text.Encoding Encoding)
+		private static bool IsUtf(System.Text.Encoding Encoding)
 		{
 			switch (Encoding.WindowsCodePage)
 			{

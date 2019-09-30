@@ -1,7 +1,10 @@
-﻿using OpenBve.RouteManager;
-using OpenBveApi.Objects;
-using OpenBve.SignalManager;
-using OpenBveApi.Math;
+﻿using OpenBveApi.Math;
+using OpenBveApi.Routes;
+using OpenBveApi.Trains;
+using RouteManager2.Climate;
+using RouteManager2.MessageManager;
+using RouteManager2.SignalManager;
+using SoundManager;
 
 namespace OpenBve
 {
@@ -114,7 +117,7 @@ namespace OpenBve
 		{
 			internal double StartingPosition;
 			internal double EndingPosition;
-			internal MessageManager.Message Message;
+			internal AbstractMessage Message;
 		}
 
 		internal struct StopRequest
@@ -122,9 +125,9 @@ namespace OpenBve
 			internal int StationIndex;
 			internal int MaxNumberOfCars;
 			internal double TrackPosition;
-			internal TrackManager.RequestStop Early;
-			internal TrackManager.RequestStop OnTime;
-			internal TrackManager.RequestStop Late;
+			internal RequestStop Early;
+			internal RequestStop OnTime;
+			internal RequestStop Late;
 			internal bool FullSpeed;
 		}
 		private enum SoundType { World, TrainStatic, TrainDynamic }
@@ -132,7 +135,7 @@ namespace OpenBve
 		private struct Sound
 		{
 			internal double TrackPosition;
-			internal Sounds.SoundBuffer SoundBuffer;
+			internal SoundBuffer SoundBuffer;
 			internal SoundType Type;
 			internal Vector2 Position;
 			//TODO:
@@ -214,7 +217,7 @@ namespace OpenBve
 			internal Transponder[] Transponders;
 			internal DestinationEvent[] DestinationChanges;
 			internal PointOfInterest[] PointsOfInterest;
-			internal TrackManager.TrackElement CurrentTrackState;
+			internal TrackElement CurrentTrackState;
 			internal double Pitch;
 			internal double Turn;
 			internal int Station;

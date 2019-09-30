@@ -6,7 +6,9 @@
 // ╚═════════════════════════════════════════════════════════════╝
 
 using OpenBveApi.Math;
+using OpenBveApi.Routes;
 using OpenBveApi.Trains;
+using SoundManager;
 
 namespace OpenBve {
 	using System;
@@ -18,7 +20,7 @@ namespace OpenBve {
 
 		// structures
 		internal struct Axle {
-			internal TrackManager.TrackFollower Follower;
+			internal TrackFollower Follower;
 		}
 		internal struct Section { }
 
@@ -153,24 +155,11 @@ namespace OpenBve {
 			internal double CurrentPitchDueToAccelerationTrackPosition;
 			internal double CurrentPitchDueToAccelerationSpeed;
 		}
-		internal struct CarBrightness {
-			internal float PreviousBrightness;
-			internal double PreviousTrackPosition;
-			internal float NextBrightness;
-			internal double NextTrackPosition;
-		}
 		internal struct Horn {
 			internal CarSound Sound;
 			internal bool Loop;
 		}
-		internal struct CarSound {
-			/// <summary>The sound buffer to play</summary>
-			internal Sounds.SoundBuffer Buffer;
-			/// <summary>The source of the sound within the car</summary>
-			internal Sounds.SoundSource Source;
-			/// <summary>A Vector3 describing the position of the sound source</summary>
-			internal Vector3 Position;
-		}
+		
 		internal struct MotorSoundTableEntry {
 			internal int SoundBufferIndex;
 			internal float Pitch;
@@ -257,9 +246,8 @@ namespace OpenBve {
 			internal CarSounds Sounds;
 			internal bool Derailed;
 			internal bool Topples;
-			internal CarBrightness Brightness;
 
-			internal void CreateWorldCoordinates(Vector3 Car, out Vector3 Position, out Vector3 Direction)
+			public override void CreateWorldCoordinates(Vector3 Car, out Vector3 Position, out Vector3 Direction)
 			{
 				Direction = FrontAxle.Follower.WorldPosition - RearAxle.Follower.WorldPosition;
 				double t = Direction.Norm();
@@ -357,13 +345,6 @@ namespace OpenBve {
 			internal double Time;
 			internal bool Reset;
 		}
-		internal struct TrainPendingTransponder {
-			internal TrackManager.TransponderType Type;
-			internal bool SwitchSubsystem;
-			internal int OptionalInteger;
-			internal double OptionalFloat;
-			internal int SectionIndex;
-		}
 		
 		// train specs
 		internal enum PassAlarmType {
@@ -388,12 +369,17 @@ namespace OpenBve {
 			internal TrainAirBrake AirBrake;
 		}
 		// train
-		internal enum TrainStopState {
-			Pending = 0, Boarding = 1, Completed = 2
-		}
 		internal class Train : AbstractTrain {
 			internal Car[] Cars;
 			internal TrainSpecs Specs;
+
+			public override int NumberOfCars
+			{
+				get
+				{
+					return this.Cars.Length;
+				}
+			}
 
 			public override double FrontCarTrackPosition()
 			{
@@ -403,6 +389,14 @@ namespace OpenBve {
 			public override double RearCarTrackPosition()
 			{
 				return Cars[Cars.Length - 1].RearAxle.Follower.TrackPosition - Cars[Cars.Length - 1].RearAxlePosition - 0.5 * Cars[Cars.Length - 1].Length;
+			}
+
+			public override bool IsPlayerTrain
+			{
+				get
+				{
+					return true;
+				}
 			}
 		}
 

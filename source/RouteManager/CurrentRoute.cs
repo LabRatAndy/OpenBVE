@@ -3,6 +3,7 @@ using OpenBve.BackgroundManager;
 using OpenBve.SignalManager;
 using OpenBveApi.Colors;
 using OpenBveApi.Routes;
+using OpenBveApi.Trains;
 using OpenTK.Graphics.OpenGL;
 
 namespace OpenBve.RouteManager
@@ -10,16 +11,24 @@ namespace OpenBve.RouteManager
 	/// <summary>The current route</summary>
 	public static class CurrentRoute
 	{
+		/// <summary>The list of tracks available in the simulation.</summary>
+		public static Track[] Tracks = { new Track() };
+		/// <summary>Holds a reference to the base TrainManager.Trains array</summary>
+		public static AbstractTrain[] Trains;
 		/// <summary>Holds all signal sections within the current route</summary>
-		public static Section[] Sections = new Section[] { };
+		public static Section[] Sections = { };
+		/// <summary>Holds all stations within the current route</summary>
+		public static RouteStation[] Stations = { };
 		/// <summary>Holds all .PreTrain instructions for the current route</summary>
 		/// <remarks>Must be in distance and time ascending order</remarks>
-		public static BogusPretrainInstruction[] BogusPretrainInstructions = new BogusPretrainInstruction[] { };
+		public static BogusPretrainInstruction[] BogusPretrainInstructions = { };
+		/// <summary>Holds all points of interest within the game world</summary>
+		public static PointOfInterest[] PointsOfInterest = { };
 		/// <summary>The currently displayed background texture</summary>
 		public static BackgroundHandle CurrentBackground = new StaticBackground(null, 6, false);
 		/// <summary>The new background texture (Currently fading in)</summary>
 		public static BackgroundHandle TargetBackground = new StaticBackground(null, 6, false);
-		/// <summary>The start of a reigon without fog</summary>
+		/// <summary>The start of a region without fog</summary>
 		/// <remarks>Must not be below the viewing distance (e.g. 600m)</remarks>
 		public static float NoFogStart = 800.0f;
 		/// <summary>The end of a reigon without fog</summary>
@@ -30,7 +39,10 @@ namespace OpenBve.RouteManager
 		public static Fog CurrentFog = new Fog(NoFogStart, NoFogEnd, Color24.Grey, 0.5);
 		/// <summary>Holds the next fog</summary>
 		public static Fog NextFog = new Fog(NoFogStart, NoFogEnd, Color24.Grey, 1.0);
-		
+		/// <summary>The initial elevation in meters</summary>
+		public static double InitialElevation = 0.0;
+		/// <summary>The current in game time, expressed as the number of seconds since midnight on the first day</summary>
+		public static double SecondsSinceMidnight = 0.0;
 
 		/// <summary>Updates the currently displayed background</summary>
 		/// <param name="TimeElapsed">The time elapsed since the previous call to this function</param>

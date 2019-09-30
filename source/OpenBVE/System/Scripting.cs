@@ -1,7 +1,5 @@
 ﻿using System;
-using LibRender;
 using OpenBveApi.Math;
-using OpenBve.RouteManager;
 
 // ReSharper disable UnusedMember.Global
 
@@ -28,22 +26,22 @@ namespace OpenBve
                 if (IsPartOfTrain)
                 {
                     int nextSectionIndex = Train.CurrentSectionIndex + 1;
-                    if (nextSectionIndex >= 0 & nextSectionIndex < CurrentRoute.Sections.Length)
+                    if (nextSectionIndex >= 0 & nextSectionIndex < Program.CurrentRoute.Sections.Length)
                     {
-                        int a = CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
-                        if (a >= 0 & a < CurrentRoute.Sections[nextSectionIndex].Aspects.Length)
+                        int a = Program.CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
+                        if (a >= 0 & a < Program.CurrentRoute.Sections[nextSectionIndex].Aspects.Length)
                         {
-                            return CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
+                            return Program.CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
                         }
                         return 0;
                     }
                 }
-                else if (SectionIndex >= 0 & SectionIndex < CurrentRoute.Sections.Length)
+                else if (SectionIndex >= 0 & SectionIndex < Program.CurrentRoute.Sections.Length)
                 {
-                    int a = CurrentRoute.Sections[SectionIndex].CurrentAspect;
-                    if (a >= 0 & a < CurrentRoute.Sections[SectionIndex].Aspects.Length)
+                    int a = Program.CurrentRoute.Sections[SectionIndex].CurrentAspect;
+                    if (a >= 0 & a < Program.CurrentRoute.Sections[SectionIndex].Aspects.Length)
                     {
-                        return CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
+                        return Program.CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
                     }
                 }
                 return 0;
@@ -79,9 +77,9 @@ namespace OpenBve
                 }
                 if (CarIndex > Train.Cars.Length)
                 {
-                    return Train.Cars[0].Specs.CurrentSpeed;
+                    return Train.Cars[0].CurrentSpeed;
                 }
-                return Train.Cars[CarIndex].Specs.CurrentSpeed;
+                return Train.Cars[CarIndex].CurrentSpeed;
             }
 
             /// <summary>Returns the speed of the selected car, accounting for wheelslip and wheel lock</summary>
@@ -128,7 +126,7 @@ namespace OpenBve
                         if (Train.Cars[j].Specs.CurrentAccelerationOutput < 0.0)
                         {
                             return Train.Cars[j].Specs.CurrentAccelerationOutput*
-                                   (double) Math.Sign(Train.Cars[j].Specs.CurrentSpeed);
+                                   (double) Math.Sign(Train.Cars[j].CurrentSpeed);
                         }
                         if (Train.Cars[j].Specs.CurrentAccelerationOutput > 0.0)
                         {
@@ -153,7 +151,7 @@ namespace OpenBve
                     if (Train.Cars[CarIndex].Specs.CurrentAccelerationOutput < 0.0)
                     {
                         return Train.Cars[CarIndex].Specs.CurrentAccelerationOutput*
-                               (double) Math.Sign(Train.Cars[CarIndex].Specs.CurrentSpeed);
+                               (double) Math.Sign(Train.Cars[CarIndex].CurrentSpeed);
                     }
                     if (Train.Cars[CarIndex].Specs.CurrentAccelerationOutput > 0.0)
                     {
@@ -652,7 +650,7 @@ namespace OpenBve
             public static bool hasPlugin(TrainManager.Train Train)
             {
                 if (Train == null) return false;
-                if (Train == TrainManager.PlayerTrain && Train.Plugin != null)
+                if (Train.IsPlayerTrain && Train.Plugin != null)
                 {
                     return TrainManager.PlayerTrain.Plugin.IsDefault;
                 }
@@ -689,7 +687,7 @@ namespace OpenBve
             /// <returns>Returns the number of seconds elapsed since midnight on the first day</returns>
             public static double time()
             {
-                return Game.SecondsSinceMidnight;
+                return Program.CurrentRoute.SecondsSinceMidnight;
             }
 
             /// <summary>Gets the camera distance in meters from the current object </summary>
@@ -697,9 +695,9 @@ namespace OpenBve
             /// <returns>The distance in meters</returns>
             public static double CameraDistance(Vector3 Position)
             {
-                double dx = Camera.AbsolutePosition.X - Position.X;
-                double dy = Camera.AbsolutePosition.Y - Position.Y;
-                double dz = Camera.AbsolutePosition.Z - Position.Z;
+                double dx = Program.Renderer.Camera.AbsolutePosition.X - Position.X;
+                double dy = Program.Renderer.Camera.AbsolutePosition.Y - Position.Y;
+                double dz = Program.Renderer.Camera.AbsolutePosition.Z - Position.Z;
                 return Math.Sqrt(dx * dx + dy * dy + dz * dz);
             }
         }

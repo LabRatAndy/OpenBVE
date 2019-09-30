@@ -17,7 +17,7 @@
 			{
 				if (DelayedValue != AirBrakeHandleState.Invalid)
 				{
-					if (DelayedTime <= Game.SecondsSinceMidnight)
+					if (DelayedTime <= Program.CurrentRoute.SecondsSinceMidnight)
 					{
 						Actual = (int)DelayedValue;
 						DelayedValue = AirBrakeHandleState.Invalid;
@@ -28,12 +28,12 @@
 					if (Safety == (int)AirBrakeHandleState.Release & Actual != (int)AirBrakeHandleState.Release)
 					{
 						DelayedValue = AirBrakeHandleState.Release;
-						DelayedTime = Game.SecondsSinceMidnight;
+						DelayedTime = Program.CurrentRoute.SecondsSinceMidnight;
 					}
 					else if (Safety == (int)AirBrakeHandleState.Service & Actual != (int)AirBrakeHandleState.Service)
 					{
 						DelayedValue = AirBrakeHandleState.Service;
-						DelayedTime = Game.SecondsSinceMidnight;
+						DelayedTime = Program.CurrentRoute.SecondsSinceMidnight;
 					}
 					else if (Safety == (int)AirBrakeHandleState.Lap)
 					{

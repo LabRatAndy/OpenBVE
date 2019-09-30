@@ -1,6 +1,5 @@
 ﻿using System;
 using OpenBveApi.Math;
-using OpenBveApi.Textures;
 using OpenBveApi.World;
 
 namespace OpenBveApi.Objects
@@ -152,6 +151,25 @@ namespace OpenBveApi.Objects
 			return Result;
 		}
 
+		/// <summary>Creates a mirrored clone of this object</summary>
+		public override UnifiedObject Mirror()
+		{
+			StaticObject Result = (StaticObject)this.Clone();
+			for (int i = 0; i < Result.Mesh.Vertices.Length; i++)
+			{
+				Result.Mesh.Vertices[i].Coordinates.X = -Result.Mesh.Vertices[i].Coordinates.X;
+			}
+			for (int i = 0; i < Result.Mesh.Faces.Length; i++)
+			{
+				for (int k = 0; k < Result.Mesh.Faces[i].Vertices.Length; k++)
+				{
+					Result.Mesh.Faces[i].Vertices[k].Normal.X = -Result.Mesh.Faces[i].Vertices[k].Normal.X;
+				}
+				Result.Mesh.Faces[i].Flip();
+			}
+			return Result;
+		}
+
 		/// <summary>Joins two static objects</summary>
 		/// <param name="Add">The static object to join</param>
 		public void JoinObjects(StaticObject Add)
@@ -164,9 +182,9 @@ namespace OpenBveApi.Objects
 			int mf = Mesh.Faces.Length;
 			int mm = Mesh.Materials.Length;
 			int mv = Mesh.Vertices.Length;
-			Array.Resize<MeshFace>(ref Mesh.Faces, mf + Add.Mesh.Faces.Length);
-			Array.Resize<MeshMaterial>(ref Mesh.Materials, mm + Add.Mesh.Materials.Length);
-			Array.Resize<VertexTemplate>(ref Mesh.Vertices, mv + Add.Mesh.Vertices.Length);
+			Array.Resize(ref Mesh.Faces, mf + Add.Mesh.Faces.Length);
+			Array.Resize(ref Mesh.Materials, mm + Add.Mesh.Materials.Length);
+			Array.Resize(ref Mesh.Vertices, mv + Add.Mesh.Vertices.Length);
 			for (int i = 0; i < Add.Mesh.Faces.Length; i++)
 			{
 				Mesh.Faces[mf + i] = Add.Mesh.Faces[i];
@@ -375,6 +393,7 @@ namespace OpenBveApi.Objects
 		/// <summary>Applies world data to create a transformed model</summary>
 		public void ApplyData(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double startingDistance, double endingDistance, double BlockLength, double TrackPosition, double Brightness, double ViewingDistance)
 		{
+			if (Prototype == null) return;
 			StartingDistance = float.MaxValue;
 			EndingDistance = float.MinValue;
 			Mesh.Vertices = new VertexTemplate[Prototype.Mesh.Vertices.Length];
@@ -506,7 +525,7 @@ namespace OpenBveApi.Objects
 						int n = (Mesh.Faces[i].Vertices.Length / 3) * 3;
 						if (Mesh.Faces[i].Vertices.Length != n)
 						{
-							Array.Resize<MeshFaceVertex>(ref Mesh.Faces[i].Vertices, n);
+							Array.Resize(ref Mesh.Faces[i].Vertices, n);
 						}
 					}
 				}
@@ -518,7 +537,7 @@ namespace OpenBveApi.Objects
 						int n = Mesh.Faces[i].Vertices.Length & ~3;
 						if (Mesh.Faces[i].Vertices.Length != n)
 						{
-							Array.Resize<MeshFaceVertex>(ref Mesh.Faces[i].Vertices, n);
+							Array.Resize(ref Mesh.Faces[i].Vertices, n);
 						}
 					}
 				}
@@ -530,7 +549,7 @@ namespace OpenBveApi.Objects
 						int n = Mesh.Faces[i].Vertices.Length & ~1;
 						if (Mesh.Faces[i].Vertices.Length != n)
 						{
-							Array.Resize<MeshFaceVertex>(ref Mesh.Faces[i].Vertices, n);
+							Array.Resize(ref Mesh.Faces[i].Vertices, n);
 						}
 					}
 				}

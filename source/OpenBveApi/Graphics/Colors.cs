@@ -74,7 +74,7 @@ namespace OpenBveApi.Colors {
 			{
 				return false;
 			}
-			return this.Equals((Color24)obj);
+			return Equals(this, (Color24)obj);
 		}
 
 		/// <summary>Returns the hashcode for this instance.</summary>
@@ -118,9 +118,9 @@ namespace OpenBveApi.Colors {
 		public static bool TryParseHexColor(string Expression, out Color24 Color)
 		{
 			Color = Blue;
-			if (Expression.StartsWith("#"))
+			if (Expression.StartsWith("#", StringComparison.InvariantCultureIgnoreCase))
 			{
-				string a = Expression.Substring(1).TrimStart();
+				string a = Expression.Substring(1).TrimStart(new char[] { });
 				int x; if (int.TryParse(a, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out x))
 				{
 					int r = (x >> 16) & 0xFF;
@@ -137,12 +137,34 @@ namespace OpenBveApi.Colors {
 			return false;
 		}
 
+		public static Color24 ParseHexColor(string Expression)
+		{
+			Color24 color;
+
+			if (!TryParseHexColor(Expression, out color))
+			{
+				throw new FormatException();
+			}
+
+			return color;
+		}
+
 		/// <summary>Casts a System.Drawing.Color to a Color24, discarding the alpha component</summary>
 		/// <param name="c">The System.Drawing.Color</param>
 		/// <returns>The new Color24</returns>
 		public static implicit operator Color24(System.Drawing.Color c)
 		{
 			return new Color24(c.R, c.G, c.B);
+		}
+
+		public static implicit operator System.Drawing.Color(Color24 c)
+		{
+			return System.Drawing.Color.FromArgb(c.R, c.G, c.B);
+		}
+
+		public override string ToString()
+		{
+			return string.Format("#{0}", BitConverter.ToString(new byte[] { R, G, B }).Replace("-", string.Empty));
 		}
 	}
 	
@@ -247,7 +269,7 @@ namespace OpenBveApi.Colors {
 			{
 				return false;
 			}
-			return this.Equals((Color32)obj);
+			return Equals(this, (Color32)obj);
 		}
 
 		/// <summary>Returns the hashcode for this instance.</summary>
@@ -303,9 +325,9 @@ namespace OpenBveApi.Colors {
 		/// <returns>True if the parse succeds, false if it does not</returns>
 		public static bool TryParseHexColor(string Expression, out Color32 Color)
 		{
-			if (Expression.StartsWith("#"))
+			if (Expression.StartsWith("#", StringComparison.InvariantCultureIgnoreCase))
 			{
-				string a = Expression.Substring(1).TrimStart();
+				string a = Expression.Substring(1).TrimStart(new char[] { });
 				int x; if (Int32.TryParse(a, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out x))
 				{
 					int r = (x >> 16) & 0xFF;
@@ -491,7 +513,7 @@ namespace OpenBveApi.Colors {
 			{
 				return false;
 			}
-			return this.Equals((Color96)obj);
+			return Equals(this, (Color96)obj);
 		}
 
 		/// <summary>Returns the hashcode for this instance.</summary>
@@ -615,7 +637,7 @@ namespace OpenBveApi.Colors {
 			{
 				return false;
 			}
-			return this.Equals((Color128)obj);
+			return Equals(this, (Color128)obj);
 		}
 
 		/// <summary>Returns the hashcode for this instance.</summary>

@@ -1,9 +1,8 @@
 using System;
-using LibRender;
-using OpenBveApi.Math;
 using OpenBveApi.FunctionScripting;
+using OpenBveApi.Math;
 using OpenBveApi.Runtime;
-using OpenBve.RouteManager;
+using OpenBveApi.Trains;
 
 namespace OpenBve {
 	internal static class FunctionScripts {
@@ -213,22 +212,23 @@ namespace OpenBve {
 						s--; break;
 					case Instructions.CurrentObjectState:
 						Function.Stack[s] = CurrentState;
+						s++;
 						break;
 						// time/camera
 					case Instructions.TimeSecondsSinceMidnight:
-						Function.Stack[s] = Game.SecondsSinceMidnight;
+						Function.Stack[s] = Program.CurrentRoute.SecondsSinceMidnight;
 						s++; break;
 					case Instructions.CameraDistance:
 						{
-							double dx = Camera.AbsolutePosition.X - Position.X;
-							double dy = Camera.AbsolutePosition.Y - Position.Y;
-							double dz = Camera.AbsolutePosition.Z - Position.Z;
+							double dx = Program.Renderer.Camera.AbsolutePosition.X - Position.X;
+							double dy = Program.Renderer.Camera.AbsolutePosition.Y - Position.Y;
+							double dz = Program.Renderer.Camera.AbsolutePosition.Z - Position.Z;
 							Function.Stack[s] = Math.Sqrt(dx * dx + dy * dy + dz * dz);
 							s++;
 						} break;
 					case Instructions.CameraView:
 						//Returns whether the camera is in interior or exterior mode
-						if (Camera.CurrentMode == CameraViewMode.Interior || Camera.CurrentMode == CameraViewMode.InteriorLookAhead)
+						if (Program.Renderer.Camera.CurrentMode == CameraViewMode.Interior || Program.Renderer.Camera.CurrentMode == CameraViewMode.InteriorLookAhead)
 						{
 							Function.Stack[s] = 0;
 						}
@@ -254,7 +254,7 @@ namespace OpenBve {
 						s++; break;
 					case Instructions.TrainSpeed:
 						if (Train != null) {
-							Function.Stack[s] = Train.Cars[CarIndex].Specs.CurrentSpeed;
+							Function.Stack[s] = Train.Cars[CarIndex].CurrentSpeed;
 						} else {
 							Function.Stack[s] = 0.0;
 						}
@@ -264,7 +264,7 @@ namespace OpenBve {
 							int j = (int)Math.Round(Function.Stack[s - 1]);
 							if (j < 0) j += Train.Cars.Length;
 							if (j >= 0 & j < Train.Cars.Length) {
-								Function.Stack[s - 1] = Train.Cars[j].Specs.CurrentSpeed;
+								Function.Stack[s - 1] = Train.Cars[j].CurrentSpeed;
 							} else {
 								Function.Stack[s - 1] = 0.0;
 							}
@@ -319,7 +319,7 @@ namespace OpenBve {
 								if (Train.Cars[j].Specs.IsMotorCar) {
 									// hack: CurrentAccelerationOutput does not distinguish between forward/backward
 									if (Train.Cars[j].Specs.CurrentAccelerationOutput < 0.0) {
-										Function.Stack[s] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Math.Sign(Train.Cars[j].Specs.CurrentSpeed);
+										Function.Stack[s] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Math.Sign(Train.Cars[j].CurrentSpeed);
 									} else if (Train.Cars[j].Specs.CurrentAccelerationOutput > 0.0) {
 										Function.Stack[s] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Train.Handles.Reverser.Actual;
 									} else {
@@ -339,7 +339,7 @@ namespace OpenBve {
 							if (j >= 0 & j < Train.Cars.Length) {
 								// hack: CurrentAccelerationOutput does not distinguish between forward/backward
 								if (Train.Cars[j].Specs.CurrentAccelerationOutput < 0.0) {
-									Function.Stack[s - 1] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Math.Sign(Train.Cars[j].Specs.CurrentSpeed);
+									Function.Stack[s - 1] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Math.Sign(Train.Cars[j].CurrentSpeed);
 								} else if (Train.Cars[j].Specs.CurrentAccelerationOutput > 0.0) {
 									Function.Stack[s - 1] = Train.Cars[j].Specs.CurrentAccelerationOutput * (double)Train.Handles.Reverser.Actual;
 								} else {
@@ -710,7 +710,7 @@ namespace OpenBve {
 									}
 								}
 							}
-							Function.Stack[s] = q ? 1.0 : 0.0;
+							Function.Stack[s - 1] = q ? 1.0 : 0.0;
 						} else {
 							Function.Stack[s - 1] = 0.0;
 						}
@@ -742,7 +742,7 @@ namespace OpenBve {
 									}
 								}
 							}
-							Function.Stack[s] = q ? 1.0 : 0.0;
+							Function.Stack[s - 1] = q ? 1.0 : 0.0;
 						} else {
 							Function.Stack[s - 1] = 0.0;
 						}
@@ -764,6 +764,48 @@ namespace OpenBve {
 						}
 						else
 						{
+							Function.Stack[s] = 0.0;
+						}
+						s++; break;
+					case Instructions.PilotLamp:
+						if (Train != null) {
+							if (Train.SafetySystems.PilotLamp.Lit)
+							{
+								Function.Stack[s] = 1.0;
+							}
+							else
+							{
+								Function.Stack[s] = 0.0;
+							}
+						} else {
+							Function.Stack[s] = 0.0;
+						}
+						s++; break;
+					case Instructions.PassAlarm:
+						if (Train != null) {
+							if (Train.SafetySystems.PassAlarm.Lit)
+							{
+								Function.Stack[s] = 1.0;
+							}
+							else
+							{
+								Function.Stack[s] = 0.0;
+							}
+						} else {
+							Function.Stack[s] = 0.0;
+						}
+						s++; break;
+					case Instructions.StationAdjustAlarm:
+						if (Train != null) {
+							if (Train.SafetySystems.StationAdjust.Lit)
+							{
+								Function.Stack[s] = 1.0;
+							}
+							else
+							{
+								Function.Stack[s] = 0.0;
+							}
+						} else {
 							Function.Stack[s] = 0.0;
 						}
 						s++; break;
@@ -879,7 +921,7 @@ namespace OpenBve {
 								 * 2 ==> Secondary horn
 								 * 3 ==> Music horn
 								 */
-								if (Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[j].Source))
+								if (Program.Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[j].Source))
 								{
 									Function.Stack[s] = j + 1;
 									break;
@@ -898,7 +940,7 @@ namespace OpenBve {
 					case Instructions.PrimaryKlaxon:
 						if (Train != null)
 						{
-							Function.Stack[s] = Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[0].Source) ? 1.0 : 0.0;
+							Function.Stack[s] = Program.Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[0].Source) ? 1.0 : 0.0;
 						}
 						else
 						{
@@ -908,7 +950,7 @@ namespace OpenBve {
 					case Instructions.SecondaryKlaxon:
 						if (Train != null)
 						{
-							Function.Stack[s] = Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[1].Source) ? 1.0 : 0.0;
+							Function.Stack[s] = Program.Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[1].Source) ? 1.0 : 0.0;
 						}
 						else
 						{
@@ -918,7 +960,7 @@ namespace OpenBve {
 					case Instructions.MusicKlaxon:
 						if (Train != null)
 						{
-							Function.Stack[s] = Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[2].Source) ? 1.0 : 0.0;
+							Function.Stack[s] = Program.Sounds.IsPlaying(TrainManager.PlayerTrain.Cars[TrainManager.PlayerTrain.DriverCar].Horns[2].Source) ? 1.0 : 0.0;
 						}
 						else
 						{
@@ -1063,7 +1105,7 @@ namespace OpenBve {
 						break;
 						// safety
 					case Instructions.SafetyPluginAvailable:
-						if (Train == TrainManager.PlayerTrain && Train.Plugin != null) {
+						if (Train != null && Train.IsPlayerTrain && Train.Plugin != null) {
 							Function.Stack[s] = TrainManager.PlayerTrain.Plugin.IsDefault ? 0.0 : 1.0;
 						} else {
 							Function.Stack[s] = 0.0;
@@ -1092,7 +1134,7 @@ namespace OpenBve {
 						else
 						{
 							int stationIdx;
-							if (Train.Station >= 0 && Train.StationState != TrainManager.TrainStopState.Completed)
+							if (Train.Station >= 0 && Train.StationState != TrainStopState.Completed)
 							{
 								stationIdx = Train.LastStation;
 							}
@@ -1100,20 +1142,20 @@ namespace OpenBve {
 							{
 								stationIdx = Train.LastStation + 1;
 							}
-							if (stationIdx > Game.Stations.Length - 1)
+							if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 							{
 								stationIdx = Train.LastStation;
 							}
-							int n = Game.Stations[stationIdx].GetStopIndex(Train.Cars.Length);
+							int n = Program.CurrentRoute.Stations[stationIdx].GetStopIndex(Train.NumberOfCars);
 							double p0 = Train.FrontCarTrackPosition();
 							double p1;
-							if (Game.Stations[stationIdx].Stops.Length > 0)
+							if (Program.CurrentRoute.Stations[stationIdx].Stops.Length > 0)
 							{
-								p1 = Game.Stations[stationIdx].Stops[n].TrackPosition;
+								p1 = Program.CurrentRoute.Stations[stationIdx].Stops[n].TrackPosition;
 							}
 							else
 							{
-								p1 = Game.Stations[stationIdx].DefaultTrackPosition;
+								p1 = Program.CurrentRoute.Stations[stationIdx].DefaultTrackPosition;
 							}
 							Function.Stack[s] = p1 - p0;
 						}
@@ -1126,7 +1168,7 @@ namespace OpenBve {
 						else
 						{
 							int stationIdx;
-							if (Train.Station >= 0 && Train.StationState != TrainManager.TrainStopState.Completed)
+							if (Train.Station >= 0 && Train.StationState != TrainStopState.Completed)
 							{
 								stationIdx = Train.LastStation;
 							}
@@ -1134,7 +1176,7 @@ namespace OpenBve {
 							{
 								stationIdx = Train.LastStation + 1;
 							}
-							if (stationIdx > Game.Stations.Length - 1)
+							if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 							{
 								Function.Stack[s] = 0.0; //Passed the terminal station, hence cannot stop again
 							}
@@ -1148,22 +1190,22 @@ namespace OpenBve {
 						if (Train != null)
 						{
 							int stationIdx = (int)Math.Round(Function.Stack[s - 1]); //Station index
-							if (stationIdx > Game.Stations.Length - 1)
+							if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 							{
 								Function.Stack[s - 1] = 0.0; //Invalid index
 							}
 							else
 							{
-								int n = Game.Stations[stationIdx].GetStopIndex(Train.Cars.Length);
+								int n = Program.CurrentRoute.Stations[stationIdx].GetStopIndex(Train.NumberOfCars);
 								double p0 = Train.FrontCarTrackPosition();
 								double p1;
-								if (Game.Stations[stationIdx].Stops.Length > 0)
+								if (Program.CurrentRoute.Stations[stationIdx].Stops.Length > 0)
 								{
-									p1 = Game.Stations[stationIdx].Stops[n].TrackPosition;
+									p1 = Program.CurrentRoute.Stations[stationIdx].Stops[n].TrackPosition;
 								}
 								else
 								{
-									p1 = Game.Stations[stationIdx].DefaultTrackPosition;
+									p1 = Program.CurrentRoute.Stations[stationIdx].DefaultTrackPosition;
 								}
 								Function.Stack[s - 1] = p1 - p0;
 							}
@@ -1177,7 +1219,7 @@ namespace OpenBve {
 						if (Train != null)
 						{
 							int stationIdx = (int)Math.Round(Function.Stack[s - 1]); //Station index
-							if (stationIdx > Game.Stations.Length - 1)
+							if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 							{
 								Function.Stack[s - 1] = 0.0; //Invalid index
 							}
@@ -1205,7 +1247,7 @@ namespace OpenBve {
 							else
 							{
 								int stationIdx = Train.LastStation + 1;
-								if (stationIdx > Game.Stations.Length - 1)
+								if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 								{
 									stationIdx = Train.LastStation;
 								}
@@ -1221,12 +1263,12 @@ namespace OpenBve {
 							else
 							{
 								int stationIdx = Train.LastStation + 1;
-								if (stationIdx > Game.Stations.Length - 1)
+								if (stationIdx > Program.CurrentRoute.Stations.Length - 1)
 								{
 									stationIdx = Train.LastStation;
 								}
 
-								while (stationIdx < Game.Stations.Length - 1)
+								while (stationIdx < Program.CurrentRoute.Stations.Length - 1)
 								{
 									if (Game.StopsAtStation(stationIdx, Train))
 									{
@@ -1241,18 +1283,18 @@ namespace OpenBve {
 					case Instructions.SectionAspectNumber:
 						if (IsPartOfTrain) {
 							int nextSectionIndex = Train.CurrentSectionIndex + 1;
-							if (nextSectionIndex >= 0 & nextSectionIndex < CurrentRoute.Sections.Length) {
-								int a = CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
-								if (a >= 0 & a < CurrentRoute.Sections[nextSectionIndex].Aspects.Length) {
-									Function.Stack[s] = (double)CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
+							if (nextSectionIndex >= 0 & nextSectionIndex < Program.CurrentRoute.Sections.Length) {
+								int a = Program.CurrentRoute.Sections[nextSectionIndex].CurrentAspect;
+								if (a >= 0 & a < Program.CurrentRoute.Sections[nextSectionIndex].Aspects.Length) {
+									Function.Stack[s] = (double)Program.CurrentRoute.Sections[nextSectionIndex].Aspects[a].Number;
 								} else {
 									Function.Stack[s] = 0;
 								}
 							}
-						} else if (SectionIndex >= 0 & SectionIndex < CurrentRoute.Sections.Length) {
-							int a = CurrentRoute.Sections[SectionIndex].CurrentAspect;
-							if (a >= 0 & a < CurrentRoute.Sections[SectionIndex].Aspects.Length) {
-								Function.Stack[s] = (double)CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
+						} else if (SectionIndex >= 0 & SectionIndex < Program.CurrentRoute.Sections.Length) {
+							int a = Program.CurrentRoute.Sections[SectionIndex].CurrentAspect;
+							if (a >= 0 & a < Program.CurrentRoute.Sections[SectionIndex].Aspects.Length) {
+								Function.Stack[s] = (double)Program.CurrentRoute.Sections[SectionIndex].Aspects[a].Number;
 							} else {
 								Function.Stack[s] = 0;
 							}

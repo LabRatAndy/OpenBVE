@@ -1,4 +1,5 @@
 ﻿using System;
+using SoundManager;
 
 namespace OpenBve
 {
@@ -139,25 +140,7 @@ namespace OpenBve
 					}
 				}
 			}
-
-			if (oldState != OpenBveApi.Runtime.DoorStates.None & newState == OpenBveApi.Runtime.DoorStates.None)
-			{
-				Sounds.SoundBuffer buffer = Train.Cars[Train.DriverCar].Sounds.PilotLampOn.Buffer;
-				if (buffer != null)
-				{
-					OpenBveApi.Math.Vector3 pos = Train.Cars[Train.DriverCar].Sounds.PilotLampOn.Position;
-					Sounds.PlaySound(buffer, 1.0, 1.0, pos, Train, Train.DriverCar, false);
-				}
-			}
-			else if (oldState == OpenBveApi.Runtime.DoorStates.None & newState != OpenBveApi.Runtime.DoorStates.None)
-			{
-				Sounds.SoundBuffer buffer = Train.Cars[Train.DriverCar].Sounds.PilotLampOff.Buffer;
-				if (buffer != null)
-				{
-					OpenBveApi.Math.Vector3 pos = Train.Cars[Train.DriverCar].Sounds.PilotLampOff.Position;
-					Sounds.PlaySound(buffer, 1.0, 1.0, pos, Train, Train.DriverCar, false);
-				}
-			}
+			Train.SafetySystems.PilotLamp.Update(newState);
 			if (oldState != newState)
 			{
 				if (Train.Plugin != null)
@@ -174,11 +157,11 @@ namespace OpenBve
 		/// <param name="ForwardsTolerance">The forwards tolerance for this stop point</param>
 		internal static void AttemptToOpenDoors(Train Train, int StationIndex, double BackwardsTolerance, double ForwardsTolerance)
 		{
-			if ((GetDoorsState(Train, Game.Stations[StationIndex].OpenLeftDoors, Game.Stations[StationIndex].OpenRightDoors) & TrainDoorState.AllOpened) == 0)
+			if ((GetDoorsState(Train, Program.CurrentRoute.Stations[StationIndex].OpenLeftDoors, Program.CurrentRoute.Stations[StationIndex].OpenRightDoors) & TrainDoorState.AllOpened) == 0)
 			{
 					if (Train.StationDistanceToStopPoint < BackwardsTolerance & -Train.StationDistanceToStopPoint < ForwardsTolerance)
 					{
-						OpenTrainDoors(Train, Game.Stations[StationIndex].OpenLeftDoors, Game.Stations[StationIndex].OpenRightDoors);
+						OpenTrainDoors(Train, Program.CurrentRoute.Stations[StationIndex].OpenLeftDoors, Program.CurrentRoute.Stations[StationIndex].OpenRightDoors);
 					}
 				
 			}
@@ -188,7 +171,7 @@ namespace OpenBve
 		/// <param name="Train">The train</param>
 		internal static void AttemptToCloseDoors(Train Train)
 		{
-			if (Game.SecondsSinceMidnight >= Train.StationDepartureTime - 1.0 / Train.Cars[Train.DriverCar].Specs.DoorCloseFrequency)
+			if (Program.CurrentRoute.SecondsSinceMidnight >= Train.StationDepartureTime - 1.0 / Train.Cars[Train.DriverCar].Specs.DoorCloseFrequency)
 			{
 				if ((GetDoorsState(Train, true, true) & TrainDoorState.AllClosed) == 0)
 				{
@@ -222,11 +205,11 @@ namespace OpenBve
 			{
 				for (int i = 0; i < Train.Cars.Length; i++)
 				{
-					Sounds.SoundBuffer buffer = Train.Cars[i].Doors[0].OpenSound.Buffer;
+					SoundBuffer buffer = Train.Cars[i].Doors[0].OpenSound.Buffer;
 					if (buffer != null)
 					{
 						OpenBveApi.Math.Vector3 pos = Train.Cars[i].Doors[0].OpenSound.Position;
-						Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorOpenPitch, 1.0, pos, Train, i, false);
+						Program.Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorOpenPitch, 1.0, pos, Train.Cars[i], false);
 					}
 					for (int j = 0; j < Train.Cars[i].Doors.Length; j++)
 					{
@@ -241,11 +224,11 @@ namespace OpenBve
 			{
 				for (int i = 0; i < Train.Cars.Length; i++)
 				{
-					Sounds.SoundBuffer buffer = Train.Cars[i].Doors[1].OpenSound.Buffer;
+					SoundBuffer buffer = Train.Cars[i].Doors[1].OpenSound.Buffer;
 					if (buffer != null)
 					{
 						OpenBveApi.Math.Vector3 pos = Train.Cars[i].Doors[1].OpenSound.Position;
-						Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorOpenPitch, 1.0, pos, Train, i, false);
+						Program.Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorOpenPitch, 1.0, pos, Train.Cars[i], false);
 					}
 					for (int j = 0; j < Train.Cars[i].Doors.Length; j++)
 					{
@@ -278,11 +261,11 @@ namespace OpenBve
 			}
 			if (sl)
 			{
-				Sounds.SoundBuffer buffer = Train.Cars[CarIndex].Doors[0].OpenSound.Buffer;
+				SoundBuffer buffer = Train.Cars[CarIndex].Doors[0].OpenSound.Buffer;
 				if (buffer != null)
 				{
 					OpenBveApi.Math.Vector3 pos = Train.Cars[CarIndex].Doors[0].OpenSound.Position;
-					Sounds.PlaySound(buffer, Train.Cars[CarIndex].Specs.DoorOpenPitch, 1.0, pos, Train, CarIndex, false);
+					Program.Sounds.PlaySound(buffer, Train.Cars[CarIndex].Specs.DoorOpenPitch, 1.0, pos, Train.Cars[CarIndex], false);
 				}
 				for (int i = 0; i < Train.Cars[CarIndex].Doors.Length; i++)
 				{
@@ -294,11 +277,11 @@ namespace OpenBve
 			}
 			if (sr)
 			{
-				Sounds.SoundBuffer buffer = Train.Cars[CarIndex].Doors[1].OpenSound.Buffer;
+				SoundBuffer buffer = Train.Cars[CarIndex].Doors[1].OpenSound.Buffer;
 				if (buffer != null)
 				{
 					OpenBveApi.Math.Vector3 pos = Train.Cars[CarIndex].Doors[1].OpenSound.Position;
-					Sounds.PlaySound(buffer, Train.Cars[CarIndex].Specs.DoorOpenPitch, 1.0, pos, Train, CarIndex, false);
+					Program.Sounds.PlaySound(buffer, Train.Cars[CarIndex].Specs.DoorOpenPitch, 1.0, pos, Train.Cars[CarIndex], false);
 				}
 				for (int i = 0; i < Train.Cars[CarIndex].Doors.Length; i++)
 				{
@@ -342,11 +325,11 @@ namespace OpenBve
 			{
 				for (int i = 0; i < Train.Cars.Length; i++)
 				{
-					Sounds.SoundBuffer buffer = Train.Cars[i].Doors[0].CloseSound.Buffer;
+					SoundBuffer buffer = Train.Cars[i].Doors[0].CloseSound.Buffer;
 					if (buffer != null)
 					{
 						OpenBveApi.Math.Vector3 pos = Train.Cars[i].Doors[0].CloseSound.Position;
-						Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorClosePitch, 1.0, pos, Train, i, false);
+						Program.Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorClosePitch, 1.0, pos, Train.Cars[i], false);
 					}
 				}
 			}
@@ -354,11 +337,11 @@ namespace OpenBve
 			{
 				for (int i = 0; i < Train.Cars.Length; i++)
 				{
-					Sounds.SoundBuffer buffer = Train.Cars[i].Doors[1].CloseSound.Buffer;
+					SoundBuffer buffer = Train.Cars[i].Doors[1].CloseSound.Buffer;
 					if (buffer != null)
 					{
 						OpenBveApi.Math.Vector3 pos = Train.Cars[i].Doors[1].CloseSound.Position;
-						Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorClosePitch, 1.0, pos, Train, i, false);
+						Program.Sounds.PlaySound(buffer, Train.Cars[i].Specs.DoorClosePitch, 1.0, pos, Train.Cars[i], false);
 					}
 				}
 			}

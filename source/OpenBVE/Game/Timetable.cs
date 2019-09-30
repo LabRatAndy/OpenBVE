@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Drawing;
-using LibRender;
 using OpenBveApi;
 using OpenBveApi.Runtime;
 using OpenBveApi.Textures;
 using OpenBveApi.Interface;
+using OpenBveApi.Objects;
+using RouteManager2.Events;
 
 namespace OpenBve {
 	internal static class Timetable {
@@ -15,7 +16,7 @@ namespace OpenBve {
 		internal static double DefaultTimetablePosition = 0.0;
 		
 		// members (custom timetable)
-		internal static ObjectManager.AnimatedObject[] CustomObjects = new ObjectManager.AnimatedObject[16];
+		internal static AnimatedObject[] CustomObjects = new AnimatedObject[16];
 		internal static int CustomObjectsUsed;
 		internal static bool CustomTimetableAvailable;
 		internal static Texture CurrentCustomTimetableDaytimeTexture;
@@ -65,12 +66,12 @@ namespace OpenBve {
 				double Limit = -1.0, LastLimit = 6.94444444444444;
 				int LastArrivalHours = -1, LastDepartureHours = -1;
 				double LastTime = -1.0;
-				for (int i = 0; i < TrackManager.Tracks[0].Elements.Length; i++)
+				for (int i = 0; i < Program.CurrentRoute.Tracks[0].Elements.Length; i++)
 				{
-					for (int j = 0; j < TrackManager.Tracks[0].Elements[i].Events.Length; j++)
+					for (int j = 0; j < Program.CurrentRoute.Tracks[0].Elements[i].Events.Length; j++)
 					{
-						TrackManager.StationStartEvent sse = TrackManager.Tracks[0].Elements[i].Events[j] as TrackManager.StationStartEvent;
-						if (sse != null && Game.Stations[sse.StationIndex].Name != string.Empty)
+						StationStartEvent sse = Program.CurrentRoute.Tracks[0].Elements[i].Events[j] as StationStartEvent;
+						if (sse != null && Program.CurrentRoute.Stations[sse.StationIndex].Name != string.Empty)
 						{
 							if (Limit == -1.0) Limit = LastLimit;
 							// update station
@@ -79,14 +80,14 @@ namespace OpenBve {
 								Array.Resize<Station>(ref Stations, Stations.Length << 1);
 							}
 
-							Stations[n].Name = Game.Stations[sse.StationIndex].Name;
-							Stations[n].NameJapanese = Game.Stations[sse.StationIndex].Name.IsJapanese();
-							Stations[n].Pass = !Game.Stations[sse.StationIndex].PlayerStops();
-							Stations[n].Terminal = Game.Stations[sse.StationIndex].Type != StationType.Normal;
+							Stations[n].Name = Program.CurrentRoute.Stations[sse.StationIndex].Name;
+							Stations[n].NameJapanese = Program.CurrentRoute.Stations[sse.StationIndex].Name.IsJapanese();
+							Stations[n].Pass = !Program.CurrentRoute.Stations[sse.StationIndex].PlayerStops();
+							Stations[n].Terminal = Program.CurrentRoute.Stations[sse.StationIndex].Type != StationType.Normal;
 							double x;
-							if (Game.Stations[sse.StationIndex].ArrivalTime >= 0.0)
+							if (Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime >= 0.0)
 							{
-								x = Game.Stations[sse.StationIndex].ArrivalTime;
+								x = Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime;
 								x -= 86400.0 * Math.Floor(x / 86400.0);
 								int hours = (int) Math.Floor(x / 3600.0);
 								x -= 3600.0 * (double) hours;
@@ -105,9 +106,9 @@ namespace OpenBve {
 								Stations[n].Arrival.Second = "";
 							}
 
-							if (Game.Stations[sse.StationIndex].DepartureTime >= 0.0)
+							if (Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime >= 0.0)
 							{
-								x = Game.Stations[sse.StationIndex].DepartureTime;
+								x = Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime;
 								x -= 86400.0 * Math.Floor(x / 86400.0);
 								int hours = (int) Math.Floor(x / 3600.0);
 								x -= 3600.0 * (double) hours;
@@ -141,13 +142,13 @@ namespace OpenBve {
 								// time
 								if (LastTime >= 0.0)
 								{
-									if (Game.Stations[sse.StationIndex].ArrivalTime >= 0.0)
+									if (Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime >= 0.0)
 									{
-										x = Game.Stations[sse.StationIndex].ArrivalTime;
+										x = Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime;
 									}
-									else if (Game.Stations[sse.StationIndex].DepartureTime >= 0.0)
+									else if (Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime >= 0.0)
 									{
-										x = Game.Stations[sse.StationIndex].DepartureTime;
+										x = Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime;
 									}
 									else x = -1.0;
 
@@ -179,13 +180,13 @@ namespace OpenBve {
 							}
 
 							// update last data
-							if (Game.Stations[sse.StationIndex].DepartureTime >= 0.0)
+							if (Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime >= 0.0)
 							{
-								LastTime = Game.Stations[sse.StationIndex].DepartureTime;
+								LastTime = Program.CurrentRoute.Stations[sse.StationIndex].DepartureTime;
 							}
-							else if (Game.Stations[sse.StationIndex].ArrivalTime >= 0.0)
+							else if (Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime >= 0.0)
 							{
-								LastTime = Game.Stations[sse.StationIndex].ArrivalTime;
+								LastTime = Program.CurrentRoute.Stations[sse.StationIndex].ArrivalTime;
 							}
 							else
 							{
@@ -199,7 +200,7 @@ namespace OpenBve {
 
 						if (n >= 1)
 						{
-							TrackManager.LimitChangeEvent lce = TrackManager.Tracks[0].Elements[i].Events[j] as TrackManager.LimitChangeEvent;
+							LimitChangeEvent lce = Program.CurrentRoute.Tracks[0].Elements[i].Events[j] as LimitChangeEvent;
 							if (lce != null)
 							{
 								if (lce.NextSpeedLimit != double.PositiveInfinity & lce.NextSpeedLimit > Limit) Limit = lce.NextSpeedLimit;
@@ -233,7 +234,7 @@ namespace OpenBve {
 				for (int k = 0; k < 2; k++)
 				{
 					Bitmap b = new Bitmap(w, h);
-					Graphics g = Graphics.FromImage(b);
+					System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(b);
 					g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 					g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 					g.Clear(Color.Transparent);
@@ -492,17 +493,17 @@ namespace OpenBve {
 					if (k == 0)
 					{
 						// measures
-						int nw = TextureManager.RoundUpToPowerOfTwo(w);
+						int nw = Program.Renderer.TextureManager.RoundUpToPowerOfTwo(w);
 						offsetx = nw - w;
 						w = nw;
 						actualheight = h;
-						h = TextureManager.RoundUpToPowerOfTwo(h);
+						h = Program.Renderer.TextureManager.RoundUpToPowerOfTwo(h);
 					}
 					else
 					{
 						// create texture
 						g.Dispose();
-						timetableTexture = TextureManager.RegisterTexture(b);
+						timetableTexture = Program.Renderer.TextureManager.RegisterTexture(b);
 					}
 				}
 			}
@@ -511,9 +512,16 @@ namespace OpenBve {
 		/// <summary>Creates the texture used to display the default auto-generated timetable</summary>
 		internal static void CreateTimetable()
 		{
-			Table Table = new Table();
-			Table.CollectData();
-			Table.RenderData(ref DefaultTimetableTexture);
+			try
+			{
+				Table Table = new Table();
+				Table.CollectData();
+				Table.RenderData(ref DefaultTimetableTexture);
+			}
+			catch
+			{
+				DefaultTimetableTexture = null;
+			}
 		}
 
 
@@ -521,12 +529,12 @@ namespace OpenBve {
 		internal static void UpdateCustomTimetable(Texture daytime, Texture nighttime) {
 			for (int i = 0; i < CustomObjectsUsed; i++) {
 				for (int j = 0; j < CustomObjects[i].States.Length; j++) {
-					for (int k = 0; k < CustomObjects[i].States[j].Object.Mesh.Materials.Length; k++) {
+					for (int k = 0; k < CustomObjects[i].States[j].Prototype.Mesh.Materials.Length; k++) {
 						if (daytime != null) {
-							CustomObjects[i].States[j].Object.Mesh.Materials[k].DaytimeTexture = daytime;
+							CustomObjects[i].States[j].Prototype.Mesh.Materials[k].DaytimeTexture = daytime;
 						}
 						if (nighttime != null) {
-							CustomObjects[i].States[j].Object.Mesh.Materials[k].NighttimeTexture = nighttime;
+							CustomObjects[i].States[j].Prototype.Mesh.Materials[k].NighttimeTexture = nighttime;
 						}
 					}
 				}
@@ -545,9 +553,9 @@ namespace OpenBve {
 		}
 		
 		// add object for custom timetable
-		internal static void AddObjectForCustomTimetable(ObjectManager.AnimatedObject obj) {
+		internal static void AddObjectForCustomTimetable(AnimatedObject obj) {
 			if (CustomObjectsUsed >= CustomObjects.Length) {
-				Array.Resize<ObjectManager.AnimatedObject>(ref CustomObjects, CustomObjects.Length << 1);
+				Array.Resize(ref CustomObjects, CustomObjects.Length << 1);
 			}
 			CustomObjects[CustomObjectsUsed] = obj;
 			CustomObjectsUsed++;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
+using OpenBveApi;
 using OpenBveApi.Interface;
-using OpenBveApi.Math;
 using OpenBveApi.Objects;
 
 namespace OpenBve
@@ -97,6 +97,7 @@ namespace OpenBve
 					case TextEncoding.Encoding.Shift_JIS:
 						Encoding = System.Text.Encoding.GetEncoding(932);
 						break;
+					case TextEncoding.Encoding.ASCII:
 					case TextEncoding.Encoding.Windows1252:
 						Encoding = System.Text.Encoding.GetEncoding(1252);
 						break;
@@ -105,6 +106,9 @@ namespace OpenBve
 						break;
 					case TextEncoding.Encoding.EUC_KR:
 						Encoding = System.Text.Encoding.GetEncoding(949);
+						break;
+					case TextEncoding.Encoding.OEM866:
+						Encoding = System.Text.Encoding.GetEncoding(866);
 						break;
 				}
 			}
@@ -120,22 +124,14 @@ namespace OpenBve
 				case ".b3d":
 				case ".x":
 				case ".obj":
-					Program.CurrentHost.LoadObject(FileName, Encoding, out Result);
-					break;
 				case ".animated":
-					Result = AnimatedObjectParser.ReadObject(FileName, Encoding);
+				case ".l3dgrp":
+				case ".l3dobj":
+				case ".s":
+					Program.CurrentHost.LoadObject(FileName, Encoding, out Result);
 					break;
 				case ".xml":
 					Result = XMLParser.ReadObject(FileName, Encoding);
-					break;
-				case ".l3dgrp":
-					Result = Ls3DGrpParser.ReadObject(FileName, Encoding, new Vector3());
-					break;
-				case ".l3dobj":
-					Result = Ls3DObjectParser.ReadObject(FileName, new Vector3());
-					break;
-				case ".s":
-					Result = MsTsShapeParser.ReadObject(FileName);
 					break;
 				default:
 					Interface.AddMessage(MessageType.Error, false, "The file extension is not supported: " + FileName);
@@ -193,19 +189,24 @@ namespace OpenBve
 				Interface.AddMessage(MessageType.Error, false, "The file " + FileName + " does not have a recognised extension.");
 				return null;
 			}
-			UnifiedObject obj;
 			switch (e.ToLowerInvariant())
 			{
 				case ".csv":
 				case ".b3d":
 				case ".x":
 				case ".obj":
-					Program.CurrentHost.LoadObject(FileName, Encoding, out obj);
-					Result = (StaticObject)obj;
-					break;
+				case ".l3dgrp":
+				case ".l3dobj":
 				case ".animated":
 				case ".s":
-					Interface.AddMessage(MessageType.Error, false, "Tried to load an animated object even though only static objects are allowed: " + FileName);
+					UnifiedObject obj;
+					Program.CurrentHost.LoadObject(FileName, Encoding, out obj);
+					if (obj is AnimatedObjectCollection)
+					{
+						Interface.AddMessage(MessageType.Error, false, "Tried to load an animated object even though only static objects are allowed: " + FileName);
+						return null;
+					}
+					Result = (StaticObject)obj;
 					break;
 				/*
 				 * This will require implementing a specific static object load function- Leave alone for the moment

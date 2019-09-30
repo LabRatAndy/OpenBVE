@@ -98,7 +98,7 @@ namespace OpenBve
 				{
 					if (a.Length > Name.Length)
 					{
-						string b = a.Substring(Name.Length).TrimStart();
+						string b = a.Substring(Name.Length).TrimStart(new char[] { });
 						int j; if (int.TryParse(b, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out j))
 						{
 							if (j >= 0)
@@ -149,8 +149,12 @@ namespace OpenBve
 			return Textures;
 		}
 
-		private static string GetChecksum(string file)
+		internal static string GetChecksum(string file)
 		{
+			if (string.IsNullOrEmpty(file) || !File.Exists(file))
+			{
+				return string.Empty;
+			}
 			using (FileStream stream = File.OpenRead(file))
 			{
 				SHA256Managed sha = new SHA256Managed();
