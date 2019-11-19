@@ -26,13 +26,27 @@ namespace OpenBve {
 		// date and time
 		internal static double SecondsSinceMidnight = 0.0;
 		internal static double StartupTime = 0.0;
+		internal static bool MinimalisticSimulation = false;
+		internal static double[] RouteUnitOfLength = new double[] { 1.0 };
 
+		
+
+		// route constants
+		internal static string RouteComment = "";
+		internal static string RouteImage = "";
+		
 		// game constants
 		internal static double[] PrecedingTrainTimeDeltas;
 		internal static double PrecedingTrainSpeedLimit;
 
 		internal static TrainStartMode TrainStart = TrainStartMode.EmergencyBrakesNoAts;
 		internal static string TrainName = "";
+
+		// information
+		
+		/// <summary>The current plugin debug message to be displayed</summary>
+		internal static string InfoDebugString = "";
+		
 
 		// ================================
 
@@ -43,8 +57,8 @@ namespace OpenBve {
 			TrainManager.Trains = new TrainManager.Train[] { };
 			// game
 			Interface.ClearMessages();
-			Program.CurrentRoute.Comment = "";
-			Program.CurrentRoute.Image = "";
+			RouteComment = "";
+			RouteImage = "";
 			Program.CurrentRoute.Atmosphere.AccelerationDueToGravity = 9.80665;
 			Program.CurrentRoute.Atmosphere.InitialAirPressure = 101325.0;
 			Program.CurrentRoute.Atmosphere.InitialAirTemperature = 293.15;
@@ -53,7 +67,7 @@ namespace OpenBve {
 			Program.CurrentRoute.Atmosphere.SeaLevelAirTemperature = 293.15;
 			Program.CurrentRoute.Stations = new RouteStation[] { };
 			Program.CurrentRoute.Sections = new Section[] { };
-			Program.CurrentRoute.BufferTrackPositions = new double[] { };
+			BufferTrackPositions = new double[] { };
 			Program.Renderer.Marker.MarkerTextures = new Texture[] { };
 			Program.CurrentRoute.PointsOfInterest = new PointOfInterest[] { };
 			Program.CurrentRoute.BogusPreTrainInstructions = new BogusPreTrainInstruction[] { };
@@ -62,7 +76,7 @@ namespace OpenBve {
 			Program.CurrentRoute.PreviousFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.0);
 			Program.CurrentRoute.CurrentFog = new Fog(0.0f, 0.0f, Color24.Grey, 0.5);
 			Program.CurrentRoute.NextFog = new Fog(0.0f, 0.0f, Color24.Grey, 1.0);
-			Program.CurrentRoute.NoFogStart = (float)Program.CurrentRoute.CurrentBackground.BackgroundImageDistance + 200.0f;
+			Program.CurrentRoute.NoFogStart = (float)BackgroundHandle.BackgroundImageDistance + 200.0f;
 			Program.CurrentRoute.NoFogEnd = 2.0f * Program.CurrentRoute.NoFogStart;
 			Program.Renderer.InfoTotalTriangles = 0;
 			Program.Renderer.InfoTotalTriangleStrip = 0;
@@ -71,7 +85,7 @@ namespace OpenBve {
 			Program.Renderer.InfoTotalPolygon = 0;
 			// object manager
 			Program.Renderer.InitializeVisibility();
-			ObjectManager.AnimatedWorldObjects = new WorldObject[4];
+			ObjectManager.AnimatedWorldObjects = new AnimatedWorldObject[4];
 			ObjectManager.AnimatedWorldObjectsUsed = 0;
 			// renderer / sound
 			Program.Renderer.Reset();
@@ -80,6 +94,14 @@ namespace OpenBve {
 		}
 
 		// ================================
+
+		
+		
+
+		// ================================
+
+		// buffers
+		internal static double[] BufferTrackPositions = new double[] { };
 
 		internal static bool ApplyPointOfInterest(int Value, bool Relative) {
 			double t = 0.0;

@@ -7,7 +7,9 @@
 
 using System;
 using OpenBveApi;
+using OpenBveApi.Graphics;
 using OpenBveApi.Interface;
+using OpenBveApi.Math;
 using OpenBveApi.Objects;
 
 namespace OpenBve {
@@ -36,11 +38,16 @@ namespace OpenBve {
 	// --- Game.cs ---
 	internal static class Game {
 		internal static double SecondsSinceMidnight = 0.0;
+		internal enum SectionType { ValueBased, IndexBased }
+		internal struct SectionAspect {
+			internal int Number;
+			internal double Speed;
+		}
 		
 		internal static void Reset() {
 			Program.Renderer.Reset();
 			Program.Renderer.InitializeVisibility();
-			ObjectManager.AnimatedWorldObjects = new WorldObject[4];
+			ObjectManager.AnimatedWorldObjects = new AnimatedWorldObject[4];
 			ObjectManager.AnimatedWorldObjectsUsed = 0;
 		}
 	}

@@ -6,7 +6,6 @@ using System.Text;
 using System.Windows.Forms;
 using OpenBveApi;
 using OpenBveApi.Interface;
-using RouteManager2;
 
 namespace OpenBve
 {
@@ -768,9 +767,9 @@ namespace OpenBve
 						pictureboxRouteGradient.Height, false);
 				}
 				// image
-				if (Program.CurrentRoute.Image.Length != 0)
+				if (Game.RouteImage.Length != 0)
 				{
-					TryLoadImage(pictureboxRouteImage, Program.CurrentRoute.Image);
+					TryLoadImage(pictureboxRouteImage, Game.RouteImage);
 				}
 				else
 				{
@@ -803,7 +802,7 @@ namespace OpenBve
 				}
 
 				// description
-				string Description = Program.CurrentRoute.Comment.ConvertNewlinesToCrLf();
+				string Description = Game.RouteComment.ConvertNewlinesToCrLf();
 				if (Description.Length != 0)
 				{
 					textboxRouteDescription.Text = Description;

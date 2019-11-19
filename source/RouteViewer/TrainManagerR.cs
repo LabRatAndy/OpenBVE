@@ -22,6 +22,7 @@ namespace OpenBve {
 		internal struct Axle {
 			internal TrackFollower Follower;
 		}
+		internal struct Section { }
 
 		// cars
 		internal struct Door {
@@ -239,6 +240,7 @@ namespace OpenBve {
 			internal Axle RearAxle;
 			internal double FrontAxlePosition;
 			internal double RearAxlePosition;
+			internal Section[] Sections;
 			internal int CurrentSection;
 			internal CarSpecs Specs;
 			internal CarSounds Sounds;

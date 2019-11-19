@@ -1,4 +1,4 @@
-﻿using OpenBveApi.Input;
+﻿using OpenTK.Input;
 
 namespace OpenBveApi.Interface
 {

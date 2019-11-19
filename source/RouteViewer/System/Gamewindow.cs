@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
-using OpenBveApi.Math;
 using OpenBveApi.Routes;
 using OpenTK;
 using OpenTK.Graphics;
@@ -110,7 +109,7 @@ namespace OpenBve
 			MouseUp += Program.MouseEvent;
 	        FileDrop += Program.FileDrop;
             Program.ResetCamera();
-            Program.CurrentRoute.CurrentBackground.BackgroundImageDistance = 600.0;
+            BackgroundHandle.BackgroundImageDistance = 600.0;
             Program.Renderer.Camera.ForwardViewingDistance = 600.0;
             Program.Renderer.Camera.BackwardViewingDistance = 0.0;
             Program.Renderer.Camera.ExtraViewingDistance = 50.0;
@@ -157,9 +156,9 @@ namespace OpenBve
 			currentlyLoading = true;
 
 			Program.Renderer.PushMatrix(MatrixMode.Projection);
-			Matrix4D.CreateOrthographicOffCenter(0.0f, Program.Renderer.Screen.Width, Program.Renderer.Screen.Height, 0.0f, -1.0f, 1.0f, out Program.Renderer.CurrentProjectionMatrix);
+			Program.Renderer.CurrentProjectionMatrix = Matrix4d.CreateOrthographicOffCenter(0.0, Program.Renderer.Screen.Width, Program.Renderer.Screen.Height, 0.0, -1.0, 1.0);
 			Program.Renderer.PushMatrix(MatrixMode.Modelview);
-			Program.Renderer.CurrentViewMatrix = Matrix4D.Identity;
+			Program.Renderer.CurrentViewMatrix = Matrix4d.Identity;
 
 			while (!Loading.Complete && !Loading.Cancel)
 			{

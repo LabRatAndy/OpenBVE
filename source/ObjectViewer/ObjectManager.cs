@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using OpenBveApi.Interface;
 using OpenBveApi.Objects;
+using OpenBveApi.Routes;
 using OpenBveApi.Trains;
 
 namespace OpenBve
@@ -20,8 +21,8 @@ namespace OpenBve
 				double z = AnimatedWorldObjects[i].Object.TranslateZFunction == null ? 0.0 : AnimatedWorldObjects[i].Object.TranslateZFunction.LastResult;
 				double pa = AnimatedWorldObjects[i].TrackPosition + z - AnimatedWorldObjects[i].Radius - extraRadius;
 				double pb = AnimatedWorldObjects[i].TrackPosition + z + AnimatedWorldObjects[i].Radius + extraRadius;
-				double ta = Program.Renderer.Camera.Alignment.Position.Z - Program.CurrentRoute.CurrentBackground.BackgroundImageDistance - Program.Renderer.Camera.ExtraViewingDistance;
-				double tb = Program.Renderer.Camera.Alignment.Position.Z + Program.CurrentRoute.CurrentBackground.BackgroundImageDistance + Program.Renderer.Camera.ExtraViewingDistance;
+				double ta = Program.Renderer.Camera.Alignment.Position.Z - BackgroundHandle.BackgroundImageDistance - Program.Renderer.Camera.ExtraViewingDistance;
+				double tb = Program.Renderer.Camera.Alignment.Position.Z + BackgroundHandle.BackgroundImageDistance + Program.Renderer.Camera.ExtraViewingDistance;
 				bool visible = pb >= ta & pa <= tb;
 				if (visible | ForceUpdate)
 				{

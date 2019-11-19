@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using OpenBveApi.Interface;
 using OpenTK.Input;
-using Key = OpenBveApi.Input.Key;
+using OpenBveApi.Interface;
 
 namespace OpenBve {
 	internal partial class formMain : Form {
@@ -551,7 +550,7 @@ namespace OpenBve {
 			}
 			for (int j = 0; j < Translations.TranslatedKeys.Length; j++)
 			{
-				if (kbState.IsKeyDown((OpenTK.Input.Key)Translations.TranslatedKeys[j].Key))
+				if (kbState.IsKeyDown(Translations.TranslatedKeys[j].Key))
 				{
 					int i = listviewControls.SelectedIndices[0];
 					Interface.CurrentControls[i].Key = Translations.TranslatedKeys[j].Key;

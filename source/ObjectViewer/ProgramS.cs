@@ -58,7 +58,7 @@ namespace OpenBve {
 
 		internal static CurrentRoute CurrentRoute;
 
-		internal static readonly Object LockObj = new Object();
+		internal static Object LockObj = new Object();
 
 		// main
 	    [STAThread]
@@ -263,7 +263,6 @@ namespace OpenBve {
 			Renderer.InitializeVisibility();
 			Renderer.UpdateVisibility(0.0, true);
 			ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
-			Renderer.ApplyBackgroundColor();
 		}
 
 		internal static MouseState currentMouseState;
@@ -403,7 +402,6 @@ namespace OpenBve {
 	                Renderer.InitializeVisibility();
 	                Renderer.UpdateVisibility(0.0, true);
 	                ObjectManager.UpdateAnimatedWorldObjects(0.01, true);
-					Renderer.ApplyBackgroundColor();
 	                break;
 	            case Key.F7:
 	            {
@@ -514,7 +512,6 @@ namespace OpenBve {
 		            }
 					Dialog.Dispose();
 	            }
-					Renderer.ApplyBackgroundColor();
 	                break;
 	            case Key.F9:
 	                if (Interface.MessageCount != 0)
@@ -530,7 +527,6 @@ namespace OpenBve {
 	                Renderer.TextureManager.UnloadAllTextures();
 	                Interface.ClearMessages();
 	                Files = new string[] {};
-					Renderer.ApplyBackgroundColor();
 	                break;
 	            case Key.Left:
 	                RotateX = -1;

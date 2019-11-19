@@ -11,7 +11,6 @@ using OpenBveApi.Interface;
 using OpenBveApi.Routes;
 using OpenBveApi.Trains;
 using OpenBveApi.Textures;
-using RouteManager2;
 using RouteManager2.SignalManager;
 using RouteManager2.Stations;
 using RouteManager2.Events;
@@ -289,7 +288,7 @@ namespace OpenBve {
 			PreprocessOptions(IsRW, Expressions, ref Data, ref UnitOfLength, PreviewOnly);
 			PreprocessSortByTrackPosition(IsRW, UnitOfLength, ref Expressions);
 			ParseRouteForData(FileName, IsRW, Encoding, Expressions, UnitOfLength, ref Data, PreviewOnly);
-			Program.CurrentRoute.UnitOfLength = UnitOfLength;
+			Game.RouteUnitOfLength = UnitOfLength;
 		}
 
 		// preprocess sort by track position
@@ -575,7 +574,7 @@ namespace OpenBve {
 									if (Arguments.Length < 1) {
 										Interface.AddMessage(MessageType.Error, false, Command + " is expected to have one argument at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 									} else {
-										Program.CurrentRoute.Comment = Arguments[0];
+										Game.RouteComment = Arguments[0];
 									} break;
 								case "route.image":
 									if (Arguments.Length < 1) {
@@ -585,7 +584,7 @@ namespace OpenBve {
 										if (!System.IO.File.Exists(f)) {
 											Interface.AddMessage(MessageType.Error, true, "FileName " + f + " not found in " + Command + " at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 										} else {
-											Program.CurrentRoute.Image = f;
+											Game.RouteImage = f;
 										}
 									} break;
 								case "route.timetable":
@@ -3275,30 +3274,7 @@ namespace OpenBve {
 													Interface.AddMessage(MessageType.Error, false, "DepartureTime is invalid in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
 													dep = -1.0;
 												}
-											} else if (Arguments[2].StartsWith("J:", StringComparison.InvariantCultureIgnoreCase)) {
-												string[] splitString = Arguments[2].Split(new char[] {':'});
-												for (int i = 0; i < splitString.Length; i++)
-												{
-													switch (i)
-													{
-														case 1:
-															if (!NumberFormats.TryParseIntVb6(splitString[1].TrimStart(), out Program.CurrentRoute.Stations[CurrentStation].JumpIndex)) {
-																Interface.AddMessage(MessageType.Error, false, "JumpStationIndex is invalid in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-																dep = -1.0;
-															} else {
-																Program.CurrentRoute.Stations[CurrentStation].Type = StationType.Jump;
-															}
-															break;
-														case 2:
-															if (!Interface.TryParseTime(splitString[2].TrimStart(), out dep)) {
-																Interface.AddMessage(MessageType.Error, false, "DepartureTime is invalid in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
-																dep = -1.0;
-															}
-															break;
-													}
-												}
-											}
-											else if(Arguments[2].Length == 1 && Arguments[2][0] == '.')
+											} else if(Arguments[2].Length == 1 && Arguments[2][0] == '.')
 											{ /* Treat a single period as a blank space */ }
 											else if (!Interface.TryParseTime(Arguments[2], out dep)) {
 												Interface.AddMessage(MessageType.Error, false, "DepartureTime is invalid in Track.Sta at line " + Expressions[j].Line.ToString(Culture) + ", column " + Expressions[j].Column.ToString(Culture) + " in file " + Expressions[j].File);
@@ -3649,9 +3625,9 @@ namespace OpenBve {
 								case "track.buffer":
 									{
 										if (!PreviewOnly) {
-											int n = Program.CurrentRoute.BufferTrackPositions.Length;
-											Array.Resize<double>(ref Program.CurrentRoute.BufferTrackPositions, n + 1);
-											Program.CurrentRoute.BufferTrackPositions[n] = Data.TrackPosition;
+											int n = Game.BufferTrackPositions.Length;
+											Array.Resize<double>(ref Game.BufferTrackPositions, n + 1);
+											Game.BufferTrackPositions[n] = Data.TrackPosition;
 										}
 									} break;
 								case "track.form":

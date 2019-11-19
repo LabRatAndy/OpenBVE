@@ -1,9 +1,8 @@
 ﻿using System;
-using OpenBveApi.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace LibRender2
+namespace OpenBveApi.Graphics
 {
 	/// <summary>
 	/// Class that represents an OpenGL/OpenTK vertex buffer object 
@@ -35,20 +34,25 @@ namespace LibRender2
 			GL.BindBuffer(BufferTarget.ArrayBuffer, handle);
 		}
 
-		/// <summary>Copies the VertexData into the the VBO</summary>
-		/// <remarks>This method must be called before attempting to use the VBO</remarks>
+		/// <summary>
+		/// Copies the VertexData into the the VBO must be done before using the VBO
+		/// </summary>
 		internal void BufferData()
 		{
 			GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(vertexData.Length * LibRenderVertex.SizeInBytes), vertexData, drawType);
 		}
 
-		/// <summary>Updates the VertexData contained within the VBO</summary>
+		/// <summary>
+		/// Update the VertexData into the the VBO
+		/// </summary>
 		internal void BufferSubData(LibRenderVertex[] VertexData, int Offset = 0)
 		{
 			GL.BufferSubData(BufferTarget.ArrayBuffer, new IntPtr(Offset * LibRenderVertex.SizeInBytes), new IntPtr(VertexData.Length * LibRenderVertex.SizeInBytes), VertexData);
 		}
 
-		/// <summary>Enables a specific vertex attribute array</summary>
+		/// <summary>
+		/// Enables the attribute
+		/// </summary>
 		internal void EnableAttribute(VertexLayout VertexLayout)
 		{
 			if (VertexLayout.Position >= 0)
@@ -77,28 +81,24 @@ namespace LibRender2
 		/// </summary>
 		internal void SetAttribute(VertexLayout VertexLayout)
 		{
-			int offset = 0;
 			if (VertexLayout.Position >= 0)
 			{
-				GL.VertexAttribPointer(VertexLayout.Position, 3, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, offset);
-				offset += Vector3.SizeInBytes;
+				GL.VertexAttribPointer(VertexLayout.Position, 3, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, 0);
 			}
 
 			if (VertexLayout.Normal >= 0)
 			{
-				GL.VertexAttribPointer(VertexLayout.Normal, 3, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, offset);
-				offset += Vector3.SizeInBytes;
+				GL.VertexAttribPointer(VertexLayout.Normal, 3, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, Vector3.SizeInBytes);
 			}
 
 			if (VertexLayout.UV >= 0)
 			{
-				GL.VertexAttribPointer(VertexLayout.UV, 2, VertexAttribPointerType.Double, false, LibRenderVertex.SizeInBytes, offset);
-				offset += Vector2d.SizeInBytes; //equivialant to API Vector2
+				GL.VertexAttribPointer(VertexLayout.UV, 2, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, Vector3.SizeInBytes * 2);
 			}
 
 			if (VertexLayout.Color >= 0)
 			{
-				GL.VertexAttribPointer(VertexLayout.Color, 4, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, offset);
+				GL.VertexAttribPointer(VertexLayout.Color, 4, VertexAttribPointerType.Float, false, LibRenderVertex.SizeInBytes, Vector3.SizeInBytes * 2 + Vector2.SizeInBytes);
 			}
 		}
 

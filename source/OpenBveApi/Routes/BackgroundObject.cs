@@ -34,7 +34,6 @@ namespace OpenBveApi.Routes
 			}
 		}
 
-		/// <inheritdoc/>
 		public override void UpdateBackground(double SecondsSinceMidnight, double TimeElapsed, bool Target)
 		{
 			//No updates required

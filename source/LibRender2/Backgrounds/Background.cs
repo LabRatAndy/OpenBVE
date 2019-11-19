@@ -1,5 +1,4 @@
-﻿using OpenBveApi.Math;
-using OpenBveApi.Objects;
+﻿using OpenBveApi.Objects;
 using OpenBveApi.Routes;
 using OpenBveApi.Textures;
 using OpenTK;
@@ -133,12 +132,12 @@ namespace LibRender2.Backgrounds
 					data.CreateVAO();
 				}
 
-				renderer.DefaultShader.Activate();
+				renderer.DefaultShader.Use();
 				renderer.ResetShader(renderer.DefaultShader);
 
 				// matrix
 				renderer.DefaultShader.SetCurrentProjectionMatrix(renderer.CurrentProjectionMatrix);
-				renderer.DefaultShader.SetCurrentModelViewMatrix(Matrix4D.Scale(scale) * renderer.CurrentViewMatrix);
+				renderer.DefaultShader.SetCurrentModelViewMatrix(Matrix4d.Scale(scale) * renderer.CurrentViewMatrix);
 
 				// fog
 				if (renderer.OptionFog)
@@ -146,7 +145,7 @@ namespace LibRender2.Backgrounds
 					renderer.DefaultShader.SetIsFog(true);
 					renderer.DefaultShader.SetFogStart(renderer.Fog.Start);
 					renderer.DefaultShader.SetFogEnd(renderer.Fog.End);
-					renderer.DefaultShader.SetFogColor(renderer.Fog.Color);
+					renderer.DefaultShader.SetFogColor(new Color4(renderer.Fog.Color.R, renderer.Fog.Color.G, renderer.Fog.Color.B, 255));
 				}
 
 				// texture
@@ -161,20 +160,19 @@ namespace LibRender2.Backgrounds
 				renderer.DefaultShader.SetOpacity(alpha);
 
 				// render polygon
-				VertexArrayObject VAO = (VertexArrayObject) data.VAO;
-				VAO.Bind();
+				data.VAO.Bind();
 
 				for (int i = 0; i + 9 < 32 * 10; i += 10)
 				{
-					VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Quads, i, 4);
-					VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Triangles, i + 4, 3);
-					VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Triangles, i + 7, 3);
+					data.VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Quads, i, 4);
+					data.VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Triangles, i + 4, 3);
+					data.VAO.Draw(renderer.DefaultShader.VertexLayout, PrimitiveType.Triangles, i + 7, 3);
 				}
 
-				VAO.UnBind();
+				data.VAO.UnBind();
 
 				GL.BindTexture(TextureTarget.Texture2D, 0);
-				renderer.DefaultShader.Deactivate();
+				renderer.DefaultShader.NonUse();
 
 				GL.Disable(EnableCap.Texture2D);
 				renderer.RestoreBlendFunc();
@@ -187,7 +185,7 @@ namespace LibRender2.Backgrounds
 		{
 			if (data.Object.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref data.Object.Mesh, false);
+				data.Object.Mesh.CreateVAO(false);
 			}
 
 			foreach (MeshFace face in data.Object.Mesh.Faces)
@@ -215,10 +213,10 @@ namespace LibRender2.Backgrounds
 					}
 				}
 
-				renderer.DefaultShader.Activate();
+				renderer.DefaultShader.Use();
 				renderer.ResetShader(renderer.DefaultShader);
 				renderer.RenderFace(renderer.DefaultShader, new ObjectState { Prototype = data.Object }, face);
-				renderer.DefaultShader.Deactivate();
+				renderer.DefaultShader.NonUse();
 			}
 		}
 	}

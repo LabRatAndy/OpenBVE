@@ -4,7 +4,6 @@ using LibRender2.Screens;
 using OpenBveApi;
 using OpenBveApi.Colors;
 using OpenBveApi.Graphics;
-using OpenBveApi.Math;
 using OpenBveApi.Runtime;
 using OpenBveApi.Textures;
 using OpenBveApi.Trains;
@@ -36,9 +35,9 @@ namespace OpenBve.Graphics.Renderers
 			//Initialize openGL
 			renderer.SetBlendFunc();
 			renderer.PushMatrix(MatrixMode.Projection);
-			Matrix4D.CreateOrthographicOffCenter(0.0f, renderer.Screen.Width, renderer.Screen.Height, 0.0f, -1.0f, 1.0f, out renderer.CurrentProjectionMatrix);
+			renderer.CurrentProjectionMatrix = Matrix4d.CreateOrthographicOffCenter(0.0, renderer.Screen.Width, renderer.Screen.Height, 0.0, -1.0, 1.0);
 			renderer.PushMatrix(MatrixMode.Modelview);
-			renderer.CurrentViewMatrix = Matrix4D.Identity;
+			renderer.CurrentViewMatrix = Matrix4d.Identity;
 
 			//Check which overlays to show
 			switch (renderer.CurrentOutputMode)
