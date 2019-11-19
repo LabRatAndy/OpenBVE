@@ -1,6 +1,7 @@
 ﻿using System;
 using OpenBveApi.Runtime;
 using OpenBveApi.Trains;
+using RouteManager2;
 using RouteManager2.Events;
 
 namespace OpenBve
@@ -546,12 +547,12 @@ namespace OpenBve
 										}
 									}
 								}
-								else if (Program.CurrentRoute.Tracks[currentTrack].Elements[i].Events[j] is TrackManager.StationEndEvent && Train.NextStopSkipped == StopSkipMode.None)
+								else if (Program.CurrentRoute.Tracks[currentTrack].Elements[i].Events[j] is StationEndEvent && Train.NextStopSkipped == StopSkipMode.None)
 								{
 									// station end
 									if (Train.Station == -1)
 									{
-										TrackManager.StationEndEvent e = (TrackManager.StationEndEvent)Program.CurrentRoute.Tracks[currentTrack].Elements[i].Events[j];
+										StationEndEvent e = (StationEndEvent)Program.CurrentRoute.Tracks[currentTrack].Elements[i].Events[j];
 										if (StopsAtStation(e.StationIndex, Train) & Train.LastStation != e.StationIndex)
 										{
 											int s = Program.CurrentRoute.Stations[e.StationIndex].GetStopIndex(Train.NumberOfCars);
@@ -600,9 +601,9 @@ namespace OpenBve
 					// buffers ahead
 					if (Train.IsPlayerTrain)
 					{
-						for (int i = 0; i < BufferTrackPositions.Length; i++)
+						for (int i = 0; i < Program.CurrentRoute.BufferTrackPositions.Length; i++)
 						{
-							double dist = BufferTrackPositions[i] - tp;
+							double dist = Program.CurrentRoute.BufferTrackPositions[i] - tp;
 							if (dist > 0.0)
 							{
 								double edec;

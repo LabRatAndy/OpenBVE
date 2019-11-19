@@ -4,11 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using LibRender2;
+using LibRender2.Objects;
 using OpenBveApi;
 using OpenBveApi.Colors;
 using OpenBveApi.Graphics;
 using OpenBveApi.Hosts;
 using OpenBveApi.Interface;
+using OpenBveApi.Math;
 using OpenBveApi.Objects;
 using OpenBveApi.Routes;
 using OpenBveApi.Runtime;
@@ -17,6 +19,7 @@ using OpenBveApi.World;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using RouteManager2.Events;
+using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace OpenBve
 {
@@ -28,9 +31,6 @@ namespace OpenBve
 		// options
 		internal bool OptionInterface = true;
 		internal bool OptionEvents = false;
-
-		// current opengl data
-		internal bool TransparentColorDepthSorting = false;
 
 		// textures
 		private Texture BrightnessChangeTexture;
@@ -62,8 +62,6 @@ namespace OpenBve
 			TextureManager.RegisterTexture(Path.CombineFile(Folder, "buffer.png"), out BufferTexture);
 			TextureManager.RegisterTexture(Path.CombineFile(Folder, "sound.png"), out SoundTexture);
 			TextureManager.RegisterTexture(Path.CombineFile(Folder, "switchsound.png"), out PointSoundTexture);
-
-			TransparentColorDepthSorting = Interface.CurrentOptions.TransparencyMode == TransparencyMode.Quality & Interface.CurrentOptions.Interpolation != InterpolationMode.NearestNeighbor & Interface.CurrentOptions.Interpolation != InterpolationMode.Bilinear;
 		}
 
 		internal void CreateObject(UnifiedObject Prototype, OpenBveApi.Math.Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition)
@@ -79,6 +77,10 @@ namespace OpenBve
 			if (Prototype is StaticObject)
 			{
 				StaticObject s = (StaticObject)Prototype;
+				if (s.Mesh.Faces.Length == 0)
+				{
+					return;
+				}
 				CreateStaticObject(s, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, 0.0, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
 			}
 			else if (Prototype is AnimatedObjectCollection)
@@ -253,13 +255,7 @@ namespace OpenBve
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
 			// set up camera
-			double dx = Camera.AbsoluteDirection.X;
-			double dy = Camera.AbsoluteDirection.Y;
-			double dz = Camera.AbsoluteDirection.Z;
-			double ux = Camera.AbsoluteUp.X;
-			double uy = Camera.AbsoluteUp.Y;
-			double uz = Camera.AbsoluteUp.Z;
-			CurrentViewMatrix = Matrix4d.LookAt(0.0, 0.0, 0.0, dx, dy, -dz, ux, uy, -uz);
+			CurrentViewMatrix = Matrix4D.LookAt(Vector3.Zero, new Vector3(Camera.AbsoluteDirection.X, Camera.AbsoluteDirection.Y, -Camera.AbsoluteDirection.Z), new Vector3(Camera.AbsoluteUp.X, Camera.AbsoluteUp.Y, -Camera.AbsoluteUp.Z));
 			GL.Light(LightName.Light0, LightParameter.Position, new[] { (float)Lighting.OptionLightPosition.X, (float)Lighting.OptionLightPosition.Y, (float)-Lighting.OptionLightPosition.Z, 0.0f });
 
 			// fog
@@ -293,7 +289,7 @@ namespace OpenBve
 			float aa = Program.CurrentRoute.CurrentFog.Start;
 			float bb = Program.CurrentRoute.CurrentFog.End;
 
-			if (aa < bb & aa < BackgroundHandle.BackgroundImageDistance)
+			if (aa < bb & aa < Program.CurrentRoute.CurrentBackground.BackgroundImageDistance)
 			{
 				OptionFog = true;
 				Fog.Start = aa;
@@ -314,10 +310,10 @@ namespace OpenBve
 			{
 				if (Interface.CurrentOptions.IsUseNewRenderer)
 				{
-					DefaultShader.Use();
+					DefaultShader.Activate();
 					ResetShader(DefaultShader);
 					RenderFace(DefaultShader, face);
-					DefaultShader.NonUse();
+					DefaultShader.Deactivate();
 				}
 				else
 				{
@@ -339,10 +335,10 @@ namespace OpenBve
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Use();
+						DefaultShader.Activate();
 						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.NonUse();
+						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -364,10 +360,10 @@ namespace OpenBve
 						{
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Use();
+								DefaultShader.Activate();
 								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.NonUse();
+								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -394,10 +390,10 @@ namespace OpenBve
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Use();
+							DefaultShader.Activate();
 							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.NonUse();
+							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -414,10 +410,10 @@ namespace OpenBve
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Use();
+							DefaultShader.Activate();
 							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.NonUse();
+							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -487,12 +483,12 @@ namespace OpenBve
 							StationStartEvent f = (StationStartEvent)e;
 							sta[f.StationIndex] = true;
 						}
-						else if (e is TrackManager.StationEndEvent)
+						else if (e is StationEndEvent)
 						{
 							s = 0.25;
 							dy = 1.6;
 							t = StationEndTexture;
-							TrackManager.StationEndEvent f = (TrackManager.StationEndEvent)e;
+							StationEndEvent f = (StationEndEvent)e;
 							sta[f.StationIndex] = true;
 						}
 						else if (e is LimitChangeEvent)
@@ -513,9 +509,9 @@ namespace OpenBve
 							dy = 0.4;
 							t = TransponderTexture;
 						}
-						else if (e is TrackManager.SoundEvent)
+						else if (e is SoundEvent)
 						{
-							TrackManager.SoundEvent f = (TrackManager.SoundEvent)e;
+							SoundEvent f = (SoundEvent)e;
 							s = 0.2;
 							dx = f.Position.X;
 							dy = f.Position.Y < 0.1 ? 0.1 : f.Position.Y;
@@ -573,7 +569,7 @@ namespace OpenBve
 			}
 
 			// buffers
-			foreach (double p in Game.BufferTrackPositions)
+			foreach (double p in Program.CurrentRoute.BufferTrackPositions)
 			{
 				double d = p - World.CameraTrackFollower.TrackPosition;
 
@@ -603,9 +599,9 @@ namespace OpenBve
 			//Initialize openGL
 			SetBlendFunc();
 			PushMatrix(MatrixMode.Projection);
-			CurrentProjectionMatrix = Matrix4d.CreateOrthographicOffCenter(0.0, Screen.Width, Screen.Height, 0.0, -1.0, 1.0);
+			Matrix4D.CreateOrthographicOffCenter(0.0f, Screen.Width, Screen.Height, 0.0f, -1.0f, 1.0f, out CurrentProjectionMatrix);
 			PushMatrix(MatrixMode.Modelview);
-			CurrentViewMatrix = Matrix4d.Identity;
+			CurrentViewMatrix = Matrix4D.Identity;
 
 			CultureInfo culture = CultureInfo.InvariantCulture;
 
@@ -746,9 +742,14 @@ namespace OpenBve
 								break;
 						}
 
-						if (Program.CurrentRoute.Stations[Program.CurrentStation].Type == StationType.ChangeEnds)
+						switch (Program.CurrentRoute.Stations[Program.CurrentStation].Type)
 						{
-							t.Append(", Change ends");
+							case StationType.ChangeEnds:
+								t.Append(", Change ends");
+								break;
+							case StationType.Jump:
+								t.Append(", then Jumps to " + Program.CurrentRoute.Stations[Program.CurrentRoute.Stations[Program.CurrentStation].JumpIndex].Name);
+								break;
 						}
 
 						t.Append(", Ratio=").Append((100.0 * Program.CurrentRoute.Stations[Program.CurrentStation].PassengerRatio).ToString("0", culture)).Append("%");
@@ -818,20 +819,20 @@ namespace OpenBve
 		{
 			CultureInfo culture = CultureInfo.InvariantCulture;
 
-			if (Game.RouteUnitOfLength.Length == 1 && Game.RouteUnitOfLength[0] == 1.0)
+			if (Program.CurrentRoute.UnitOfLength.Length == 1 && Program.CurrentRoute.UnitOfLength[0] == 1.0)
 			{
 				return Value.ToString("0.00", culture);
 			}
 
-			double[] values = new double[Game.RouteUnitOfLength.Length];
+			double[] values = new double[Program.CurrentRoute.UnitOfLength.Length];
 
-			for (int i = 0; i < Game.RouteUnitOfLength.Length - 1; i++)
+			for (int i = 0; i < Program.CurrentRoute.UnitOfLength.Length - 1; i++)
 			{
-				values[i] = Math.Floor(Value / Game.RouteUnitOfLength[i]);
-				Value -= values[i] * Game.RouteUnitOfLength[i];
+				values[i] = Math.Floor(Value / Program.CurrentRoute.UnitOfLength[i]);
+				Value -= values[i] * Program.CurrentRoute.UnitOfLength[i];
 			}
 
-			values[Game.RouteUnitOfLength.Length - 1] = Value / Game.RouteUnitOfLength[Game.RouteUnitOfLength.Length - 1];
+			values[Program.CurrentRoute.UnitOfLength.Length - 1] = Value / Program.CurrentRoute.UnitOfLength[Program.CurrentRoute.UnitOfLength.Length - 1];
 			StringBuilder builder = new StringBuilder();
 
 			for (int i = 0; i < values.Length - 1; i++)

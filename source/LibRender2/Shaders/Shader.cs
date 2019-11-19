@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using OpenBveApi.Graphics;
+using OpenBveApi.Colors;
+using OpenBveApi.Math;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
+using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace LibRender2.Shaders
 {
@@ -85,46 +87,44 @@ namespace LibRender2.Shaders
 			Disposable.Add(this);
 		}
 
-		/// <summary>
-		/// Loads the shader source and compiles the shader 
-		/// </summary>
+		/// <summary>Loads the shader source and compiles the shader</summary>
 		/// <param name="shaderSource">Shader source code string</param>
 		/// <param name="shaderType">type of shader VertexShader or FragmentShader</param>
 		private void LoadShader(string shaderSource, ShaderType shaderType)
 		{
 			int status;
 
-			if (shaderType == ShaderType.VertexShader)
+			switch (shaderType)
 			{
-				vertexShader = GL.CreateShader(shaderType);
-				GL.ShaderSource(vertexShader, shaderSource);
-				GL.CompileShader(vertexShader);
-				GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out status);
+				case ShaderType.VertexShader:
+					vertexShader = GL.CreateShader(shaderType);
+					GL.ShaderSource(vertexShader, shaderSource);
+					GL.CompileShader(vertexShader);
+					GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out status);
+					if (status == 0)
+					{
+						throw new ApplicationException(GL.GetShaderInfoLog(vertexShader));
+					}
+					break;
+				case ShaderType.FragmentShader:
+				
+					fragmentShader = GL.CreateShader(shaderType);
+					GL.ShaderSource(fragmentShader, shaderSource);
+					GL.CompileShader(fragmentShader);
+					GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out status);
 
-				if (status == 0)
-				{
-					throw new ApplicationException(GL.GetShaderInfoLog(vertexShader));
-				}
-			}
-
-			if (shaderType == ShaderType.FragmentShader)
-			{
-				fragmentShader = GL.CreateShader(shaderType);
-				GL.ShaderSource(fragmentShader, shaderSource);
-				GL.CompileShader(fragmentShader);
-				GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out status);
-
-				if (status == 0)
-				{
-					throw new ApplicationException(GL.GetShaderInfoLog(fragmentShader));
-				}
+					if (status == 0)
+					{
+						throw new ApplicationException(GL.GetShaderInfoLog(fragmentShader));
+					}
+					break;
+				default:
+					throw new InvalidOperationException("Attempted to load an unknown shader type");
 			}
 		}
 
-		/// <summary>
-		/// Activate the shader program for use
-		/// </summary>
-		public void Use()
+		/// <summary>Activates the shader program for use</summary>
+		public void Activate()
 		{
 			GL.UseProgram(handle);
 		}
@@ -170,14 +170,13 @@ namespace LibRender2.Shaders
 			};
 		}
 
-		public void NonUse()
+		/// <summary>Deactivates the shader</summary>
+		public void Deactivate()
 		{
 			GL.UseProgram(0);
 		}
 
-		/// <summary>
-		/// cleans up, releasing the underlying openTK/OpenGL shader program
-		/// </summary>
+		/// <summary>Cleans up, releasing the underlying openTK/OpenGL shader program</summary>
 		public void Dispose()
 		{
 			if (!disposed)
@@ -188,13 +187,13 @@ namespace LibRender2.Shaders
 			}
 		}
 
-		private Matrix4 ConvertToMatrix4(Matrix4d mat)
+		private Matrix4 ConvertToMatrix4(Matrix4D mat)
 		{
 			return new Matrix4(
-				(float)mat.M11, (float)mat.M12, (float)mat.M13, (float)mat.M14,
-				(float)mat.M21, (float)mat.M22, (float)mat.M23, (float)mat.M24,
-				(float)mat.M31, (float)mat.M32, (float)mat.M33, (float)mat.M34,
-				(float)mat.M41, (float)mat.M42, (float)mat.M43, (float)mat.M44
+				(float)mat.Row0.X, (float)mat.Row0.Y, (float)mat.Row0.Z, (float)mat.Row0.W,
+				(float)mat.Row1.X, (float)mat.Row1.Y, (float)mat.Row1.Z, (float)mat.Row1.W,
+				(float)mat.Row2.X, (float)mat.Row2.Y, (float)mat.Row2.Z, (float)mat.Row2.W,
+				(float)mat.Row3.X, (float)mat.Row3.Y, (float)mat.Row3.Z, (float)mat.Row3.W
 			);
 		}
 
@@ -204,7 +203,7 @@ namespace LibRender2.Shaders
 		/// Set the projection matrix
 		/// </summary>
 		/// <param name="ProjectionMatrix"></param>
-		public void SetCurrentProjectionMatrix(Matrix4d ProjectionMatrix)
+		public void SetCurrentProjectionMatrix(Matrix4D ProjectionMatrix)
 		{
 			Matrix4 matrix = ConvertToMatrix4(ProjectionMatrix);
 			GL.UniformMatrix4(UniformLayout.CurrentProjectionMatrix, false, ref matrix);
@@ -214,7 +213,7 @@ namespace LibRender2.Shaders
 		/// Set the model view matrix
 		/// </summary>
 		/// <param name="ModelViewMatrix"></param>
-		public void SetCurrentModelViewMatrix(Matrix4d ModelViewMatrix)
+		public void SetCurrentModelViewMatrix(Matrix4D ModelViewMatrix)
 		{
 			Matrix4 matrix = ConvertToMatrix4(ModelViewMatrix);
 			GL.UniformMatrix4(UniformLayout.CurrentModelViewMatrix, false, ref matrix);
@@ -224,7 +223,7 @@ namespace LibRender2.Shaders
 		/// Set the normal matrix
 		/// </summary>
 		/// <param name="NormalMatrix"></param>
-		public void SetCurrentNormalMatrix(Matrix4d NormalMatrix)
+		public void SetCurrentNormalMatrix(Matrix4D NormalMatrix)
 		{
 			Matrix4 matrix = ConvertToMatrix4(NormalMatrix);
 			GL.UniformMatrix4(UniformLayout.CurrentNormalMatrix, false, ref matrix);
@@ -234,7 +233,7 @@ namespace LibRender2.Shaders
 		/// Set the texture matrix
 		/// </summary>
 		/// <param name="TextureMatrix"></param>
-		public void SetCurrentTextureMatrix(Matrix4d TextureMatrix)
+		public void SetCurrentTextureMatrix(Matrix4D TextureMatrix)
 		{
 			Matrix4 matrix = ConvertToMatrix4(TextureMatrix);
 			GL.UniformMatrix4(UniformLayout.CurrentTextureMatrix, false, ref matrix);
@@ -247,42 +246,42 @@ namespace LibRender2.Shaders
 
 		public void SetLightPosition(Vector3 LightPosition)
 		{
-			GL.Uniform3(UniformLayout.LightPosition, LightPosition);
+			GL.Uniform3(UniformLayout.LightPosition, (float)LightPosition.X, (float)LightPosition.Y, (float)LightPosition.Z);
 		}
 
-		public void SetLightAmbient(Color4 LightAmbient)
+		public void SetLightAmbient(Color24 LightAmbient)
 		{
-			GL.Uniform4(UniformLayout.LightAmbient, LightAmbient);
+			GL.Uniform4(UniformLayout.LightAmbient, LightAmbient.R / 255.0f, LightAmbient.G / 255.0f, LightAmbient.B / 255.0f, 1.0f);
 		}
 
-		public void SetLightDiffuse(Color4 LightDiffuse)
+		public void SetLightDiffuse(Color24 LightDiffuse)
 		{
-			GL.Uniform4(UniformLayout.LightDiffuse, LightDiffuse);
+			GL.Uniform4(UniformLayout.LightDiffuse, LightDiffuse.R / 255.0f, LightDiffuse.G / 255.0f, LightDiffuse.B / 255.0f, 1.0f);
 		}
 
-		public void SetLightSpecular(Color4 LightSpecular)
+		public void SetLightSpecular(Color24 LightSpecular)
 		{
-			GL.Uniform4(UniformLayout.LightSpecular, LightSpecular);
+			GL.Uniform4(UniformLayout.LightSpecular, LightSpecular.R / 255.0f, LightSpecular.G / 255.0f, LightSpecular.B / 255.0f, 1.0f);
 		}
 
-		public void SetMaterialAmbient(Color4 MaterialAmbient)
+		public void SetMaterialAmbient(Color32 MaterialAmbient)
 		{
-			GL.Uniform4(UniformLayout.MaterialAmbient, MaterialAmbient);
+			GL.Uniform4(UniformLayout.MaterialAmbient, MaterialAmbient.R / 255.0f, MaterialAmbient.G / 255.0f, MaterialAmbient.B / 255.0f, MaterialAmbient.A / 255.0f);
 		}
 
-		public void SetMaterialDiffuse(Color4 MaterialDiffuse)
+		public void SetMaterialDiffuse(Color32 MaterialDiffuse)
 		{
-			GL.Uniform4(UniformLayout.MaterialDiffuse, MaterialDiffuse);
+			GL.Uniform4(UniformLayout.MaterialDiffuse, MaterialDiffuse.R / 255.0f, MaterialDiffuse.G / 255.0f, MaterialDiffuse.B / 255.0f, MaterialDiffuse.A / 255.0f);
 		}
 
-		public void SetMaterialSpecular(Color4 MaterialSpecular)
+		public void SetMaterialSpecular(Color32 MaterialSpecular)
 		{
-			GL.Uniform4(UniformLayout.MaterialSpecular, MaterialSpecular);
+			GL.Uniform4(UniformLayout.MaterialSpecular, MaterialSpecular.R / 255.0f, MaterialSpecular.G / 255.0f, MaterialSpecular.B / 255.0f, MaterialSpecular.A / 255.0f);
 		}
 
-		public void SetMaterialEmission(Color4 MaterialEmission)
+		public void SetMaterialEmission(Color24 MaterialEmission)
 		{
-			GL.Uniform4(UniformLayout.MaterialEmission, MaterialEmission);
+			GL.Uniform4(UniformLayout.MaterialEmission, MaterialEmission.R / 255.0f, MaterialEmission.G / 255.0f, MaterialEmission.B / 255.0f, 1.0f);
 		}
 
 		public void SetMaterialShininess(float MaterialShininess)
@@ -305,9 +304,9 @@ namespace LibRender2.Shaders
 			GL.Uniform1(UniformLayout.FogEnd, FogEnd);
 		}
 
-		public void SetFogColor(Color4 FogColor)
+		public void SetFogColor(Color24 FogColor)
 		{
-			GL.Uniform4(UniformLayout.FogColor, FogColor);
+			GL.Uniform4(UniformLayout.FogColor, FogColor.R / 255.0f, FogColor.G / 255.0f, FogColor.B / 255.0f, 1.0f);
 		}
 
 		public void SetIsTexture(bool IsTexture)

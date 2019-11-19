@@ -119,8 +119,6 @@
       <SubType>Code</SubType>
       <DependentUpon>AI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Game\Events\EventTypes\Sounds.cs" />
-    <Compile Include="Game\Events\EventTypes\Station.cs" />
     <Compile Include="Game\MessageManager.cs" />
     <Compile Include="Game\MessageManager.TextualMessages.cs">
       <DependentUpon>MessageManager.cs</DependentUpon>
@@ -132,7 +130,6 @@
     <Compile Include="Game\RouteInfoOverlay.cs" />
     <Compile Include="Game\Information.cs" />
     <Compile Include="Game\Menu.cs" />
-    <Compile Include="Game\RouteConstants.cs" />
     <Compile Include="Game\Score\Score.cs" />
     <Compile Include="Game\Score\Score.Log.cs" />
     <Compile Include="Game\Score\Score.ScoreMessage.cs" />

@@ -2,6 +2,7 @@
 using System.Linq;
 using LibRender2;
 using LibRender2.MotionBlurs;
+using LibRender2.Objects;
 using LibRender2.Viewports;
 using OpenBve.Graphics.Renderers;
 using OpenBveApi;
@@ -9,11 +10,12 @@ using OpenBveApi.Colors;
 using OpenBveApi.Graphics;
 using OpenBveApi.Hosts;
 using OpenBveApi.Interface;
+using OpenBveApi.Math;
 using OpenBveApi.Objects;
 using OpenBveApi.Routes;
 using OpenBveApi.World;
-using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace OpenBve.Graphics
 {
@@ -66,13 +68,16 @@ namespace OpenBve.Graphics
 		internal int CreateStaticObject(UnifiedObject Prototype, OpenBveApi.Math.Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
 		{
 			StaticObject obj = Prototype as StaticObject;
-
 			if (obj == null)
 			{
 				Interface.AddMessage(MessageType.Error, false, "Attempted to use an animated object where only static objects are allowed.");
 				return -1;
 			}
-
+			if (obj.Mesh.Faces.Length == 0)
+			{
+				//Null object- Waste of time trying to calculate anything for these
+				return -1;
+			}
 			return base.CreateStaticObject(obj, Position, BaseTransformation, AuxTransformation, AccurateObjectDisposal, AccurateObjectDisposalZOffset, StartingDistance, EndingDistance, BlockLength, TrackPosition, Brightness);
 		}
 
@@ -210,11 +215,11 @@ namespace OpenBve.Graphics
 			{
 				case ViewportMode.Scenery:
 					BackgroundObject b = Program.CurrentRoute.CurrentBackground as BackgroundObject;
-					double cd = b != null ? Math.Max(BackgroundHandle.BackgroundImageDistance, b.ClipDistance) : BackgroundHandle.BackgroundImageDistance;
-					CurrentProjectionMatrix = Matrix4d.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.5, cd);
+					double cd = b != null ? Math.Max(Program.CurrentRoute.CurrentBackground.BackgroundImageDistance, b.ClipDistance) : Program.CurrentRoute.CurrentBackground.BackgroundImageDistance;
+					CurrentProjectionMatrix = Matrix4D.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.5, cd);
 					break;
 				case ViewportMode.Cab:
-					CurrentProjectionMatrix = Matrix4d.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.025, 50.0);
+					CurrentProjectionMatrix = Matrix4D.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.025, 50.0);
 					break;
 				default:
 					throw new ArgumentOutOfRangeException();
@@ -268,13 +273,7 @@ namespace OpenBve.Graphics
 			UpdateViewport(ViewportChangeMode.ChangeToScenery);
 
 			// set up camera
-			double dx = Camera.AbsoluteDirection.X;
-			double dy = Camera.AbsoluteDirection.Y;
-			double dz = Camera.AbsoluteDirection.Z;
-			double ux = Camera.AbsoluteUp.X;
-			double uy = Camera.AbsoluteUp.Y;
-			double uz = Camera.AbsoluteUp.Z;
-			CurrentViewMatrix = Matrix4d.LookAt(0.0, 0.0, 0.0, dx, dy, -dz, ux, uy, -uz);
+			CurrentViewMatrix = Matrix4D.LookAt(Vector3.Zero, new Vector3(Camera.AbsoluteDirection.X, Camera.AbsoluteDirection.Y, -Camera.AbsoluteDirection.Z), new Vector3(Camera.AbsoluteUp.X, Camera.AbsoluteUp.Y, -Camera.AbsoluteUp.Z));
 			GL.Light(LightName.Light0, LightParameter.Position, new[] { (float)Lighting.OptionLightPosition.X, (float)Lighting.OptionLightPosition.Y, (float)-Lighting.OptionLightPosition.Z, 0.0f });
 
 			// fog
@@ -305,7 +304,7 @@ namespace OpenBve.Graphics
 			float aa = Program.CurrentRoute.CurrentFog.Start;
 			float bb = Program.CurrentRoute.CurrentFog.End;
 
-			if (aa < bb & aa < BackgroundHandle.BackgroundImageDistance)
+			if (aa < bb & aa < Program.CurrentRoute.CurrentBackground.BackgroundImageDistance)
 			{
 				OptionFog = true;
 				Fog.Start = aa;
@@ -326,10 +325,10 @@ namespace OpenBve.Graphics
 			{
 				if (Interface.CurrentOptions.IsUseNewRenderer)
 				{
-					DefaultShader.Use();
+					DefaultShader.Activate();
 					ResetShader(DefaultShader);
 					RenderFace(DefaultShader, face);
-					DefaultShader.NonUse();
+					DefaultShader.Deactivate();
 				}
 				else
 				{
@@ -351,10 +350,10 @@ namespace OpenBve.Graphics
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Use();
+						DefaultShader.Activate();
 						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.NonUse();
+						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -376,10 +375,10 @@ namespace OpenBve.Graphics
 						{
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Use();
+								DefaultShader.Activate();
 								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.NonUse();
+								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -406,10 +405,10 @@ namespace OpenBve.Graphics
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Use();
+							DefaultShader.Activate();
 							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.NonUse();
+							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -426,10 +425,10 @@ namespace OpenBve.Graphics
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Use();
+							DefaultShader.Activate();
 							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.NonUse();
+							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -454,7 +453,7 @@ namespace OpenBve.Graphics
 			// overlay layer
 			OptionFog = false;
 			UpdateViewport(ViewportChangeMode.ChangeToCab);
-			CurrentViewMatrix = Matrix4d.LookAt(0.0, 0.0, 0.0, dx, dy, -dz, ux, uy, -uz);
+			CurrentViewMatrix = Matrix4D.LookAt(Vector3.Zero, new Vector3(Camera.AbsoluteDirection.X, Camera.AbsoluteDirection.Y, -Camera.AbsoluteDirection.Z), new Vector3(Camera.AbsoluteUp.X, Camera.AbsoluteUp.Y, -Camera.AbsoluteUp.Z));
 
 			if (Camera.CurrentRestriction == CameraRestrictionMode.NotAvailable)
 			{
@@ -473,10 +472,10 @@ namespace OpenBve.Graphics
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Use();
+						DefaultShader.Activate();
 						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.NonUse();
+						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -498,10 +497,10 @@ namespace OpenBve.Graphics
 					{
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Use();
+							DefaultShader.Activate();
 							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.NonUse();
+							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -523,10 +522,10 @@ namespace OpenBve.Graphics
 							{
 								if (Interface.CurrentOptions.IsUseNewRenderer)
 								{
-									DefaultShader.Use();
+									DefaultShader.Activate();
 									ResetShader(DefaultShader);
 									RenderFace(DefaultShader, face);
-									DefaultShader.NonUse();
+									DefaultShader.Deactivate();
 								}
 								else
 								{
@@ -553,10 +552,10 @@ namespace OpenBve.Graphics
 
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Use();
+								DefaultShader.Activate();
 								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.NonUse();
+								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -573,10 +572,10 @@ namespace OpenBve.Graphics
 
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Use();
+								DefaultShader.Activate();
 								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.NonUse();
+								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -608,10 +607,10 @@ namespace OpenBve.Graphics
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Use();
+						DefaultShader.Activate();
 						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.NonUse();
+						DefaultShader.Deactivate();
 					}
 					else
 					{

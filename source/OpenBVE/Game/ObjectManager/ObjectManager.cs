@@ -1,5 +1,4 @@
 using OpenBveApi.Objects;
-using OpenBveApi.Routes;
 using OpenBveApi.Trains;
 
 namespace OpenBve
@@ -21,11 +20,16 @@ namespace OpenBve
 			{
 				TrainManager.Train train = null;
 				const double extraRadius = 10.0;
-				double z = AnimatedWorldObjects[i].Object.TranslateZFunction == null ? 0.0 : AnimatedWorldObjects[i].Object.TranslateZFunction.LastResult;
+				double z = 0.0;
+				if(AnimatedWorldObjects[i].Object != null)
+				{
+					//Standalone sound may not have an object file attached
+					z = AnimatedWorldObjects[i].Object.TranslateZFunction == null ? 0.0 : AnimatedWorldObjects[i].Object.TranslateZFunction.LastResult;
+				}
 				double pa = AnimatedWorldObjects[i].TrackPosition + z - AnimatedWorldObjects[i].Radius - extraRadius;
 				double pb = AnimatedWorldObjects[i].TrackPosition + z + AnimatedWorldObjects[i].Radius + extraRadius;
-				double ta = World.CameraTrackFollower.TrackPosition + Program.Renderer.Camera.Alignment.Position.Z - BackgroundHandle.BackgroundImageDistance - Program.Renderer.Camera.ExtraViewingDistance;
-				double tb = World.CameraTrackFollower.TrackPosition + Program.Renderer.Camera.Alignment.Position.Z + BackgroundHandle.BackgroundImageDistance + Program.Renderer.Camera.ExtraViewingDistance;
+				double ta = World.CameraTrackFollower.TrackPosition + Program.Renderer.Camera.Alignment.Position.Z - Program.CurrentRoute.CurrentBackground.BackgroundImageDistance - Program.Renderer.Camera.ExtraViewingDistance;
+				double tb = World.CameraTrackFollower.TrackPosition + Program.Renderer.Camera.Alignment.Position.Z + Program.CurrentRoute.CurrentBackground.BackgroundImageDistance + Program.Renderer.Camera.ExtraViewingDistance;
 				bool visible = pb >= ta & pa <= tb;
 				if (visible | ForceUpdate)
 				{

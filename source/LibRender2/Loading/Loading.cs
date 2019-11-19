@@ -138,7 +138,15 @@ namespace LibRender2.Loadings
 				{
 					// place the centre of the logo at from the screen top
 					int logoTop = (int)(renderer.Screen.Height * logoCentreYFactor - TextureLogo.Height / 2.0);
+					renderer.UnsetBlendFunc();
+					renderer.SetAlphaFunc(AlphaFunction.Equal, 1.0f);
+					GL.DepthMask(true);
 					renderer.Rectangle.Draw(TextureLogo, new Point((renderer.Screen.Width - TextureLogo.Width) / 2, logoTop), new Size(TextureLogo.Width, TextureLogo.Height), Color128.White);
+					renderer.SetBlendFunc();
+					renderer.SetAlphaFunc(AlphaFunction.Less, 1.0f);
+					GL.DepthMask(false);
+					renderer.Rectangle.Draw(TextureLogo, new Point((renderer.Screen.Width - TextureLogo.Width) / 2, logoTop), new Size(TextureLogo.Width, TextureLogo.Height), Color128.White);
+					renderer.SetAlphaFunc(AlphaFunction.Equal, 1.0f);
 				}
 			}
 			// ReSharper disable once RedundantIfElseBlock
@@ -157,7 +165,7 @@ namespace LibRender2.Loadings
 			int versionTop = logoBottom + blankHeight - fontHeight;
 			renderer.OpenGlString.Draw(Font, "Version " + ProgramVersion, new Point(halfWidth, versionTop), TextAlignment.TopMiddle, Color128.White);
 			// for the moment, do not show any URL; would go right below the first division
-			//			DrawString(Fonts.SmallFont, "https://sites.google.com/site/openbvesim/home",
+			//			DrawString(Fonts.SmallFont, "https://openbve-project.net",
 			//				new Point(halfWidth, versionTop + fontHeight+2),
 			//				TextAlignment.TopMiddle, Color128.White);
 
