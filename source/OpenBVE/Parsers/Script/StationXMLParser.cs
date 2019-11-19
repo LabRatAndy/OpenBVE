@@ -81,10 +81,6 @@ namespace OpenBve
 											case "changeends":
 												station.Type = StationType.ChangeEnds;
 												break;
-											case "j":
-											case "jump":
-												station.Type = StationType.Jump;
-												break;
 											case "t":
 											case "terminal":
 												station.Type = StationType.Terminal;
@@ -92,21 +88,6 @@ namespace OpenBve
 											default:
 												station.Type = StationType.Normal;
 												break;
-										}
-										break;
-									case "jumpindex":
-										if (!string.IsNullOrEmpty(c.InnerText))
-										{
-											if (!NumberFormats.TryParseIntVb6(c.InnerText, out station.JumpIndex))
-											{
-												Interface.AddMessage(MessageType.Error, false, "Station jump index was invalid in XML file " + fileName);
-												station.Type = StationType.Normal;
-											}
-										}
-										else
-										{
-											Interface.AddMessage(MessageType.Error, false, "Station jump index was empty in XML file " + fileName);
-											station.Type = StationType.Normal;
 										}
 										break;
 									case "passalarm":

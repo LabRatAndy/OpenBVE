@@ -1,6 +1,5 @@
 ﻿using System;
 using OpenBveApi.Trains;
-using SoundManager;
 
 namespace OpenBve
 {
@@ -67,7 +66,7 @@ namespace OpenBve
 				double d = Program.CurrentRoute.Stations[stationIndex].Stops[stopIndex].TrackPosition - train.Cars[0].FrontAxle.Follower.TrackPosition + train.Cars[0].FrontAxle.Position - 0.5 * train.Cars[0].Length;
 				if (train.IsPlayerTrain)
 				{
-					SoundsBase.SuppressSoundEvents = true;
+					TrackManager.SuppressSoundEvents = true;
 				}
 				while (d != 0.0)
 				{
@@ -96,7 +95,7 @@ namespace OpenBve
 				if (train.IsPlayerTrain)
 				{
 					TrainManager.UnderailTrains();
-					SoundsBase.SuppressSoundEvents = false;
+					TrackManager.SuppressSoundEvents = false;
 				}
 				if (train.Handles.EmergencyBrake.Driver)
 				{

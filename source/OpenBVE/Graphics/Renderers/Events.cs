@@ -4,7 +4,6 @@ using OpenBveApi.Math;
 using OpenBveApi.Routes;
 using OpenBveApi.Textures;
 using OpenTK.Graphics.OpenGL;
-using RouteManager2;
 using RouteManager2.Events;
 
 namespace OpenBve.Graphics.Renderers
@@ -106,12 +105,12 @@ namespace OpenBve.Graphics.Renderers
 							StationStartEvent f = (StationStartEvent)e;
 							sta[f.StationIndex] = true;
 						}
-						else if (e is StationEndEvent)
+						else if (e is TrackManager.StationEndEvent)
 						{
 							s = 0.25;
 							dy = 1.6;
 							t = StationEndTexture;
-							StationEndEvent f = (StationEndEvent)e;
+							TrackManager.StationEndEvent f = (TrackManager.StationEndEvent)e;
 							sta[f.StationIndex] = true;
 						}
 						else if (e is LimitChangeEvent)
@@ -132,16 +131,16 @@ namespace OpenBve.Graphics.Renderers
 							dy = 0.4;
 							t = TransponderTexture;
 						}
-						else if (e is SoundEvent)
+						else if (e is TrackManager.SoundEvent)
 						{
-							SoundEvent f = (SoundEvent)e;
+							TrackManager.SoundEvent f = (TrackManager.SoundEvent)e;
 							s = 0.2;
 							dx = f.Position.X;
 							dy = f.Position.Y < 0.1 ? 0.1 : f.Position.Y;
 							dz = f.Position.Z;
 							t = SoundTexture;
 						}
-						else if (e is PointSoundEvent)
+						else if (e is TrackManager.PointSoundEvent)
 						{
 							s = 0.2;
 							dx = 0;
@@ -200,7 +199,7 @@ namespace OpenBve.Graphics.Renderers
 			}
 
 			// buffers
-			foreach (double p in Program.CurrentRoute.BufferTrackPositions)
+			foreach (double p in Game.BufferTrackPositions)
 			{
 				double d = p - World.CameraTrackFollower.TrackPosition;
 

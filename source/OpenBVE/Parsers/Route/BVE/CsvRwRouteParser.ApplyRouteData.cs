@@ -361,7 +361,7 @@ namespace OpenBve
 					int f = j < Data.Structure.Flange.Length ? Data.Structure.Flange[j] : 0;
 					int m = Program.CurrentRoute.Tracks[0].Elements[n].Events.Length;
 					Array.Resize(ref Program.CurrentRoute.Tracks[0].Elements[n].Events, m + 1);
-					Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new RailSoundsChangeEvent(0.0, CurrentRunIndex, CurrentFlangeIndex, r, f);
+					Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new TrackManager.RailSoundsChangeEvent(0.0, CurrentRunIndex, CurrentFlangeIndex, r, f);
 					CurrentRunIndex = r;
 					CurrentFlangeIndex = f;
 				}
@@ -392,7 +392,7 @@ namespace OpenBve
 								{
 									int m = Program.CurrentRoute.Tracks[j].Elements[n].Events.Length;
 									Array.Resize(ref Program.CurrentRoute.Tracks[j].Elements[n].Events, m + 1);
-									Program.CurrentRoute.Tracks[j].Elements[n].Events[m] = new PointSoundEvent();
+									Program.CurrentRoute.Tracks[j].Elements[n].Events[m] = new TrackManager.PointSoundEvent();
 								}
 							}
 						}
@@ -433,7 +433,7 @@ namespace OpenBve
 								{
 									m = Program.CurrentRoute.Tracks[0].Elements[j].Events.Length;
 									Array.Resize(ref Program.CurrentRoute.Tracks[0].Elements[j].Events, m + 1);
-									Program.CurrentRoute.Tracks[0].Elements[j].Events[m] = new StationPassAlarmEvent(0.0);
+									Program.CurrentRoute.Tracks[0].Elements[j].Events[m] = new TrackManager.StationPassAlarmEvent(0.0);
 								}
 							}
 						}
@@ -528,10 +528,10 @@ namespace OpenBve
 							switch (Data.Blocks[i].SoundEvents[j].Type)
 							{
 								case SoundType.TrainStatic:
-									Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new SoundEvent(d, Data.Blocks[i].SoundEvents[j].SoundBuffer, true, true, false, Vector3.Zero, 0.0, Program.CurrentHost);
+									Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new TrackManager.SoundEvent(d, Data.Blocks[i].SoundEvents[j].SoundBuffer, true, true, false, Vector3.Zero, 0.0);
 									break;
 								case SoundType.TrainDynamic:
-									Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new SoundEvent(d, Data.Blocks[i].SoundEvents[j].SoundBuffer, false, false, true, Vector3.Zero, Data.Blocks[i].SoundEvents[j].Speed, Program.CurrentHost);
+									Program.CurrentRoute.Tracks[0].Elements[n].Events[m] = new TrackManager.SoundEvent(d, Data.Blocks[i].SoundEvents[j].SoundBuffer, false, false, true, Vector3.Zero, Data.Blocks[i].SoundEvents[j].Speed);
 									break;
 							}
 						}
@@ -1619,7 +1619,7 @@ namespace OpenBve
 						double d = p - (double)(k + Data.FirstUsedBlock) * (double)Data.BlockInterval;
 						int m = Program.CurrentRoute.Tracks[0].Elements[k].Events.Length;
 						Array.Resize(ref Program.CurrentRoute.Tracks[0].Elements[k].Events, m + 1);
-						Program.CurrentRoute.Tracks[0].Elements[k].Events[m] = new StationEndEvent(d, i, Program.CurrentRoute, Program.CurrentHost);
+						Program.CurrentRoute.Tracks[0].Elements[k].Events[m] = new TrackManager.StationEndEvent(d, i);
 					}
 				}
 			}
@@ -1685,39 +1685,21 @@ namespace OpenBve
 					Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " expects trains to stop but does not define stop points at track position " + Program.CurrentRoute.Stations[i].DefaultTrackPosition.ToString(Culture) + " in file " + FileName);
 					Program.CurrentRoute.Stations[i].StopMode = StationStopMode.AllPass;
 				}
-
-				switch (Program.CurrentRoute.Stations[i].Type)
+				if (Program.CurrentRoute.Stations[i].Type == StationType.ChangeEnds)
 				{
-					case StationType.ChangeEnds:
-						if (i < Program.CurrentRoute.Stations.Length - 1)
+					if (i < Program.CurrentRoute.Stations.Length - 1)
+					{
+						if (Program.CurrentRoute.Stations[i + 1].StopMode != StationStopMode.AllStop)
 						{
-							if (Program.CurrentRoute.Stations[i + 1].StopMode != StationStopMode.AllStop)
-							{
-								Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as \"change ends\" but the subsequent station does not expect all trains to stop in file " + FileName);
-								Program.CurrentRoute.Stations[i + 1].StopMode = StationStopMode.AllStop;
-							}
+							Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as \"change ends\" but the subsequent station does not expect all trains to stop in file " + FileName);
+							Program.CurrentRoute.Stations[i + 1].StopMode = StationStopMode.AllStop;
 						}
-						else
-						{
-							Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as \"change ends\" but there is no subsequent station defined in file " + FileName);
-							Program.CurrentRoute.Stations[i].Type = StationType.Terminal;
-						}
-						break;
-					case StationType.Jump:
-						if (Program.CurrentRoute.Stations[i].JumpIndex < Program.CurrentRoute.Stations.Length)
-						{
-							if (Program.CurrentRoute.Stations[Program.CurrentRoute.Stations[i].JumpIndex].StopMode != StationStopMode.AllStop)
-							{
-								Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as a \"jump trigger\" but the target station does not expect all trains to stop in file " + FileName);
-								Program.CurrentRoute.Stations[Program.CurrentRoute.Stations[i].JumpIndex].StopMode = StationStopMode.AllStop;
-							}
-						}
-						else
-						{
-							Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as a \"jump trigger\" but the target station does not exist in file " + FileName);
-							Program.CurrentRoute.Stations[i].Type = StationType.Terminal;
-						}
-						break;
+					}
+					else
+					{
+						Interface.AddMessage(MessageType.Warning, false, "Station " + Program.CurrentRoute.Stations[i].Name + " is marked as \"change ends\" but there is no subsequent station defined in file " + FileName);
+						Program.CurrentRoute.Stations[i].Type = StationType.Terminal;
+					}
 				}
 			}
 			if (Program.CurrentRoute.Stations.Length != 0)
@@ -1766,9 +1748,9 @@ namespace OpenBve
 									Program.CurrentRoute.Tracks[0].Elements[i].Events[Program.CurrentRoute.Tracks[0].Elements[i].Events.Length - 1] = new TransponderEvent(Program.CurrentRoute, 0.0, TransponderTypes.AtcTrackStatus, 3, 0, false);
 								}
 							}
-							else if (Program.CurrentRoute.Tracks[0].Elements[i].Events[j] is StationEndEvent)
+							else if (Program.CurrentRoute.Tracks[0].Elements[i].Events[j] is TrackManager.StationEndEvent)
 							{
-								StationEndEvent station = (StationEndEvent)Program.CurrentRoute.Tracks[0].Elements[i].Events[j];
+								TrackManager.StationEndEvent station = (TrackManager.StationEndEvent)Program.CurrentRoute.Tracks[0].Elements[i].Events[j];
 								if (Program.CurrentRoute.Stations[station.StationIndex].SafetySystem == SafetySystem.Atc)
 								{
 									Array.Resize(ref Program.CurrentRoute.Tracks[0].Elements[i].Events, Program.CurrentRoute.Tracks[0].Elements[i].Events.Length + 2);

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using LibRender2;
-using LibRender2.Objects;
 using LibRender2.Shaders;
+using OpenBveApi.Graphics;
 using OpenBveApi.Interface;
 using OpenBveApi.Objects;
 using OpenBveApi.Runtime;
@@ -28,8 +27,8 @@ namespace OpenBve.Graphics.Renderers
 			touchFaces = new List<FaceState>();
 
 			pickingShader = new Shader("default", "picking", true);
-			pickingShader.Activate();
-			pickingShader.Deactivate();
+			pickingShader.Use();
+			pickingShader.NonUse();
 
 			fbo = new FrameBufferObject();
 			fbo.Bind();
@@ -59,11 +58,11 @@ namespace OpenBve.Graphics.Renderers
 
 			foreach (FaceState face in touchFaces)
 			{
-				pickingShader.Activate();
+				pickingShader.Use();
 				renderer.ResetShader(pickingShader);
 				pickingShader.SetObjectIndex(objectStates.IndexOf(face.Object) + 1);
 				renderer.RenderFace(pickingShader, face);
-				pickingShader.Deactivate();
+				pickingShader.NonUse();
 			}
 
 			fbo.UnBind();
@@ -76,10 +75,10 @@ namespace OpenBve.Graphics.Renderers
 
 				foreach (FaceState face in touchFaces)
 				{
-					renderer.DefaultShader.Activate();
+					renderer.DefaultShader.Use();
 					renderer.ResetShader(renderer.DefaultShader);
 					renderer.RenderFace(renderer.DefaultShader, face, true);
-					renderer.DefaultShader.Deactivate();
+					renderer.DefaultShader.NonUse();
 				}
 			}
 		}
@@ -126,7 +125,7 @@ namespace OpenBve.Graphics.Renderers
 
 			if (state.Prototype.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref state.Prototype.Mesh, state.Prototype.Dynamic);
+				state.Prototype.Mesh.CreateVAO(state.Prototype.Dynamic);
 			}
 
 			foreach (MeshFace face in state.Prototype.Mesh.Faces)

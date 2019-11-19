@@ -16,16 +16,14 @@ using LibRender2.Texts;
 using LibRender2.Textures;
 using LibRender2.Viewports;
 using OpenBveApi;
-using OpenBveApi.Colors;
+using OpenBveApi.Graphics;
 using OpenBveApi.Hosts;
-using OpenBveApi.Math;
 using OpenBveApi.Objects;
 using OpenBveApi.Textures;
 using OpenBveApi.World;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
-using Vector3 = OpenBveApi.Math.Vector3;
 
 namespace LibRender2
 {
@@ -67,11 +65,11 @@ namespace LibRender2
 		public Keys Keys;
 		public MotionBlur MotionBlur;
 
-		public Matrix4D CurrentProjectionMatrix;
-		public Matrix4D CurrentViewMatrix;
+		public Matrix4d CurrentProjectionMatrix;
+		public Matrix4d CurrentViewMatrix;
 
-		protected List<Matrix4D> projectionMatrixList;
-		protected List<Matrix4D> viewMatrixList;
+		protected List<Matrix4d> projectionMatrixList;
+		protected List<Matrix4d> viewMatrixList;
 
 		public Shader DefaultShader;
 
@@ -140,8 +138,8 @@ namespace LibRender2
 			Lighting = new Lighting();
 			Marker = new Marker();
 
-			projectionMatrixList = new List<Matrix4D>();
-			viewMatrixList = new List<Matrix4D>();
+			projectionMatrixList = new List<Matrix4d>();
+			viewMatrixList = new List<Matrix4d>();
 		}
 
 		/// <summary>
@@ -167,8 +165,8 @@ namespace LibRender2
 			VisibleObjects = new VisibleObjectLibrary(currentHost, Camera, currentOptions);
 
 			DefaultShader = new Shader("default", "default", true);
-			DefaultShader.Activate();
-			DefaultShader.Deactivate();
+			DefaultShader.Use();
+			DefaultShader.NonUse();
 
 			GL.ClearColor(0.67f, 0.67f, 0.67f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -222,9 +220,9 @@ namespace LibRender2
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthMask(true);
 			SetAlphaFunc(AlphaFunction.Greater, 0.9f);
-			DefaultShader.Activate();
+			DefaultShader.Use();
 			ResetShader(DefaultShader);
-			DefaultShader.Deactivate();
+			DefaultShader.NonUse();
 		}
 
 		public void PushMatrix(MatrixMode Mode)
@@ -264,7 +262,7 @@ namespace LibRender2
 			Initialize(currentHost, currentOptions);
 		}
 
-		public int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
+		public int CreateStaticObject(StaticObject Prototype, OpenBveApi.Math.Vector3 Position, Transformation BaseTransformation, Transformation AuxTransformation, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
 		{
 			if (Prototype == null)
 			{
@@ -322,105 +320,13 @@ namespace LibRender2
 			StaticObjectStates.Add(new ObjectState
 			{
 				Prototype = Prototype,
-				Translation = Matrix4D.CreateTranslation(Position.X, Position.Y, -Position.Z),
-				//FIXME: This seems to need to be the 'wrong' way around. Need to standardise on Matrices throughout?
-				Rotate = (Matrix4D)new Transformation(AuxTransformation, BaseTransformation),
+				Translation = Matrix4d.CreateTranslation(Position.X, Position.Y, -Position.Z),
+				Rotate = (Matrix4d)new Transformation(BaseTransformation, AuxTransformation),
 				Brightness = Brightness,
 				StartingDistance = startingDistance,
 				EndingDistance = endingDistance
 			});
-			
-			foreach (MeshFace face in Prototype.Mesh.Faces)
-			{
-				switch (face.Flags & MeshFace.FaceTypeMask)
-				{
-					case MeshFace.FaceTypeTriangles:
-						InfoTotalTriangles++;
-						break;
-					case MeshFace.FaceTypeTriangleStrip:
-						InfoTotalTriangleStrip++;
-						break;
-					case MeshFace.FaceTypeQuads:
-						InfoTotalQuads++;
-						break;
-					case MeshFace.FaceTypeQuadStrip:
-						InfoTotalQuadStrip++;
-						break;
-					case MeshFace.FaceTypePolygon:
-						InfoTotalPolygon++;
-						break;
-				}
-			}
 
-			return StaticObjectStates.Count - 1;
-		}
-
-
-		public int CreateStaticObject(StaticObject Prototype, Vector3 Position, Transformation AuxTransformation, Matrix4D Rotate, Matrix4D Translate, bool AccurateObjectDisposal, double AccurateObjectDisposalZOffset, double StartingDistance, double EndingDistance, double BlockLength, double TrackPosition, double Brightness)
-		{
-			if (Prototype == null)
-			{
-				return -1;
-			}
-
-			float startingDistance = float.MaxValue;
-			float endingDistance = float.MinValue;
-
-			if (AccurateObjectDisposal)
-			{
-				foreach (VertexTemplate vertex in Prototype.Mesh.Vertices)
-				{
-					OpenBveApi.Math.Vector3 Coordinates = vertex.Coordinates;
-					Coordinates.Rotate(AuxTransformation);
-
-					if (Coordinates.Z < StartingDistance)
-					{
-						startingDistance = (float)Coordinates.Z;
-					}
-
-					if (Coordinates.Z > EndingDistance)
-					{
-						endingDistance = (float)Coordinates.Z;
-					}
-				}
-
-				startingDistance += (float)AccurateObjectDisposalZOffset;
-				endingDistance += (float)AccurateObjectDisposalZOffset;
-			}
-
-			const double minBlockLength = 20.0;
-
-			if (BlockLength < minBlockLength)
-			{
-				BlockLength *= Math.Ceiling(minBlockLength / BlockLength);
-			}
-
-			if (AccurateObjectDisposal)
-			{
-				startingDistance += (float)TrackPosition;
-				endingDistance += (float)TrackPosition;
-				double z = BlockLength * Math.Floor(TrackPosition / BlockLength);
-				StartingDistance = Math.Min(z - BlockLength, startingDistance);
-				EndingDistance = Math.Max(z + 2.0 * BlockLength, endingDistance);
-				startingDistance = (float)(BlockLength * Math.Floor(StartingDistance / BlockLength));
-				endingDistance = (float)(BlockLength * Math.Ceiling(EndingDistance / BlockLength));
-			}
-			else
-			{
-				startingDistance = (float)StartingDistance;
-				endingDistance = (float)EndingDistance;
-			}
-
-			StaticObjectStates.Add(new ObjectState
-			{
-				Prototype = Prototype,
-				Translation = Translate,
-				Rotate = Rotate,
-				Brightness = Brightness,
-				StartingDistance = startingDistance,
-				EndingDistance = endingDistance
-			});
-			
 			foreach (MeshFace face in Prototype.Mesh.Faces)
 			{
 				switch (face.Flags & MeshFace.FaceTypeMask)
@@ -643,36 +549,36 @@ namespace LibRender2
 
 			Screen.AspectRatio = Screen.Width / (double)Screen.Height;
 			Camera.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * Camera.VerticalViewingAngle) * Screen.AspectRatio);
-			CurrentProjectionMatrix = Matrix4D.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.2, 1000.0);
+			CurrentProjectionMatrix = Matrix4d.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.2, 1000.0);
 		}
 
 		public void ResetShader(Shader Shader)
 		{
 			ErrorCode message = GL.GetError();
-			
+
 			if (message != ErrorCode.NoError)
 			{
 				throw new InvalidOperationException($"OpenGL Error: {message.ToString()}");
 			}
 
-			Shader.SetCurrentProjectionMatrix(Matrix4D.Identity);
-			Shader.SetCurrentModelViewMatrix(Matrix4D.Identity);
-			Shader.SetCurrentNormalMatrix(Matrix4D.Identity);
-			Shader.SetCurrentTextureMatrix(Matrix4D.Identity);
+			Shader.SetCurrentProjectionMatrix(Matrix4d.Identity);
+			Shader.SetCurrentModelViewMatrix(Matrix4d.Identity);
+			Shader.SetCurrentNormalMatrix(Matrix4d.Identity);
+			Shader.SetCurrentTextureMatrix(Matrix4d.Identity);
 			Shader.SetIsLight(false);
 			Shader.SetLightPosition(Vector3.Zero);
-			Shader.SetLightAmbient(Color24.White);
-			Shader.SetLightDiffuse(Color24.White);
-			Shader.SetLightSpecular(Color24.White);
-			Shader.SetMaterialAmbient(Color24.White);
-			Shader.SetMaterialDiffuse(Color24.White);
-			Shader.SetMaterialSpecular(Color24.White);
-			Shader.SetMaterialEmission(Color24.White);
+			Shader.SetLightAmbient(Color4.White);
+			Shader.SetLightDiffuse(Color4.White);
+			Shader.SetLightSpecular(Color4.White);
+			Shader.SetMaterialAmbient(Color4.White);
+			Shader.SetMaterialDiffuse(Color4.White);
+			Shader.SetMaterialSpecular(Color4.White);
+			Shader.SetMaterialEmission(Color4.White);
 			Shader.SetMaterialShininess(1.0f);
 			Shader.SetIsFog(false);
 			Shader.SetFogStart(0.0f);
 			Shader.SetFogEnd(0.0f);
-			Shader.SetFogColor(Color24.White);
+			Shader.SetFogColor(Color4.White);
 			Shader.SetIsTexture(false);
 			Shader.SetTexture(0);
 			Shader.SetBrightness(1.0f);
@@ -765,17 +671,17 @@ namespace LibRender2
 			RenderFace(Shader, State.Object, State.Face, IsDebugTouchMode);
 		}
 
-		public void RenderFace(Shader Shader, FaceState State, Vector3 EyePosition, bool IsDebugTouchMode = false)
+		public void RenderFace(Shader Shader, FaceState State, Vector3d EyePosition, bool IsDebugTouchMode = false)
 		{
 			RenderFace(Shader, State.Object, State.Face, EyePosition, IsDebugTouchMode);
 		}
 
 		public void RenderFace(Shader Shader, ObjectState State, MeshFace Face, bool IsDebugTouchMode = false)
 		{
-			RenderFace(Shader, State, Face, new Vector3(Camera.AbsolutePosition.X, Camera.AbsolutePosition.Y, -Camera.AbsolutePosition.Z), IsDebugTouchMode);
+			RenderFace(Shader, State, Face, new Vector3d(Camera.AbsolutePosition.X, Camera.AbsolutePosition.Y, -Camera.AbsolutePosition.Z), IsDebugTouchMode);
 		}
 
-		public void RenderFace(Shader Shader, ObjectState State, MeshFace Face, Vector3 EyePosition, bool IsDebugTouchMode = false)
+		public void RenderFace(Shader Shader, ObjectState State, MeshFace Face, Vector3d EyePosition, bool IsDebugTouchMode = false)
 		{
 			if (State.Prototype.Mesh.Vertices.Length < 1)
 			{
@@ -784,8 +690,8 @@ namespace LibRender2
 
 			VertexTemplate[] vertices = State.Prototype.Mesh.Vertices;
 			MeshMaterial material = State.Prototype.Mesh.Materials[Face.Material];
-			VertexArrayObject VAO = (VertexArrayObject)State.Prototype.Mesh.VAO;
-			VertexArrayObject NormalsVAO = (VertexArrayObject)State.Prototype.Mesh.NormalsVAO;
+			VertexArrayObject VAO = State.Prototype.Mesh.VAO;
+			VertexArrayObject NormalsVAO = State.Prototype.Mesh.NormalsVAO;
 
 			if (!OptionBackFaceCulling || (Face.Flags & MeshFace.Face2Mask) != 0)
 			{
@@ -800,11 +706,11 @@ namespace LibRender2
 			}
 
 			// matrix
-			Matrix4D modelMatrix = State.Scale * State.Rotate * State.Translation * Matrix4D.CreateTranslation(-EyePosition);
-			Matrix4D modelViewMatrix = modelMatrix * CurrentViewMatrix;
+			Matrix4d modelMatrix = State.Scale * State.Rotate * State.Translation * Matrix4d.CreateTranslation(-EyePosition);
+			Matrix4d modelViewMatrix = modelMatrix * CurrentViewMatrix;
 			Shader.SetCurrentProjectionMatrix(CurrentProjectionMatrix);
 			Shader.SetCurrentModelViewMatrix(modelViewMatrix);
-			Shader.SetCurrentNormalMatrix(Matrix4D.Transpose(Matrix4D.Invert(modelViewMatrix)));
+			Shader.SetCurrentNormalMatrix(Matrix4d.Transpose(modelViewMatrix.Inverted()));
 			Shader.SetCurrentTextureMatrix(State.TextureTranslation);
 
 			if (OptionWireFrame || IsDebugTouchMode)
@@ -821,21 +727,21 @@ namespace LibRender2
 				if (OptionLighting)
 				{
 					Shader.SetIsLight(true);
-					Shader.SetLightPosition(new Vector3(Lighting.OptionLightPosition.X, Lighting.OptionLightPosition.Y, -Lighting.OptionLightPosition.Z));
-					Shader.SetLightAmbient(Lighting.OptionAmbientColor);
-					Shader.SetLightDiffuse(Lighting.OptionDiffuseColor);
-					Shader.SetLightSpecular(Lighting.OptionSpecularColor);
-					Shader.SetMaterialAmbient(material.Color);  // TODO
-					Shader.SetMaterialDiffuse(material.Color);
-					Shader.SetMaterialSpecular(material.Color);  // TODO
+					Shader.SetLightPosition(new Vector3((float)Lighting.OptionLightPosition.X, (float)Lighting.OptionLightPosition.Y, -(float)Lighting.OptionLightPosition.Z));
+					Shader.SetLightAmbient(new Color4(Lighting.OptionAmbientColor.R, Lighting.OptionAmbientColor.G, Lighting.OptionAmbientColor.B, 255));
+					Shader.SetLightDiffuse(new Color4(Lighting.OptionDiffuseColor.R, Lighting.OptionDiffuseColor.G, Lighting.OptionDiffuseColor.B, 255));
+					Shader.SetLightSpecular(new Color4(Lighting.OptionSpecularColor.R, Lighting.OptionSpecularColor.G, Lighting.OptionSpecularColor.B, 255));
+					Shader.SetMaterialAmbient(new Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A));  // TODO
+					Shader.SetMaterialDiffuse(new Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A));
+					Shader.SetMaterialSpecular(new Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A));  // TODO
 
 					if ((material.Flags & MeshMaterial.EmissiveColorMask) != 0)
 					{
-						Shader.SetMaterialEmission(material.EmissiveColor);
+						Shader.SetMaterialEmission(new Color4(material.EmissiveColor.R, material.EmissiveColor.G, material.EmissiveColor.B, 255));
 					}
 					else
 					{
-						Shader.SetMaterialEmission(Color24.Black);
+						Shader.SetMaterialEmission(new Color4(0.0f, 0.0f, 0.0f, 1.0f));
 					}
 
 					Shader.SetMaterialShininess(1.0f);
@@ -849,12 +755,12 @@ namespace LibRender2
 				}
 				else
 				{
-					Shader.SetMaterialAmbient(material.Color);  // TODO
+					Shader.SetMaterialAmbient(new Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A));  // TODO
 				}
 			}
 			else
 			{
-				Shader.SetMaterialAmbient(material.Color);  // TODO
+				Shader.SetMaterialAmbient(new Color4(material.Color.R, material.Color.G, material.Color.B, material.Color.A));  // TODO
 			}
 
 			// fog
@@ -863,7 +769,7 @@ namespace LibRender2
 				Shader.SetIsFog(true);
 				Shader.SetFogStart(Fog.Start);
 				Shader.SetFogEnd(Fog.End);
-				Shader.SetFogColor(Fog.Color);
+				Shader.SetFogColor(new Color4(Fog.Color.R, Fog.Color.G, Fog.Color.B, 255));
 			}
 
 			PrimitiveType DrawMode;
@@ -936,7 +842,7 @@ namespace LibRender2
 				{
 					alphaFactor = 1.0f;
 				}
-				Shader.SetOpacity(inv255 * material.Color.A * alphaFactor);
+				Shader.SetOpacity(alphaFactor);
 
 				// render polygon
 				VAO.Bind();
@@ -1022,17 +928,17 @@ namespace LibRender2
 			RenderFaceImmediateMode(State.Object, State.Face, IsDebugTouchMode);
 		}
 
-		public void RenderFaceImmediateMode(FaceState State, Vector3 EyePosition, bool IsDebugTouchMode = false)
+		public void RenderFaceImmediateMode(FaceState State, Vector3d EyePosition, bool IsDebugTouchMode = false)
 		{
 			RenderFaceImmediateMode(State.Object, State.Face, EyePosition, IsDebugTouchMode);
 		}
 
 		public void RenderFaceImmediateMode(ObjectState State, MeshFace Face, bool IsDebugTouchMode = false)
 		{
-			RenderFaceImmediateMode(State, Face, new Vector3(Camera.AbsolutePosition.X, Camera.AbsolutePosition.Y, -Camera.AbsolutePosition.Z), IsDebugTouchMode);
+			RenderFaceImmediateMode(State, Face, new Vector3d(Camera.AbsolutePosition.X, Camera.AbsolutePosition.Y, -Camera.AbsolutePosition.Z), IsDebugTouchMode);
 		}
 
-		public void RenderFaceImmediateMode(ObjectState State, MeshFace Face, Vector3 EyePosition, bool IsDebugTouchMode = false)
+		public void RenderFaceImmediateMode(ObjectState State, MeshFace Face, Vector3d EyePosition, bool IsDebugTouchMode = false)
 		{
 			if (State.Prototype.Mesh.Vertices.Length < 1)
 			{
@@ -1053,37 +959,21 @@ namespace LibRender2
 					GL.Enable(EnableCap.CullFace);
 				}
 			}
-			Matrix4D modelMatrix = State.Scale * State.Rotate * State.Translation * Matrix4D.CreateTranslation(-EyePosition);
-			// matrix
-			unsafe
-			{
-				GL.MatrixMode(MatrixMode.Projection);
-				GL.PushMatrix();
-				fixed (double* matrixPointer = &CurrentProjectionMatrix.Row0.X)
-				{
-					GL.LoadMatrix(matrixPointer);
-				}
-				GL.MatrixMode(MatrixMode.Modelview);
-				GL.PushMatrix();
-				fixed (double* matrixPointer = &CurrentViewMatrix.Row0.X)
-				{
-					GL.LoadMatrix(matrixPointer);
-				}
-				
-				double* matrixPointer2 = &modelMatrix.Row0.X;
-				{
-					GL.MultMatrix(matrixPointer2);
-				}
 
-				GL.MatrixMode(MatrixMode.Texture);
-				GL.PushMatrix();
-				fixed (double* matrixPointer = &State.TextureTranslation.Row0.X)
-				{
-					GL.LoadMatrix(matrixPointer);
-				}
-				
-			}
-			
+			// matrix
+			GL.MatrixMode(MatrixMode.Projection);
+			GL.PushMatrix();
+			GL.LoadMatrix(ref CurrentProjectionMatrix);
+
+			GL.MatrixMode(MatrixMode.Modelview);
+			GL.PushMatrix();
+			GL.LoadMatrix(ref CurrentViewMatrix);
+			Matrix4d modelMatrix = State.Scale * State.Rotate * State.Translation * Matrix4d.CreateTranslation(-EyePosition);
+			GL.MultMatrix(ref modelMatrix);
+
+			GL.MatrixMode(MatrixMode.Texture);
+			GL.PushMatrix();
+			GL.LoadMatrix(ref State.TextureTranslation);
 
 			if (OptionWireFrame)
 			{

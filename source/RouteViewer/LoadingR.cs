@@ -21,8 +21,10 @@ namespace OpenBve {
 
 		// members
 		internal static double RouteProgress;
+		internal static double TrainProgress;
 		internal static bool Cancel;
 		internal static bool Complete;
+		private static Thread Loader = null;
 		private static string CurrentRouteFile;
 		private static Encoding CurrentRouteEncoding;
 		internal static double TrainProgressCurrentSum;
@@ -38,6 +40,7 @@ namespace OpenBve {
 			
 			// members
 			RouteProgress = 0.0;
+			TrainProgress = 0.0;
 			TrainProgressCurrentSum = 0.0;
 			TrainProgressCurrentWeight = 1.0;
 			Cancel = false;
@@ -104,6 +107,7 @@ namespace OpenBve {
 		{
 			// members
 			RouteProgress = 0.0;
+			TrainProgress = 0.0;
 			TrainProgressCurrentSum = 0.0;
 			TrainProgressCurrentWeight = 1.0;
 			Cancel = false;
@@ -121,6 +125,9 @@ namespace OpenBve {
 			string ObjectFolder = OpenBveApi.Path.CombineDirectory(RailwayFolder, "Object");
 			string SoundFolder = OpenBveApi.Path.CombineDirectory(RailwayFolder, "Sound");
 			// string CompatibilityFolder = OpenBveApi.Path.CombineDirectory(Application.StartupPath, "Compatibility");
+			Game.MinimalisticSimulation = true;
+			// screen
+
 			Program.Renderer.Camera.CurrentMode = CameraViewMode.Track;
 			// load route
 			bool IsRW = string.Equals(System.IO.Path.GetExtension(CurrentRouteFile), ".rw", StringComparison.OrdinalIgnoreCase);

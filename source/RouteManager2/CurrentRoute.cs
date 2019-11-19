@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using LibRender2;
 using OpenBveApi.Colors;
 using OpenBveApi.Routes;
@@ -15,11 +14,6 @@ namespace RouteManager2
 	public class CurrentRoute
 	{
 		private readonly BaseRenderer renderer;
-
-		/// <summary>The route's comment (For display in the main menu)</summary>
-		public string Comment = "";
-		/// <summary>The route's image file (For display in the main menu)</summary>
-		public string Image = "";
 
 		/// <summary>The list of tracks available in the simulation.</summary>
 		public Track[] Tracks;
@@ -64,13 +58,8 @@ namespace RouteManager2
 
 		public Atmosphere Atmosphere;
 
-		public double[] BufferTrackPositions = new double[] { };
-
 		/// <summary>The current in game time, expressed as the number of seconds since midnight on the first day</summary>
 		public double SecondsSinceMidnight;
-
-		/// <summary>Holds the length conversion units</summary>
-		public double[] UnitOfLength = new double[] { 1.0 };
 
 		public CurrentRoute(BaseRenderer renderer)
 		{
@@ -167,7 +156,7 @@ namespace RouteManager2
 
 				if (train == null)
 				{
-					double b = -Double.MaxValue;
+					double b = -double.MaxValue;
 
 					foreach (AbstractTrain t in Trains)
 					{
@@ -340,7 +329,7 @@ namespace RouteManager2
 
 			if (CurrentFog.Start < CurrentFog.End & CurrentFog.Start < fogDistance)
 			{
-				float ratio = (float)CurrentBackground.BackgroundImageDistance / fogDistance;
+				float ratio = (float)BackgroundHandle.BackgroundImageDistance / fogDistance;
 
 				renderer.OptionFog = true;
 				renderer.Fog.Start = CurrentFog.Start * ratio * scale;

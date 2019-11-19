@@ -3,7 +3,6 @@ using System.Globalization;
 using OpenBveApi;
 using OpenBveApi.Interface;
 using OpenBveApi.Math;
-using RouteManager2;
 
 namespace OpenBve
 {
@@ -53,12 +52,12 @@ namespace OpenBve
 						Lines[i].StartsWith("$")
 					) {
 						AllowRwRouteDescription = false;
-						Program.CurrentRoute.Comment = Program.CurrentRoute.Comment.Trim(new char[] { });
+						Game.RouteComment = Game.RouteComment.Trim(new char[] { });
 					} else {
-						if (Program.CurrentRoute.Comment.Length != 0) {
-							Program.CurrentRoute.Comment += "\n";
+						if (Game.RouteComment.Length != 0) {
+							Game.RouteComment += "\n";
 						}
-						Program.CurrentRoute.Comment += Lines[i];
+						Game.RouteComment += Lines[i];
 						continue;
 					}
 				}

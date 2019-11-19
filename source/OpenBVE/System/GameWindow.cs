@@ -17,13 +17,10 @@ using OpenTK.Graphics;
 using OpenTK.Input;
 using OpenBveApi;
 using OpenBveApi.Graphics;
-using OpenBveApi.Math;
 using OpenBveApi.Routes;
 using OpenTK.Graphics.OpenGL;
-using RouteManager2;
 using RouteManager2.MessageManager;
 using Path = System.IO.Path;
-using Vector2 = OpenTK.Vector2;
 
 namespace OpenBve
 {
@@ -516,9 +513,9 @@ namespace OpenBve
 						TrainLength += TrainManager.PlayerTrain.Cars[c].Length;
 					}
 
-					for (int j = 0; j < Program.CurrentRoute.BufferTrackPositions.Length; j++)
+					for (int j = 0; j < Game.BufferTrackPositions.Length; j++)
 					{
-						if (PlayerFirstStationPosition > Program.CurrentRoute.BufferTrackPositions[j] && PlayerFirstStationPosition - TrainLength < Program.CurrentRoute.BufferTrackPositions[j])
+						if (PlayerFirstStationPosition > Game.BufferTrackPositions[j] && PlayerFirstStationPosition - TrainLength < Game.BufferTrackPositions[j])
 						{
 							/*
 							 * HACK: The initial start position for the player train is stuck on a set of buffers
@@ -526,7 +523,7 @@ namespace OpenBve
 							 */
 
 							//Set the start position to be the buffer position plus the train length plus 1m
-							PlayerFirstStationPosition = Program.CurrentRoute.BufferTrackPositions[j] + TrainLength + 1;
+							PlayerFirstStationPosition = Game.BufferTrackPositions[j] + TrainLength + 1;
 							//Update the station stop location
 							if (s >= 0)
 							{
@@ -670,7 +667,7 @@ namespace OpenBve
 			{
 				if (i != PlayerFirstStationIndex & Program.CurrentRoute.Stations[i].PlayerStops())
 				{
-					if (i == 0 || Program.CurrentRoute.Stations[i - 1].Type != StationType.ChangeEnds && Program.CurrentRoute.Stations[i - 1].Type != StationType.Jump)
+					if (i == 0 || Program.CurrentRoute.Stations[i - 1].Type != StationType.ChangeEnds)
 					{
 						Game.CurrentScore.Maximum += Game.ScoreValueStationArrival;
 					}
@@ -930,9 +927,9 @@ namespace OpenBve
 		private void LoadingScreenLoop()
 		{
 			Program.Renderer.PushMatrix(MatrixMode.Projection);
-			Matrix4D.CreateOrthographicOffCenter(0.0f, Program.Renderer.Screen.Width, Program.Renderer.Screen.Height, 0.0f, -1.0f, 1.0f, out Program.Renderer.CurrentProjectionMatrix);
+			Program.Renderer.CurrentProjectionMatrix = Matrix4d.CreateOrthographicOffCenter(0.0, Program.Renderer.Screen.Width, Program.Renderer.Screen.Height, 0.0, -1.0, 1.0);
 			Program.Renderer.PushMatrix(MatrixMode.Modelview);
-			Program.Renderer.CurrentViewMatrix = Matrix4D.Identity;
+			Program.Renderer.CurrentViewMatrix = Matrix4d.Identity;
 
 			while (!Loading.Complete && !Loading.Cancel)
 			{

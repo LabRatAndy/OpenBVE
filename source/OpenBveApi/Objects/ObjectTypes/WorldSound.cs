@@ -4,6 +4,7 @@ using OpenBveApi.Routes;
 using OpenBveApi.Sounds;
 using OpenBveApi.Trains;
 using OpenBveApi.World;
+using OpenTK.Graphics.ES11;
 
 namespace OpenBveApi.Objects
 {
@@ -64,10 +65,7 @@ namespace OpenBveApi.Objects
 				//Must clone the vector, not pass the reference
 				Position = new Vector3(position),
 				Follower = new TrackFollower(currentHost),
-				currentTrackPosition = trackPosition,
-				TrackFollowerFunction =  TrackFollowerFunction,
-				PitchFunction =  PitchFunction,
-				VolumeFunction =  VolumeFunction
+				currentTrackPosition = trackPosition
 			};
 			snd.Follower.UpdateAbsolute(trackPosition, true, true);
 			if (this.TrackFollowerFunction != null)
