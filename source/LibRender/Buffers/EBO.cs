@@ -1,8 +1,24 @@
 ﻿using System;
 using OpenTK.Graphics.OpenGL;
 
-namespace LibRender
+namespace OpenBveApi.LibRender
 {
+    /// <summary>
+    /// What type of face does the EBO represent. ie which shader to use.
+    /// </summary>
+    public enum EBOType
+    {
+        /// <summary> Plain RGBA coloured face</summary>
+        Coloured = 1,
+        /// <summary> Textured face no transparency</summary>
+        Textured = 2,
+        /// <summary>Textured face with a transparency</summary>
+        Transparent = 3,
+    }
+
+    /// <summary>
+    /// Class to represent an openGL Element Buffer Object
+    /// </summary>
     public class ElementBufferObject : IDisposable
     {
         /// <summary>
@@ -16,6 +32,23 @@ namespace LibRender
         private int[] ibo = null;
 
         /// <summary>
+        /// The EBO face type set from the EBOType enum so we know which shader to use
+        /// </summary>
+        private int type;
+
+        /// <summary>
+        /// Constructor using the supplied array of int representing the index of the vertex in the VBO
+        /// </summary>
+        /// <param name="IBO">Array of ints containing the vertex indices for the EBO</param>
+        /// <param name="type"> The face type of the EBO </param>
+        public ElementBufferObject(int[] IBO, EBOType type)
+        {
+            GL.GenBuffers(1, out handle);
+            ibo = IBO;
+            this.type = (int)type;
+			GC.KeepAlive(ibo);
+        }
+        /// <summary>
         /// Constructor using the supplied array of int representing the index of the vertex in the VBO
         /// </summary>
         /// <param name="IBO">Array of ints containing the vertex indices for the EBO</param>
@@ -23,6 +56,15 @@ namespace LibRender
         {
             GL.GenBuffers(1, out handle);
             ibo = IBO;
+			GC.KeepAlive(ibo);
+        }
+        /// <summary>
+        /// The EBO face type 
+        /// </summary>
+        public int Type
+        {
+            get { return type; }
+            set { type = value; }
         }
 
         /// <summary>
@@ -66,6 +108,7 @@ namespace LibRender
         public void Dispose()
         {
             GL.DeleteBuffer(handle);
+			ibo = null;
             GC.SuppressFinalize(this);
         }
 
@@ -75,6 +118,7 @@ namespace LibRender
         ~ElementBufferObject()
         {
             GL.DeleteBuffer(handle);
+			ibo = null;
         }
     }
 

@@ -19,6 +19,9 @@ namespace LibRender2.Shaders
 
 		private readonly int handle;
 		private int vertexShader;
+		private int tessctrlShader;
+		private int tessevalShader;
+		private int geometryShader;
 		private int fragmentShader;
 		public readonly VertexLayout VertexLayout;
 		public readonly UniformLayout UniformLayout;
@@ -83,6 +86,21 @@ namespace LibRender2.Shaders
 			UniformLayout = GetUniformLayout();
 
 			Disposable.Add(this);
+		}
+		public Shader(string vertexshadername, string fragmentshadername, string tessctrlshadername, string tessevalshadername, string geometryshadername, bool isFromStream = false)
+		{
+			int status;
+			GL.CreateProgram(1,out handle);
+			if (isFromStream)
+			{
+				//todo streamcode private helpermethod needed here to avoid repetiiev code
+			}
+			else
+			{
+				LoadShader(vertexshadername, ShaderType.VertexShader);
+				LoadShader(fragmentshadername,ShaderType.FragmentShader);
+
+			}
 		}
 
 		/// <summary>

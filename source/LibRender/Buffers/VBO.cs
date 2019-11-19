@@ -22,6 +22,7 @@ namespace LibRender
         {
             GL.GenBuffers(1, out handle);
             vertexData = vertexdata;
+			GC.KeepAlive(vertexData);
         }
         /// <summary>
         /// Binds / activates the VBO for use
@@ -62,6 +63,7 @@ namespace LibRender
         public void Dispose()
         {
             GL.DeleteBuffer(handle);
+			vertexData = null;
             GC.SuppressFinalize(this);
         }
         /// <summary>
@@ -70,6 +72,7 @@ namespace LibRender
         ~VertexBufferObject()
         {
             GL.DeleteBuffer(handle);
+			vertexData = null;
         }
     }
 }
