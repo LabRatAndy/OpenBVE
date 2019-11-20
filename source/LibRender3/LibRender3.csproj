@@ -48,8 +48,13 @@
 			<Name>OpenBveApi</Name>
 		</ProjectReference>
 	</ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="OpenTk.dll.config"/>
+		<None Include="packages.config"/>
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="Shader\Shader.cs"/>
+	</ItemGroup>
+	<ItemGroup/>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

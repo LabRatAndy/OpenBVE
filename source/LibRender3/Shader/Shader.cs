@@ -18,7 +18,7 @@ namespace LibRender3.Shader
 
         internal Shader(string vertexShaderFilename, string fragmentShaderFilename)
         {
-			
+		
         }
 		internal Shader(string vertexShaderFilename,string fragmentShaderFilename, string geomShaderfilename, string tessctrlShaderfilename, string tessevalShaderFilename)
         {
