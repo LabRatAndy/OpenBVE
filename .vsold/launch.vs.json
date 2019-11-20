@@ -1,0 +1,18 @@
+{
+  "version": "0.2.1",
+  "defaults": {},
+  "configurations": [
+    {
+      "type": "dll",
+      "exe": "",
+      "project": "source\\LibRender3\\LibRender3.csproj",
+      "name": "LibRender3.csproj"
+    },
+    {
+      "type": "dll",
+      "exe": "",
+      "project": "source\\LibRender3\\OpenTK.dll.config",
+      "name": "OpenTK.dll.config"
+    }
+  ]
+}

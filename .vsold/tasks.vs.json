@@ -1,0 +1,15 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "task-OpenBVE",
+      "appliesTo": "OpenBVE.sln",
+      "type": "launch"
+    },
+    {
+      "taskLabel": "task-OpenBve",
+      "appliesTo": "source/OpenBVE/OpenBve.csproj",
+      "type": "msbuild"
+    }
+  ]
+}
