@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Buffers\EBO.cs" />
     <Compile Include="Buffers\RenderVertex.cs" />
+    <Compile Include="Buffers\VAO.cs" />
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Buffers\VBO.cs" />
   </ItemGroup>
