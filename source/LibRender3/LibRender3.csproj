@@ -55,9 +55,11 @@
   <ItemGroup>
     <Compile Include="Buffers\EBO.cs" />
     <Compile Include="Buffers\RenderVertex.cs" />
+    <Compile Include="Buffers\UniformBufferObject.cs" />
     <Compile Include="Buffers\VAO.cs" />
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Buffers\VBO.cs" />
+    <Compile Include="Buffers\UniformStruct.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
