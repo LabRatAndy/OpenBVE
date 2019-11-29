@@ -20,6 +20,10 @@ namespace OpenBveApi.Objects
 		public string Author;
 		/// <summary> Stores the copyright information for this object.</summary>
 		public string Copyright;
+        /// <summary>Structure type of object as it is loaded in route files with structure section.</summary>
+		public StructureType structureType;
+		/// <summary>Object index used in the with structure section of the routefile</summary>
+        public ushort ObjectIndex;
 
 		private readonly Hosts.HostInterface currentHost;
 
