@@ -1,12 +1,15 @@
 ﻿namespace OpenBveApi.Objects
 {
+	/// <summary>
+    /// Enumerates the different structure types
+    /// </summary>
 	public enum StructureType
     {
 		Freeobj,
 		WallL,
 		WallR,
-		DykeL,
-		DykeR,
+		DikeL,
+		DikeR,
 		Pole,
 		Rail,
 		Ground,

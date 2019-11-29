@@ -1334,7 +1334,7 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
-															((StaticObject)obj).structureType = StructureType.DykeL;
+															((StaticObject)obj).structureType = StructureType.DikeL;
 															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.DikeL.Add(CommandIndex1, obj, "Left DikeStructure");
 														}
@@ -1362,7 +1362,7 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
-															((StaticObject)obj).structureType = StructureType.DykeR;
+															((StaticObject)obj).structureType = StructureType.DikeR;
 															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.DikeR.Add(CommandIndex1, obj, "Right DikeStructure");
 														}
