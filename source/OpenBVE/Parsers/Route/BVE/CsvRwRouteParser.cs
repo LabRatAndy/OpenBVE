@@ -1167,6 +1167,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.Rail;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.RailObjects.Add(CommandIndex1, obj, "RailStructure");
 														}
 													}
@@ -1192,6 +1194,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.Beacon;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.Beacon.Add(CommandIndex1, obj, "BeaconStructure");
 														}
 													}
@@ -1246,6 +1250,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.Ground;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.Ground.Add(CommandIndex1, obj, "GroundStructure");
 														}
 													}
@@ -1272,6 +1278,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.WallL;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.WallL.Add(CommandIndex1, obj, "Left WallStructure");
 														}
 													}
@@ -1298,6 +1306,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.WallR;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.WallR.Add(CommandIndex1, obj, "Right WallStructure");
 														}
 													}
@@ -1324,6 +1334,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.DykeL;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.DikeL.Add(CommandIndex1, obj, "Left DikeStructure");
 														}
 													}
@@ -1350,6 +1362,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.DykeR;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.DikeR.Add(CommandIndex1, obj, "Right DikeStructure");
 														}
 													}
@@ -1376,6 +1390,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.FormL;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.FormL.Add(CommandIndex1, obj, "Left FormStructure");
 														}
 													}
@@ -1402,6 +1418,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.FormR;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.FormR.Add(CommandIndex1, obj, "Right FormStructure");
 														}
 													}
@@ -1428,6 +1446,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 														if (obj != null)
 														{
+															obj.structureType = StructureType.FormCL;
+															obj.ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.FormCL.Add(CommandIndex1, obj, "Left FormCStructure");
 														}
 													}
@@ -1454,6 +1474,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.FormCR;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.FormCR.Add(CommandIndex1, obj, "Right FormCStructure");
 														}
 													}
@@ -1490,6 +1512,8 @@ namespace OpenBve {
 															var obj = ObjectManager.LoadObject(f, Encoding, false);
 															if (obj != null)
 															{
+																((StaticObject)obj).structureType = StructureType.RoofL;
+																((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 																Data.Structure.RoofL.Add(CommandIndex1, obj, "Left RoofStructure");
 															}
 														}
@@ -1527,6 +1551,8 @@ namespace OpenBve {
 															var obj = ObjectManager.LoadObject(f, Encoding, false);
 															if (obj != null)
 															{
+																((StaticObject)obj).structureType = StructureType.RoofR;
+																((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 																Data.Structure.RoofR.Add(CommandIndex1, obj, "Right RoofStructure");
 															}
 														}
@@ -1564,6 +1590,8 @@ namespace OpenBve {
 															var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 															if (obj != null)
 															{
+																((StaticObject)obj).structureType = StructureType.RoofCL;
+																((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 																Data.Structure.RoofCL.Add(CommandIndex1, obj, "Left RoofCStructure");
 															}
 														}
@@ -1601,6 +1629,8 @@ namespace OpenBve {
 															var obj = ObjectManager.LoadStaticObject(f, Encoding, false);
 															if (obj != null)
 															{
+																((StaticObject)obj).structureType = StructureType.RoofCR;
+																((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 																Data.Structure.RoofCR.Add(CommandIndex1, obj, "Right RoofCStructure");
 															}
 														}
@@ -1628,6 +1658,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadStaticObject(f, Encoding, true);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.CrackL;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.CrackL.Add(CommandIndex1, obj, "Left CrackStructure");
 														}
 													}
@@ -1654,6 +1686,9 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadStaticObject(f, Encoding, true);
 														if (obj != null)
 														{
+															// adding structure type and object index
+															((StaticObject)obj).structureType = StructureType.CrackR;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.CrackR.Add(CommandIndex1, obj, "Right CrackStructure");
 														}
 													}
@@ -1680,6 +1715,8 @@ namespace OpenBve {
 														var obj = ObjectManager.LoadObject(f, Encoding, false);
 														if (obj != null)
 														{
+															((StaticObject)obj).structureType = StructureType.Freeobj;
+															((StaticObject)obj).ObjectIndex = (ushort)CommandIndex1;
 															Data.Structure.FreeObjects.Add(CommandIndex1, obj, "FreeObject");
 														}
 													}
