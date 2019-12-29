@@ -81,13 +81,13 @@ namespace LibRender2.Objects
 			myOverlayAlphaFaces.Clear();
 		}
 
-		public void ShowObject(ObjectState State, ObjectType Type)
+		public void ShowObject(ObjectState State, ObjectType Type, VertexLayout vertexLayout)
 		{
 			bool result = AddObject(State);
 
 			if (State.Prototype.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref State.Prototype.Mesh, State.Prototype.Dynamic);
+				VAOExtensions.CreateVAO(ref State.Prototype.Mesh, State.Prototype.Dynamic,vertexLayout);
 			}
 
 			if (!result)
