@@ -806,8 +806,8 @@ namespace LibRender2
 
 			MeshMaterial material = State.Prototype.Mesh.Materials[Face.Material];
 			VertexArrayObject VAO = (VertexArrayObject)State.Prototype.Mesh.VAO;
-			
-			VAO.SetupAttributes(Shader.VertexLayout);
+			//change VAO.Bind for drawing as it only needs call once not every frame so just bind the VAO then can draw with all the attributes loaded via the bound VAO
+			VAO.Bind();
 			if (!OptionBackFaceCulling || (Face.Flags & MeshFace.Face2Mask) != 0)
 			{
 				GL.Disable(EnableCap.CullFace);
