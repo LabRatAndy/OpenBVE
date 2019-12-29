@@ -43,10 +43,13 @@ namespace LibRender2
 		}
 
 		/// <summary>
-		/// Binds the VAO ready for drawing
+		/// Sets up the attributes for the VAO
 		/// </summary>
-		public void BindForDrawing(VertexLayout VertexLayout)
+		public void SetupAttributes(VertexLayout VertexLayout)
 		{
+			//changed name to be more appropriate the set up of attributes only needs doing once. As solong as the VBO and IBO/EBO remain bound within the VAO
+			//then the attributes remain valid unless a different shader is used to draw the object. The VAO will remember the set attributes and only needs to be bound
+			//to have all the attributes pre-setup.
 			GL.BindVertexArray(handle);
 			vbo.Bind();
 			vbo.EnableAttribute(VertexLayout);

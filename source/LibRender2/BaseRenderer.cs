@@ -807,7 +807,7 @@ namespace LibRender2
 			MeshMaterial material = State.Prototype.Mesh.Materials[Face.Material];
 			VertexArrayObject VAO = (VertexArrayObject)State.Prototype.Mesh.VAO;
 			
-			VAO.BindForDrawing(Shader.VertexLayout);
+			VAO.SetupAttributes(Shader.VertexLayout);
 			if (!OptionBackFaceCulling || (Face.Flags & MeshFace.Face2Mask) != 0)
 			{
 				GL.Disable(EnableCap.CullFace);
@@ -1022,7 +1022,7 @@ namespace LibRender2
 				Shader.SetBrightness(1.0f);
 				Shader.SetOpacity(1.0f);
 				VertexArrayObject NormalsVAO = (VertexArrayObject)State.Prototype.Mesh.NormalsVAO;
-				NormalsVAO.BindForDrawing(Shader.VertexLayout);
+				NormalsVAO.SetupAttributes(Shader.VertexLayout);
 				NormalsVAO.Draw(PrimitiveType.Lines, Face.NormalsIboStartIndex, Face.Vertices.Length * 2);
 			}
 
