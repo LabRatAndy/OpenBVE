@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using LibRender2;
 using LibRender2.MotionBlurs;
@@ -221,30 +221,11 @@ namespace OpenBve.Graphics
 				case ViewportMode.Cab:
 					CurrentProjectionMatrix = Matrix4D.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.025, 50.0);
 					break;
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 
 			Touch.UpdateViewport();
 		}
-
-		/// <summary>Updates the openGL viewport</summary>
-		/// <param name="Mode">The viewport change mode</param>
-		internal void UpdateViewport(ViewportChangeMode Mode)
-		{
-			switch (Mode)
-			{
-				case ViewportChangeMode.ChangeToScenery:
-					CurrentViewportMode = ViewportMode.Scenery;
-					break;
-				case ViewportChangeMode.ChangeToCab:
-					CurrentViewportMode = ViewportMode.Cab;
-					break;
-			}
-
-			UpdateViewport();
-		}
-
+		
 		// render scene
 		internal void RenderScene(double TimeElapsed)
 		{
@@ -319,16 +300,34 @@ namespace OpenBve.Graphics
 
 			// world layer
 			// opaque face
+			if (Interface.CurrentOptions.IsUseNewRenderer)
+			{
+				//Setup the shader for rendering the scene
+				DefaultShader.Activate();
+				if (OptionLighting)
+				{
+					DefaultShader.SetIsLight(true);
+					DefaultShader.SetLightPosition(Lighting.OptionLightPosition);
+					DefaultShader.SetLightAmbient(Lighting.OptionAmbientColor);
+					DefaultShader.SetLightDiffuse(Lighting.OptionDiffuseColor);
+					DefaultShader.SetLightSpecular(Lighting.OptionSpecularColor);
+				}
+				if (OptionFog)
+				{
+					DefaultShader.SetIsFog(true);
+					DefaultShader.SetFogStart(Fog.Start);
+					DefaultShader.SetFogEnd(Fog.End);
+					DefaultShader.SetFogColor(Fog.Color);
+				}
+				DefaultShader.SetTexture(0);
+				DefaultShader.SetCurrentProjectionMatrix(CurrentProjectionMatrix);
+			}
 			ResetOpenGlState();
-
 			foreach (FaceState face in VisibleObjects.OpaqueFaces)
 			{
 				if (Interface.CurrentOptions.IsUseNewRenderer)
 				{
-					DefaultShader.Activate();
-					ResetShader(DefaultShader);
 					RenderFace(DefaultShader, face);
-					DefaultShader.Deactivate();
 				}
 				else
 				{
@@ -339,7 +338,6 @@ namespace OpenBve.Graphics
 			// alpha face
 			ResetOpenGlState();
 			VisibleObjects.SortPolygonsInAlphaFaces();
-
 			if (Interface.CurrentOptions.TransparencyMode == TransparencyMode.Performance)
 			{
 				SetBlendFunc();
@@ -350,10 +348,7 @@ namespace OpenBve.Graphics
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Activate();
-						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -375,10 +370,7 @@ namespace OpenBve.Graphics
 						{
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Activate();
-								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -405,10 +397,7 @@ namespace OpenBve.Graphics
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Activate();
-							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -425,10 +414,7 @@ namespace OpenBve.Graphics
 
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Activate();
-							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -449,13 +435,16 @@ namespace OpenBve.Graphics
 			{
 				MotionBlur.RenderFullscreen(Interface.CurrentOptions.MotionBlur, FrameRate, Math.Abs(Camera.CurrentSpeed));
 			}
-
+			if (Interface.CurrentOptions.IsUseNewRenderer)
+			{
+				ResetShader(DefaultShader); //Must reset shader between overlay and world layers for correct lighting results
+				DefaultShader.SetCurrentProjectionMatrix(CurrentProjectionMatrix);
+			}
 			// overlay layer
 			OptionFog = false;
 			UpdateViewport(ViewportChangeMode.ChangeToCab);
 			CurrentViewMatrix = Matrix4D.LookAt(Vector3.Zero, new Vector3(Camera.AbsoluteDirection.X, Camera.AbsoluteDirection.Y, -Camera.AbsoluteDirection.Z), new Vector3(Camera.AbsoluteUp.X, Camera.AbsoluteUp.Y, -Camera.AbsoluteUp.Z));
-
-			if (Camera.CurrentRestriction == CameraRestrictionMode.NotAvailable)
+			if (Camera.CurrentRestriction == CameraRestrictionMode.NotAvailable || Camera.CurrentRestriction == CameraRestrictionMode.Restricted3D)
 			{
 				ResetOpenGlState(); // TODO: inserted
 				GL.Clear(ClearBufferMask.DepthBufferBit);
@@ -472,10 +461,7 @@ namespace OpenBve.Graphics
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Activate();
-						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -497,10 +483,7 @@ namespace OpenBve.Graphics
 					{
 						if (Interface.CurrentOptions.IsUseNewRenderer)
 						{
-							DefaultShader.Activate();
-							ResetShader(DefaultShader);
 							RenderFace(DefaultShader, face);
-							DefaultShader.Deactivate();
 						}
 						else
 						{
@@ -522,10 +505,7 @@ namespace OpenBve.Graphics
 							{
 								if (Interface.CurrentOptions.IsUseNewRenderer)
 								{
-									DefaultShader.Activate();
-									ResetShader(DefaultShader);
 									RenderFace(DefaultShader, face);
-									DefaultShader.Deactivate();
 								}
 								else
 								{
@@ -552,10 +532,7 @@ namespace OpenBve.Graphics
 
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Activate();
-								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -572,10 +549,7 @@ namespace OpenBve.Graphics
 
 							if (Interface.CurrentOptions.IsUseNewRenderer)
 							{
-								DefaultShader.Activate();
-								ResetShader(DefaultShader);
 								RenderFace(DefaultShader, face);
-								DefaultShader.Deactivate();
 							}
 							else
 							{
@@ -602,15 +576,11 @@ namespace OpenBve.Graphics
 				GL.Disable(EnableCap.DepthTest);
 				GL.DepthMask(false);
 				VisibleObjects.SortPolygonsInOverlayAlphaFaces();
-
 				foreach (FaceState face in VisibleObjects.OverlayAlphaFaces)
 				{
 					if (Interface.CurrentOptions.IsUseNewRenderer)
 					{
-						DefaultShader.Activate();
-						ResetShader(DefaultShader);
 						RenderFace(DefaultShader, face);
-						DefaultShader.Deactivate();
 					}
 					else
 					{
@@ -618,11 +588,18 @@ namespace OpenBve.Graphics
 					}
 				}
 			}
-
+			if (Interface.CurrentOptions.IsUseNewRenderer)
+			{
+				/*
+				 * Must remember to de-activate at the end of the render sequence if in GL3 mode.
+				 * The overlays currently use immediate mode and do not work correctly with the shader active
+				 */
+				DefaultShader.Deactivate();
+			}
 			// render touch
 			OptionLighting = false;
 			Touch.RenderScene();
-
+			
 			// render overlays
 			ResetOpenGlState();
 			UnsetAlphaFunc();

@@ -1,4 +1,6 @@
 ﻿using System;
+using LibRender2.Camera;
+using LibRender2.Viewports;
 using OpenBveApi.Graphics;
 using OpenBveApi.Math;
 using OpenBveApi.Runtime;
@@ -7,6 +9,7 @@ namespace LibRender2.Cameras
 {
 	public class CameraProperties
 	{
+		private readonly BaseRenderer Renderer;
 		/// <summary>The current viewing distance in the forward direction.</summary>
 		public double ForwardViewingDistance;
 		/// <summary>The current viewing distance in the backward direction.</summary>
@@ -21,8 +24,21 @@ namespace LibRender2.Cameras
 		public double VerticalViewingAngle;
 		/// <summary>The original vertical viewing angle in radians</summary>
 		public double OriginalVerticalViewingAngle;
+		/// <summary>A Matrix4D describing the current camera translation</summary>
+		public Matrix4D TranslationMatrix;
 		/// <summary>The absolute in-world camera position</summary>
-		public Vector3 AbsolutePosition;
+		public Vector3 AbsolutePosition
+		{
+			get
+			{
+				return absolutePosition;
+			}
+			set
+			{
+				absolutePosition = value;
+				TranslationMatrix = Matrix4D.CreateTranslation(-value.X, -value.Y, value.Z);
+			}
+		}
 		/// <summary>The absolute in-world camera Direction vector</summary>
 		public Vector3 AbsoluteDirection;
 		/// <summary>The absolute in-world camera Up vector</summary>
@@ -51,23 +67,20 @@ namespace LibRender2.Cameras
 		public CameraViewMode CurrentMode;
 		/// <summary>The current camera restriction mode</summary>
 		public CameraRestrictionMode CurrentRestriction = CameraRestrictionMode.NotAvailable;
-		/// <summary>The top left vector when the camera is restricted</summary>
-		/// <remarks>2D panel</remarks>
-		public Vector3 RestrictionBottomLeft = new Vector3(-1.0, -1.0, 1.0);
-		/// <summary>The bottom right vector when the camera is restricted</summary>
-		/// <remarks>2D panel</remarks>
-		public Vector3 RestrictionTopRight = new Vector3(1.0, 1.0, 1.0);
 
-		internal CameraProperties()
+		private Vector3 absolutePosition;
+
+		internal CameraProperties(BaseRenderer renderer)
 		{
+			Renderer = renderer;
 		}
 
 		/// <summary>Tests whether the camera may move further in the current direction</summary>
-		public bool PerformRestrictionTest()
+		public bool PerformRestrictionTest(CameraRestriction Restriction)
 		{
 			if (CurrentRestriction == CameraRestrictionMode.On)
 			{
-				Vector3[] p = { RestrictionBottomLeft, RestrictionTopRight };
+				Vector3[] p = { Restriction.BottomLeft, Restriction.TopRight };
 				Vector2[] r = new Vector2[2];
 
 				for (int j = 0; j < 2; j++)
@@ -95,8 +108,81 @@ namespace LibRender2.Cameras
 
 				return r[0].X <= -1.0025 & r[1].X >= 1.0025 & r[0].Y <= -1.0025 & r[1].Y >= 1.0025;
 			}
+			if (CurrentRestriction == CameraRestrictionMode.Restricted3D)
+			{
+				Vector3[] p = { Restriction.BottomLeft, Restriction.TopRight };
 
+				for (int j = 0; j < 2; j++)
+				{
+					// determine relative world coordinates
+					p[j].Rotate(AbsoluteDirection, AbsoluteUp, AbsoluteSide);
+					double rx = -Math.Tan(Alignment.Yaw) - Alignment.Position.X;
+					double ry = -Math.Tan(Alignment.Pitch) - Alignment.Position.Y;
+					double rz = -Alignment.Position.Z;
+					p[j] += rx * AbsoluteSide + ry * AbsoluteUp + rz * AbsoluteDirection;
+				}
+
+				if (AlignmentDirection.Position.X > 0)
+				{
+					//moving right
+					if (AbsolutePosition.X >= Restriction.AbsoluteTopRight.X)
+					{
+						return false;
+					}
+				}
+				if (AlignmentDirection.Position.X < 0)
+				{
+					//moving left
+					if (AbsolutePosition.X <= Restriction.AbsoluteBottomLeft.X)
+					{
+						return false;
+					}
+				}
+
+				if (AlignmentDirection.Position.Y > 0)
+				{
+					//moving up
+					if (AbsolutePosition.Y >= Restriction.AbsoluteTopRight.Y)
+					{
+						return false;
+					}
+				}
+				if (AlignmentDirection.Position.Y < 0)
+				{
+					//moving down
+					if (AbsolutePosition.Y <= Restriction.AbsoluteBottomLeft.Y)
+					{
+						return false;
+					}
+				}
+
+				if (AlignmentDirection.Position.Z > 0)
+				{
+					//moving forwards
+					if (AbsolutePosition.Z >= Restriction.AbsoluteTopRight.Z)
+					{
+						return false;
+					}
+				}
+				if (AlignmentDirection.Position.Z < 0)
+				{
+					//moving back
+					if (AbsolutePosition.Z <= Restriction.AbsoluteBottomLeft.Z)
+					{
+						return false;
+					}
+				}
+			}
 			return true;
+		}
+
+		/// <summary>Applies the current zoom settings after a change</summary>
+		public void ApplyZoom()
+		{
+			VerticalViewingAngle = OriginalVerticalViewingAngle * Math.Exp(Alignment.Zoom);
+			if (VerticalViewingAngle < 0.001) VerticalViewingAngle = 0.001;
+			if (VerticalViewingAngle > 1.5) VerticalViewingAngle = 1.5;
+			Renderer.UpdateViewport(ViewportChangeMode.NoChange);
 		}
 	}
 }

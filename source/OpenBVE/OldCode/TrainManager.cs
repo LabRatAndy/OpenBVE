@@ -64,8 +64,10 @@ namespace OpenBve
 						if (DocumentElements.Any())
 						{
 							PanelAnimatedXmlParser.ParsePanelAnimatedXml(System.IO.Path.GetFileName(File), TrainPath, Train, Train.DriverCar);
-							Train.Cars[Train.DriverCar].CameraRestrictionMode = CameraRestrictionMode.NotAvailable;
-							Program.Renderer.Camera.CurrentRestriction = CameraRestrictionMode.NotAvailable;
+							if (Train.Cars[Train.DriverCar].CameraRestrictionMode != CameraRestrictionMode.Restricted3D)
+							{
+								Train.Cars[Train.DriverCar].CameraRestrictionMode = CameraRestrictionMode.NotAvailable;
+							}
 						}
 
 						DocumentElements = CurrentXML.Root.Elements("Panel");
@@ -89,7 +91,11 @@ namespace OpenBve
 
 				if (Train.Cars[Train.DriverCar].CarSections[0].Groups[0].Elements.Any())
 				{
-					Program.Renderer.InitializeVisibility();
+					OpenBVEGame.RunInRenderThread(() =>
+					{
+						//Needs to be on the thread containing the openGL context
+						Program.Renderer.InitializeVisibility();
+					});
 					World.UpdateViewingDistances();
 					return;
 				}
@@ -119,8 +125,11 @@ namespace OpenBve
 								Program.CurrentHost.CreateDynamicObject(ref a.Objects[i].internalObject);
 							}
 							Train.Cars[Train.DriverCar].CarSections[0].Groups[0].Elements = a.Objects;
-							Train.Cars[Train.DriverCar].CameraRestrictionMode = CameraRestrictionMode.NotAvailable;
-							Program.Renderer.Camera.CurrentRestriction = CameraRestrictionMode.NotAvailable;
+							if (Train.Cars[Train.DriverCar].CameraRestrictionMode != CameraRestrictionMode.Restricted3D)
+							{
+								Train.Cars[Train.DriverCar].CameraRestrictionMode = CameraRestrictionMode.NotAvailable;
+								Program.Renderer.Camera.CurrentRestriction = CameraRestrictionMode.NotAvailable;
+							}
 							World.UpdateViewingDistances();
 							return;
 						}
