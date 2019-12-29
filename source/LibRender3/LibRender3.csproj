@@ -58,6 +58,8 @@
     <Compile Include="Buffers\UniformBufferObject.cs" />
     <Compile Include="Buffers\VAO.cs" />
     <Compile Include="ObjectLists\ObjectInstance.cs" />
+    <Compile Include="ObjectLists\ObjectList.cs" />
+    <Compile Include="Renderer.cs" />
     <Compile Include="Shader\Shader.cs" />
     <Compile Include="Buffers\VBO.cs" />
     <Compile Include="Buffers\UniformStruct.cs" />
