@@ -258,7 +258,7 @@ namespace OpenBve {
 
 		public override void ShowObject(ObjectState objectToShow, ObjectType objectType)
 		{
-			Program.Renderer.VisibleObjects.ShowObject(objectToShow, objectType);
+			Program.Renderer.VisibleObjects.ShowObject(objectToShow, objectType, Program.Renderer.DefaultShader.VertexLayout);
 		}
 
 		public override void HideObject(ObjectState objectToHide)

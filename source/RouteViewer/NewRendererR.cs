@@ -119,7 +119,7 @@ namespace OpenBve
 
 			foreach (ObjectState state in StaticObjectStates.Where(recipe => recipe.StartingDistance <= p + Camera.ForwardViewingDistance & recipe.EndingDistance >= p - Camera.BackwardViewingDistance))
 			{
-				VisibleObjects.ShowObject(state, ObjectType.Static);
+				VisibleObjects.ShowObject(state, ObjectType.Static, DefaultShader.VertexLayout);
 			}
 		}
 
@@ -166,7 +166,7 @@ namespace OpenBve
 					{
 						if (StaticObjectStates[o].StartingDistance <= p + Camera.ForwardViewingDistance)
 						{
-							VisibleObjects.ShowObject(StaticObjectStates[o], ObjectType.Static);
+							VisibleObjects.ShowObject(StaticObjectStates[o], ObjectType.Static, DefaultShader.VertexLayout);
 						}
 
 						ObjectsSortedByEndPointer--;
@@ -214,7 +214,7 @@ namespace OpenBve
 					{
 						if (StaticObjectStates[o].EndingDistance >= p - Camera.BackwardViewingDistance)
 						{
-							VisibleObjects.ShowObject(StaticObjectStates[o], ObjectType.Static);
+							VisibleObjects.ShowObject(StaticObjectStates[o], ObjectType.Static, DefaultShader.VertexLayout);
 						}
 
 						ObjectsSortedByStartPointer++;
