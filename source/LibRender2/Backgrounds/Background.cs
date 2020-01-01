@@ -365,7 +365,7 @@ namespace LibRender2.Backgrounds
 		{
 			if (data.Object.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref data.Object.Mesh, false);
+				VAOExtensions.CreateVAO(ref data.Object.Mesh, false, renderer.DefaultShader.VertexLayout);
 			}
 
 			foreach (MeshFace face in data.Object.Mesh.Faces)
