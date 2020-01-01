@@ -157,7 +157,17 @@ namespace LibRender2
 		{
 			currentHost = CurrentHost;
 			currentOptions = CurrentOptions;
-
+			try
+			{
+				DefaultShader = new Shader("default", "default", true);
+				DefaultShader.Activate();
+				DefaultShader.Deactivate();
+			}
+			catch
+			{
+				CurrentHost.AddMessage(MessageType.Error, false, "Initialising the default shaders failed- Falling back to legacy openGL.");
+				CurrentOptions.IsUseNewRenderer = false;
+			}
 			Background = new Background(this);
 			Fog = new Fog();
 			OpenGlString = new OpenGlString(this);
@@ -171,17 +181,7 @@ namespace LibRender2
 			StaticObjectStates = new List<ObjectState>();
 			DynamicObjectStates = new List<ObjectState>();
 			VisibleObjects = new VisibleObjectLibrary(currentHost, Camera, currentOptions);
-			try
-			{
-				DefaultShader = new Shader("default", "default", true);
-				DefaultShader.Activate();
-				DefaultShader.Deactivate();
-			}
-			catch
-			{
-				CurrentHost.AddMessage(MessageType.Error, false, "Initialising the default shaders failed- Falling back to legacy openGL.");
-				CurrentOptions.IsUseNewRenderer = false;
-			}
+			
 
 			GL.ClearColor(0.67f, 0.67f, 0.67f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
