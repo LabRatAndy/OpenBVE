@@ -140,7 +140,7 @@ namespace OpenBve.Graphics.Renderers
 
 			if (state.Prototype.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref state.Prototype.Mesh, state.Prototype.Dynamic);
+				VAOExtensions.CreateVAO(ref state.Prototype.Mesh, state.Prototype.Dynamic, renderer.DefaultShader.VertexLayout);
 			}
 
 			foreach (MeshFace face in state.Prototype.Mesh.Faces)
