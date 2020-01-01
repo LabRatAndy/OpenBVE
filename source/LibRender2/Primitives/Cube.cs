@@ -182,6 +182,8 @@ namespace LibRender2.Primitives
 			defaultVAO.SetVBO(new VertexBufferObject(vertexData, BufferUsageHint.StaticDraw));
 			defaultVAO.SetIBO(new IndexBufferObject(Enumerable.Range(0, vertexData.Length).Select(x => (ushort) x).ToArray(), BufferUsageHint.StaticDraw));
 			defaultVAO.UnBind();
+			defaultVAO.SetupAttributes(renderer.DefaultShader.VertexLayout);
+			defaultVAO.UnBind();
 		}
 
 		/// <summary>Draws a 3D cube</summary>
@@ -258,7 +260,8 @@ namespace LibRender2.Primitives
 			}
 
 			// render polygon
-			VAO.SetupAttributes(renderer.DefaultShader.VertexLayout);
+			//change to just VAO.Bind
+			VAO.Bind();
 			VAO.Draw(PrimitiveType.Quads);
 			VAO.UnBind();
 			renderer.DefaultShader.Deactivate();

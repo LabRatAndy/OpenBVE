@@ -211,7 +211,8 @@ namespace LibRender2.Backgrounds
 
 				// render polygon
 				VertexArrayObject VAO = (VertexArrayObject) data.VAO;
-				VAO.SetupAttributes(renderer.DefaultShader.VertexLayout);
+				//change to just bind vao
+				VAO.Bind();
 
 				for (int i = 0; i + 9 < 32 * 10; i += 10)
 				{
