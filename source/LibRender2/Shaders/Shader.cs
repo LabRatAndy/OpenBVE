@@ -24,6 +24,7 @@ namespace LibRender2.Shaders
 		public readonly VertexLayout VertexLayout;
 		public readonly UniformLayout UniformLayout;
 		private bool disposed;
+		private bool isActive;
 
 		/// <summary>
 		/// Constructor
@@ -125,7 +126,12 @@ namespace LibRender2.Shaders
 		/// <summary>Activates the shader program for use</summary>
 		public void Activate()
 		{
+			if (isActive)
+			{
+				return;
+			}
 			GL.UseProgram(handle);
+			isActive = true;
 		}
 
 		public VertexLayout GetVertexLayout()
@@ -173,6 +179,7 @@ namespace LibRender2.Shaders
 		/// <summary>Deactivates the shader</summary>
 		public void Deactivate()
 		{
+			isActive = false;
 			GL.UseProgram(0);
 		}
 
@@ -289,9 +296,9 @@ namespace LibRender2.Shaders
 			GL.Uniform1(UniformLayout.IsFog, IsFog ? 1 : 0);
 		}
 
-		public void SetMaterialAdditive(bool Additive)
+		public void SetMaterialAdditive(int AdditiveBlendMode)
 		{
-			GL.Uniform1(UniformLayout.MaterialIsAdditive, Additive ? 1 : 0);
+			GL.Uniform1(UniformLayout.MaterialIsAdditive, AdditiveBlendMode);
 		}
 
 		public void SetFogStart(float FogStart)

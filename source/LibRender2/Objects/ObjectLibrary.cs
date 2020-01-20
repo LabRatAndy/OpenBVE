@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,6 +18,7 @@ namespace LibRender2.Objects
 		private readonly HostInterface currentHost;
 		private readonly CameraProperties camera;
 		private readonly BaseOptions currentOptions;
+		private readonly BaseRenderer renderer;
 
 		private readonly List<ObjectState> myObjects;
 		private readonly List<FaceState> myOpaqueFaces;
@@ -30,11 +31,12 @@ namespace LibRender2.Objects
 		public readonly ReadOnlyCollection<FaceState> OverlayOpaqueFaces;
 		public ReadOnlyCollection<FaceState> OverlayAlphaFaces;
 
-		internal VisibleObjectLibrary(HostInterface CurrentHost, CameraProperties Camera, BaseOptions CurrentOptions)
+		internal VisibleObjectLibrary(HostInterface CurrentHost, CameraProperties Camera, BaseOptions CurrentOptions, BaseRenderer Renderer)
 		{
 			currentHost = CurrentHost;
 			camera = Camera;
 			currentOptions = CurrentOptions;
+			renderer = Renderer;
 
 			myObjects = new List<ObjectState>();
 			myOpaqueFaces = new List<FaceState>();
@@ -87,7 +89,7 @@ namespace LibRender2.Objects
 
 			if (State.Prototype.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref State.Prototype.Mesh, State.Prototype.Dynamic);
+				VAOExtensions.CreateVAO(ref State.Prototype.Mesh, State.Prototype.Dynamic, renderer.DefaultShader.VertexLayout);
 			}
 
 			if (!result)
@@ -170,9 +172,6 @@ namespace LibRender2.Objects
 					}
 				}
 
-				/*
-				 * For all lists, insert the face at the end of the list.
-				 * */
 				List<FaceState> list;
 
 				switch (Type)
@@ -188,7 +187,47 @@ namespace LibRender2.Objects
 						throw new ArgumentOutOfRangeException(nameof(Type), Type, null);
 				}
 
-				list.Add(new FaceState(State, face));
+				if (!alpha)
+				{
+					/*
+					 * If an opaque face, itinerate through the list to see if the prototype is present in the list
+					 * When the new renderer is in use, this prevents re-binding the VBO as it is simply re-drawn with
+					 * a different translation matrix
+					 * NOTE: The shader isn't currently smart enough to do depth discards, so if this changes may need to
+					 * be revisited
+					 */
+					if (list.Count == 0)
+					{
+						list.Add(new FaceState(State, face));
+					}
+					else
+					{
+						for (int i = 0; i < list.Count; i++)
+						{
+
+							if (list[i].Object.Prototype == State.Prototype)
+							{
+								list.Insert(i, new FaceState(State, face));
+								break;
+							}
+							if (i == list.Count - 1)
+							{
+								list.Add(new FaceState(State, face));
+								break;
+							}
+						}
+					}
+					
+					
+				}
+				else
+				{
+					/*
+					 * Alpha faces should be inserted at the end of the list- We're going to sort it anyway so it makes no odds
+					 */
+					list.Add(new FaceState(State, face));
+				}
+				
 			}
 		}
 
@@ -206,27 +245,27 @@ namespace LibRender2.Objects
 			{
 				if (faces[i].Face.Vertices.Length >= 3)
 				{
-					Vector3 v0 = new Vector3(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[0].Index].Coordinates);
-					Vector3 v1 = new Vector3(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[1].Index].Coordinates);
-					Vector3 v2 = new Vector3(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[2].Index].Coordinates);
-					Vector3 w1 = v1 - v0;
-					Vector3 w2 = v2 - v0;
+					Vector4 v0 = new Vector4(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[0].Index].Coordinates, 1.0);
+					Vector4 v1 = new Vector4(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[1].Index].Coordinates, 1.0);
+					Vector4 v2 = new Vector4(faces[i].Object.Prototype.Mesh.Vertices[faces[i].Face.Vertices[2].Index].Coordinates, 1.0);
+					Vector4 w1 = v1 - v0;
+					Vector4 w2 = v2 - v0;
 					v0.Z *= -1.0;
 					w1.Z *= -1.0;
 					w2.Z *= -1.0;
-					v0.Transform(faces[i].Object.ModelMatrix);
-					w1.Transform(faces[i].Object.ModelMatrix);
-					w2.Transform(faces[i].Object.ModelMatrix);
+					v0 = Vector4.Transform(v0, faces[i].Object.ModelMatrix);
+					w1 = Vector4.Transform(w1, faces[i].Object.ModelMatrix);
+					w2 = Vector4.Transform(w2, faces[i].Object.ModelMatrix);
 					v0.Z *= -1.0;
 					w1.Z *= -1.0;
 					w2.Z *= -1.0;
-					Vector3 d = Vector3.Cross(w1, w2);
+					Vector3 d = Vector3.Cross(w1.Xyz, w2.Xyz);
 					double t = d.Norm();
 
 					if (t != 0.0)
 					{
 						d /= t;
-						Vector3 w0 = v0 - camera.AbsolutePosition;
+						Vector3 w0 = v0.Xyz - camera.AbsolutePosition;
 						t = Vector3.Dot(d, w0);
 						distances[i] = -t * t;
 					}

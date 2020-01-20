@@ -170,7 +170,7 @@ namespace LibRender2
 
 			StaticObjectStates = new List<ObjectState>();
 			DynamicObjectStates = new List<ObjectState>();
-			VisibleObjects = new VisibleObjectLibrary(currentHost, Camera, currentOptions);
+			VisibleObjects = new VisibleObjectLibrary(currentHost, Camera, currentOptions, this);
 			try
 			{
 				DefaultShader = new Shader("default", "default", true);
@@ -708,6 +708,7 @@ namespace LibRender2
 			Shader.SetBrightness(1.0f);
 			Shader.SetOpacity(1.0f);
 			Shader.SetObjectIndex(0);
+			Shader.SetMaterialAdditive(0);
 		}
 
 		public void SetFogForImmediateMode()
@@ -797,6 +798,8 @@ namespace LibRender2
 		
 		private Color32 lastColor;
 
+		internal int lastVAO;
+
 		public void RenderFace(Shader Shader, ObjectState State, MeshFace Face, bool IsDebugTouchMode = false)
 		{
 			if (State.Prototype.Mesh.Vertices.Length < 1)
@@ -806,8 +809,13 @@ namespace LibRender2
 
 			MeshMaterial material = State.Prototype.Mesh.Materials[Face.Material];
 			VertexArrayObject VAO = (VertexArrayObject)State.Prototype.Mesh.VAO;
+
+			if (lastVAO != VAO.handle)
+			{
+				VAO.Bind();
+				lastVAO = VAO.handle;
+			}
 			
-			VAO.BindForDrawing(Shader.VertexLayout);
 			if (!OptionBackFaceCulling || (Face.Flags & MeshFace.Face2Mask) != 0)
 			{
 				GL.Disable(EnableCap.CullFace);
@@ -828,6 +836,14 @@ namespace LibRender2
 			
 			if (OptionWireFrame || IsDebugTouchMode)
 			{
+				if (material.Color != lastColor)
+				{
+					Shader.SetMaterialAmbient(material.Color);  // TODO
+					Shader.SetMaterialDiffuse(material.Color);
+					Shader.SetMaterialSpecular(material.Color);  // TODO
+				}
+				Shader.SetOpacity(1.0f);
+				Shader.SetBrightness(1.0f);
 				VAO.Draw(PrimitiveType.LineLoop, Face.IboStartIndex, Face.Vertices.Length);
 				return;
 			}
@@ -855,13 +871,6 @@ namespace LibRender2
 					}
 
 					Shader.SetMaterialShininess(1.0f);
-
-					Lighting.OptionLightingResultingAmount = (Lighting.OptionAmbientColor.R + Lighting.OptionAmbientColor.G + Lighting.OptionAmbientColor.B) / 480.0f;
-
-					if (Lighting.OptionLightingResultingAmount > 1.0f)
-					{
-						Lighting.OptionLightingResultingAmount = 1.0f;
-					}
 				}
 				else
 				{
@@ -907,7 +916,6 @@ namespace LibRender2
 				// texture
 				if (material.DaytimeTexture != null && currentHost.LoadTexture(material.DaytimeTexture, (OpenGlTextureWrapMode) material.WrapMode))
 				{
-					GL.Enable(EnableCap.Texture2D);
 					Shader.SetIsTexture(true);
 					if (LastBoundTexture != material.DaytimeTexture.OpenGlTextures[(int) material.WrapMode])
 					{
@@ -948,16 +956,26 @@ namespace LibRender2
 				Shader.SetBrightness(factor);
 
 				float alphaFactor;
+				GlowAttenuationMode mode = GlowAttenuationMode.None;
 				if (material.GlowAttenuationData != 0)
 				{
-					alphaFactor = (float)Glow.GetDistanceFactor(modelMatrix, State.Prototype.Mesh.Vertices, ref Face, material.GlowAttenuationData);
+					alphaFactor = (float)Glow.GetDistanceFactor(modelMatrix, State.Prototype.Mesh.Vertices, ref Face, material.GlowAttenuationData, out mode);
+					
 				}
 				else
 				{
 					alphaFactor = 1.0f;
 				}
 
-				Shader.SetMaterialAdditive(material.BlendMode == MeshMaterialBlendMode.Additive);
+				if (material.BlendMode == MeshMaterialBlendMode.Additive)
+				{
+					Shader.SetMaterialAdditive(1 + (int)mode);
+				}
+				else
+				{
+					Shader.SetMaterialAdditive(0);
+				}
+				
 				Shader.SetOpacity(inv255 * material.Color.A * alphaFactor);
 
 				// render polygon
@@ -968,7 +986,6 @@ namespace LibRender2
 			if (material.NighttimeTexture != null && material.NighttimeTexture != material.DaytimeTexture && currentHost.LoadTexture(material.NighttimeTexture, (OpenGlTextureWrapMode)material.WrapMode))
 			{
 				// texture
-				GL.Enable(EnableCap.Texture2D);
 				Shader.SetIsTexture(true);
 				if (LastBoundTexture != material.NighttimeTexture.OpenGlTextures[(int)material.WrapMode])
 				{
@@ -1005,7 +1022,7 @@ namespace LibRender2
 					}
 				}
 
-				Shader.SetOpacity(alphaFactor);
+				Shader.SetOpacity(inv255 * material.Color.A * alphaFactor);
 
 				// render polygon
 				VAO.Draw(DrawMode, Face.IboStartIndex, Face.Vertices.Length);
@@ -1013,7 +1030,6 @@ namespace LibRender2
 				RestoreAlphaFunc();
 			}
 
-			GL.Disable(EnableCap.Texture2D);
 
 			// normals
 			if (OptionNormals)
@@ -1022,7 +1038,8 @@ namespace LibRender2
 				Shader.SetBrightness(1.0f);
 				Shader.SetOpacity(1.0f);
 				VertexArrayObject NormalsVAO = (VertexArrayObject)State.Prototype.Mesh.NormalsVAO;
-				NormalsVAO.BindForDrawing(Shader.VertexLayout);
+				NormalsVAO.Bind();
+				lastVAO = NormalsVAO.handle;
 				NormalsVAO.Draw(PrimitiveType.Lines, Face.NormalsIboStartIndex, Face.Vertices.Length * 2);
 			}
 

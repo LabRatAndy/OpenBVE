@@ -4,6 +4,7 @@ using OpenBveApi.Routes;
 using OpenBveApi.Textures;
 using OpenTK.Graphics.OpenGL;
 using System;
+using OpenTK.Platform.Windows;
 
 namespace LibRender2.Backgrounds
 {
@@ -178,7 +179,7 @@ namespace LibRender2.Backgrounds
 
 				if (data.VAO == null)
 				{
-					data.CreateVAO();
+					data.CreateVAO(renderer.DefaultShader.VertexLayout);
 				}
 
 				renderer.DefaultShader.Activate();
@@ -199,7 +200,6 @@ namespace LibRender2.Backgrounds
 
 				// texture
 				renderer.DefaultShader.SetIsTexture(true);
-				renderer.DefaultShader.SetTexture(0);
 				GL.BindTexture(TextureTarget.Texture2D, data.Texture.OpenGlTextures[(int)OpenGlTextureWrapMode.RepeatClamp].Name);
 				renderer.LastBoundTexture = null;
 
@@ -211,8 +211,8 @@ namespace LibRender2.Backgrounds
 
 				// render polygon
 				VertexArrayObject VAO = (VertexArrayObject) data.VAO;
-				VAO.BindForDrawing(renderer.DefaultShader.VertexLayout);
-
+				VAO.Bind();
+				renderer.lastVAO = VAO.handle;
 				for (int i = 0; i + 9 < 32 * 10; i += 10)
 				{
 					VAO.Draw(PrimitiveType.Quads, i, 4);
@@ -263,7 +263,10 @@ namespace LibRender2.Backgrounds
 				GL.BindTexture(TextureTarget.Texture2D, data.Texture.OpenGlTextures[(int)OpenGlTextureWrapMode.RepeatClamp].Name);
 				renderer.LastBoundTexture = data.Texture.OpenGlTextures[(int)OpenGlTextureWrapMode.RepeatClamp];
 				GL.Color4(1.0f, 1.0f, 1.0f, alpha);
-				
+				if (renderer.OptionFog)
+				{
+					GL.Enable(EnableCap.Fog);
+				}
 				if (data.DisplayList > 0)
 				{
 					GL.CallList(data.DisplayList);
@@ -365,7 +368,7 @@ namespace LibRender2.Backgrounds
 		{
 			if (data.Object.Mesh.VAO == null)
 			{
-				VAOExtensions.CreateVAO(ref data.Object.Mesh, false);
+				VAOExtensions.CreateVAO(ref data.Object.Mesh, false, renderer.DefaultShader.VertexLayout);
 			}
 
 			foreach (MeshFace face in data.Object.Mesh.Faces)

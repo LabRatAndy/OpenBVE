@@ -34,6 +34,10 @@ namespace OpenBve
 			internal double NextReopenTime;
 			/// <summary>Ratio that width of the obstacle to the overall width of the door</summary>
 			internal double InterferingObjectRate;
+			/// <summary>The width of the door opening</summary>
+			internal double Width;
+			/// <summary>The maximum tolerance for an interfering object in the door opening before closure will not succeed</summary>
+			internal double MaxTolerance;
 		}
 
 		/// <summary>The potential states of the train's doors.</summary>
@@ -140,7 +144,12 @@ namespace OpenBve
 					}
 				}
 			}
-			Train.SafetySystems.PilotLamp.Update(newState);
+
+			if (Train.SafetySystems.PilotLamp != null)
+			{
+				Train.SafetySystems.PilotLamp.Update(newState);
+			}
+			
 			if (oldState != newState)
 			{
 				if (Train.Plugin != null)
