@@ -176,12 +176,14 @@ namespace LibRender2.Primitives
 					Color = Color128.White
 				}
 			};
-
-			defaultVAO = new VertexArrayObject();
-			defaultVAO.Bind();
-			defaultVAO.SetVBO(new VertexBufferObject(vertexData, BufferUsageHint.StaticDraw));
-			defaultVAO.SetIBO(new IndexBufferObject(Enumerable.Range(0, vertexData.Length).Select(x => (ushort) x).ToArray(), BufferUsageHint.StaticDraw));
-			defaultVAO.UnBind();
+			if (renderer.currentOptions.IsUseNewRenderer)
+			{
+				defaultVAO = new VertexArrayObject();
+				defaultVAO.Bind();
+				defaultVAO.SetVBO(new VertexBufferObject(vertexData, BufferUsageHint.StaticDraw));
+				defaultVAO.SetIBO(new IndexBufferObject(Enumerable.Range(0, vertexData.Length).Select(x => (ushort) x).ToArray(), BufferUsageHint.StaticDraw));
+				defaultVAO.UnBind();
+			}
 		}
 
 		/// <summary>Draws a 3D cube</summary>
@@ -238,7 +240,6 @@ namespace LibRender2.Primitives
 		{
 			renderer.DefaultShader.Activate();
 			renderer.ResetShader(renderer.DefaultShader);
-
 			// matrix
 			renderer.DefaultShader.SetCurrentProjectionMatrix(renderer.CurrentProjectionMatrix);
 			renderer.DefaultShader.SetCurrentModelViewMatrix(Matrix4D.Scale(Size) * (Matrix4D)new Transformation(Direction, Up, Side) * Matrix4D.CreateTranslation(Position.X - Camera.X, Position.Y - Camera.Y, -Position.Z + Camera.Z) * renderer.CurrentViewMatrix);
@@ -247,8 +248,6 @@ namespace LibRender2.Primitives
 			if (TextureIndex != null && renderer.currentHost.LoadTexture(TextureIndex, OpenGlTextureWrapMode.ClampClamp))
 			{
 				renderer.DefaultShader.SetIsTexture(true);
-				renderer.DefaultShader.SetTexture(0);
-
 				GL.Enable(EnableCap.Texture2D);
 				GL.BindTexture(TextureTarget.Texture2D, TextureIndex.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
 			}
@@ -258,8 +257,9 @@ namespace LibRender2.Primitives
 			}
 
 			// render polygon
-			VAO.BindForDrawing(renderer.DefaultShader.VertexLayout);
+			VAO.Bind();
 			VAO.Draw(PrimitiveType.Quads);
+			renderer.lastVAO = -1;
 			VAO.UnBind();
 			renderer.DefaultShader.Deactivate();
 
