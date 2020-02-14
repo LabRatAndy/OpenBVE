@@ -147,5 +147,15 @@
 		/// The handle of "uObjectIndex" within the shader
 		/// </summary>
 		public short ObjectIndex = -1;
+
+		/// <summary>
+		/// The handle of  orthographic projection matrix for text within shader
+		/// </summary>
+		public short TextProjectionMatrix = -1;
+
+		/// <summary>
+		/// The handle of the text colour within the text shader
+		/// </summary>
+		public short TextColour = -1;
 	}
 }

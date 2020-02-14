@@ -70,6 +70,7 @@ namespace LibRender2
 
 		public Matrix4D CurrentProjectionMatrix;
 		public Matrix4D CurrentViewMatrix;
+		public Matrix4d TextProjectionMatrix;
 
 		protected List<Matrix4D> projectionMatrixList;
 		protected List<Matrix4D> viewMatrixList;
@@ -77,6 +78,7 @@ namespace LibRender2
 		private ErrorCode lastError;
 
 		public Shader DefaultShader;
+		public Shader TextShader;
 
 		/// <summary>Whether fog is enabled in the debug options</summary>
 		public bool OptionFog = true;
@@ -182,7 +184,17 @@ namespace LibRender2
 				CurrentHost.AddMessage(MessageType.Error, false, "Initialising the default shaders failed- Falling back to legacy openGL.");
 				CurrentOptions.IsUseNewRenderer = false;
 			}
-
+			try
+			{
+				TextShader = new Shader("TextShader", "TextShader", true);
+				TextShader.Activate();
+				TextShader.Deactivate();
+			}
+			catch
+			{
+				currentHost.AddMessage(MessageType.Error, false, "initialising text shader failed - falling back to legacy openGL");
+				currentOptions.IsUseNewRenderer = false;
+			}
 			GL.ClearColor(0.67f, 0.67f, 0.67f, 1.0f);
 			GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 			GL.Enable(EnableCap.DepthTest);
@@ -674,6 +686,7 @@ namespace LibRender2
 			Screen.AspectRatio = Screen.Width / (double)Screen.Height;
 			Camera.HorizontalViewingAngle = 2.0 * Math.Atan(Math.Tan(0.5 * Camera.VerticalViewingAngle) * Screen.AspectRatio);
 			CurrentProjectionMatrix = Matrix4D.CreatePerspectiveFieldOfView(Camera.VerticalViewingAngle, Screen.AspectRatio, 0.2, 1000.0);
+			TextProjectionMatrix = Matrix4d.CreateOrthographic(Screen.Width, Screen.Height, 0.2, 1000.0);
 		}
 
 		public void ResetShader(Shader Shader)

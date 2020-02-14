@@ -84,6 +84,8 @@
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <EmbeddedResource Include="..\..\assets\Shaders\picking.frag" />
+    <EmbeddedResource Include="..\..\assets\Shaders\TextShader.vert" />
+	<EmbeddedResource Include="..\..\assets\Shaders\TextShader.frag" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenBveApi\OpenBveApi.csproj">

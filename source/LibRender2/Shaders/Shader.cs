@@ -172,7 +172,9 @@ namespace LibRender2.Shaders
 				Texture = (short)GL.GetUniformLocation(handle, "uTexture"),
 				Brightness = (short)GL.GetUniformLocation(handle, "uBrightness"),
 				Opacity = (short)GL.GetUniformLocation(handle, "uOpacity"),
-				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex")
+				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex"),
+				TextProjectionMatrix = (short)GL.GetUniformLocation(handle, "TextProjectionMatrix"),
+				TextColour = (short) GL.GetUniformLocation(handle,"TextColour")
 			};
 		}
 
@@ -339,6 +341,16 @@ namespace LibRender2.Shaders
 		public void SetObjectIndex(int ObjectIndex)
 		{
 			GL.Uniform1(UniformLayout.ObjectIndex, ObjectIndex);
+		}
+
+		public void SetTextColour(Color32 TextColour)
+		{
+			GL.Uniform4(UniformLayout.TextColour, TextColour.R / 255.0f, TextColour.G / 255.0f, TextColour.B / 255.0f, TextColour.A / 255.0f);
+		}
+
+		public void SetTextColour(Color128 TextColour)
+		{
+			GL.Uniform4(UniformLayout.TextColour, TextColour.R, TextColour.G, TextColour.B, TextColour.A);
 		}
 
 		#endregion
