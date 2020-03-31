@@ -187,12 +187,12 @@ namespace LibRender2.Texts
 			{
 				if (shadow)
 				{
-					Draw(font, text, new Point(location.X - 1, location.Y + 1), alignment, new Color128(0.0f, 0.0f, 0.0f, 0.5f * color.A));
-					Draw(font, text, location, alignment, color);
+					DrawWithShader(font, text, new Point(location.X - 1, location.Y + 1), alignment, new Color128(0.0f, 0.0f, 0.0f, 0.5f * color.A));
+					DrawWithShader(font, text, location, alignment, color);
 				}
 				else
 				{
-					Draw(font, text, location, alignment, color);
+					DrawWithShader(font, text, location, alignment, color);
 				}
 				return;
 			}
