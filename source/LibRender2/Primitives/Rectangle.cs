@@ -104,5 +104,53 @@ namespace LibRender2.Primitives
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.PopMatrix();
 		}
+		public void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
+		{
+			renderer.LastBoundTexture = null;
+			//todo sort out projection matrix 
+			//todo add the shader using and fbo binding commands
+			//create the vertex data
+			float[] vertices = new float[16]
+			{
+				point.X, point.Y, 0.0f, 0.0f,
+				point.X + size.Width, point.Y, 1.0f, 0.0f,
+				point.X + size.Width, point.Y + size.Height, 1.0f, 1.0f,
+				point.X, point.Y + size.Height, 0.0f, 1.0f
+			};
+			// create the vbo and vao
+			int vbo, vao;
+			GL.GenVertexArrays(1, out vao);
+			GL.GenBuffers(1, out vbo);
+			GL.BindVertexArray(vao);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, vbo);
+			GL.BufferData(BufferTarget.ArrayBuffer, 16 * sizeof(float), vertices, BufferUsageHint.StaticDraw);
+			//set the attributes
+			//coordinates 
+			GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 0);
+			GL.EnableVertexAttribArray(0);
+			//texcoords
+			GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, 2 * sizeof(float), 2 * sizeof(float));
+			GL.EnableVertexAttribArray(1);
+			if (texture == null || !renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
+			{
+				if (colour.HasValue)
+				{
+					//todo sort out passing the colour to the shader ? via uniform or via vbo
+				}
+				//todo pass the uniforms
+				//draw the vbo
+				GL.DrawArrays(PrimitiveType.Quads, 0, );
+			}
+			else
+			{
+				GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+				if (colour.HasValue)
+				{
+					//todo sort out passing the colour to the shader ? via uniform or via vbo
+				}
+				GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+			}
+			GL.BindVertexArray(0);
+		}
 	}
 }
