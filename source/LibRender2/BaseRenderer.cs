@@ -79,6 +79,7 @@ namespace LibRender2
 
 		public Shader DefaultShader;
 		public Shader TextShader;
+		public Shader RectangleShader;
 
 		/// <summary>Whether fog is enabled in the debug options</summary>
 		public bool OptionFog = true;
@@ -193,6 +194,17 @@ namespace LibRender2
 			catch
 			{
 				currentHost.AddMessage(MessageType.Error, false, "initialising text shader failed - falling back to legacy openGL");
+				currentOptions.IsUseNewRenderer = false;
+			}
+			try
+			{
+				RectangleShader = new Shader("Rectangle", "Rectangle", true);
+				RectangleShader.Activate();
+				RectangleShader.Deactivate();
+			}
+			catch
+			{
+				currentHost.AddMessage(MessageType.Error, false, "initialising rectangle shader failed - falling back to legacy openGL.");
 				currentOptions.IsUseNewRenderer = false;
 			}
 			GL.ClearColor(0.67f, 0.67f, 0.67f, 1.0f);

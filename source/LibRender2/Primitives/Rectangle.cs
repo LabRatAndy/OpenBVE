@@ -109,6 +109,7 @@ namespace LibRender2.Primitives
 			renderer.LastBoundTexture = null;
 			//todo sort out projection matrix 
 			//todo add the shader using and fbo binding commands
+			renderer.RectangleShader.Activate();
 			//create the vertex data
 			float[] vertices = new float[16]
 			{
@@ -151,6 +152,7 @@ namespace LibRender2.Primitives
 				GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 			}
 			GL.BindVertexArray(0);
+			renderer.RectangleShader.Deactivate();
 		}
 	}
 }
