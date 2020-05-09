@@ -5,9 +5,9 @@ out VS_out
 {
 	vec2 TexCoords;
 } vs_out;
-uniform mat4 projection;
+uniform mat4 rectangleProjectionMatrix;
 void main()
 {
-	gl_Position = projection *vec4(vertex,0.0,0.0);
+	gl_Position = rectangleProjectionMatrix *vec4(vertex,0.0,0.0);
 	vs_out.TexCoords = texCords;
 }
