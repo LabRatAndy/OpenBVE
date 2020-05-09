@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -174,7 +175,12 @@ namespace LibRender2.Shaders
 				Opacity = (short)GL.GetUniformLocation(handle, "uOpacity"),
 				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex"),
 				TextProjectionMatrix = (short)GL.GetUniformLocation(handle, "TextProjectionMatrix"),
-				TextColour = (short) GL.GetUniformLocation(handle,"TextColour")
+				TextColour = (short) GL.GetUniformLocation(handle,"TextColour"),
+				RectangleProjectionMatrix = (short)GL.GetUniformLocation(handle,"rectangleProjectionMatrix"),
+				RectangleTexture = (short)GL.GetUniformLocation(handle,"rectTexture"),
+				RectangleUsedTexture = (short)GL.GetUniformLocation(handle,"usesTexture"),
+				RectangleColour = (short)GL.GetUniformLocation(handle,"rectColour"),
+				RectangleisColoured = (short)GL.GetUniformLocation(handle,"usesColour")
 			};
 		}
 
