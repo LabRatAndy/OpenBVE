@@ -358,7 +358,27 @@ namespace LibRender2.Shaders
 		{
 			GL.Uniform4(UniformLayout.TextColour, TextColour.R, TextColour.G, TextColour.B, TextColour.A);
 		}
-
+		public void SetRectangleProjectionMatrix(Matrix4D projectionMatrix)
+		{
+			Matrix4 matrix = ConvertToMatrix4(projectionMatrix);
+			GL.UniformMatrix4(UniformLayout.RectangleProjectionMatrix, false, ref matrix);
+		}
+		public void SetRectangleTexture(int textureUnit)
+		{
+			GL.Uniform1(UniformLayout.RectangleTexture, textureUnit);
+		}
+		public void SetIsRectangleTexture(int isTextured)
+		{
+			GL.Uniform1(UniformLayout.RectangleUsedTexture, isTextured);
+		}
+		public void SetRectangleColour(Color128 colour)
+		{
+			GL.Uniform4(UniformLayout.RectangleColour, colour.R, colour.G, colour.B, colour.A);
+		}
+		public void SetIsRectangleColoured(int isColoured)
+		{
+			GL.Uniform1(UniformLayout.RectangleisColoured, isColoured);		
+		}
 		#endregion
 	}
 }
