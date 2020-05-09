@@ -157,5 +157,21 @@
 		/// The handle of the text colour within the text shader
 		/// </summary>
 		public short TextColour = -1;
+
+		//rectangle shader stuff
+		// rectange orthographic projection matrix
+		public short RectangleProjectionMatrix = -1;
+
+		//rectangle texture
+		public short RectangleTexture = -1;
+
+		// Rectangle is textured
+		public short RectangleUsedTexture = -1;
+
+		// Rectangle colour
+		public short RectangleColour = -1;
+
+		//Rectangle is coloured
+		public short RectangleisColoured = -1;
 	}
 }
