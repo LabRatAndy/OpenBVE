@@ -139,19 +139,26 @@ namespace LibRender2.Primitives
 			{
 				if (colour.HasValue)
 				{
-					//todo sort out passing the colour to the shader ? via uniform or via vbo
+					renderer.RectangleShader.SetIsRectangleColoured(1); // ie true
+					renderer.RectangleShader.SetRectangleColour(colour.Value);
 				}
-				//todo pass the uniforms
+				else renderer.RectangleShader.SetIsRectangleColoured(0);
+				renderer.RectangleShader.SetIsRectangleTexture(0);
 				//draw the vbo
 				GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 			}
 			else
 			{
 				GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+				GL.ActiveTexture(TextureUnit.Texture0);
+				renderer.RectangleShader.SetIsRectangleTexture(1);
+				renderer.RectangleShader.SetRectangleTexture(0);
 				if (colour.HasValue)
 				{
-					//todo sort out passing the colour to the shader ? via uniform or via vbo
+					renderer.RectangleShader.SetIsRectangleColoured(1);
+					renderer.RectangleShader.SetRectangleColour(colour.Value);
 				}
+				else renderer.RectangleShader.SetIsRectangleColoured(0);
 				GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 			}
 			GL.BindVertexArray(0);
