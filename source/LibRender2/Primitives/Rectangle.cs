@@ -1,5 +1,7 @@
 ﻿using System.Drawing;
+using LibRender2.Screens;
 using OpenBveApi.Colors;
+using OpenBveApi.Math;
 using OpenBveApi.Textures;
 using OpenTK.Graphics.OpenGL;
 
@@ -107,9 +109,10 @@ namespace LibRender2.Primitives
 		public void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
 		{
 			renderer.LastBoundTexture = null;
-			//todo sort out projection matrix 
-			//todo add the shader using and fbo binding commands
+			Matrix4D matrix;
+			Matrix4D.CreateOrthographicOffCenter(0.0f, (float)renderer.Screen.Width, 0.0f, (float)renderer.Screen.Height, 0.1f, 600.0f, out matrix);
 			renderer.RectangleShader.Activate();
+			renderer.RectangleShader.SetRectangleProjectionMatrix(matrix);
 			//create the vertex data
 			float[] vertices = new float[16]
 			{
@@ -140,7 +143,7 @@ namespace LibRender2.Primitives
 				}
 				//todo pass the uniforms
 				//draw the vbo
-				GL.DrawArrays(PrimitiveType.Quads, 0, );
+				GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 			}
 			else
 			{
