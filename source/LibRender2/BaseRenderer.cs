@@ -42,7 +42,16 @@ namespace LibRender2
 		internal HostInterface currentHost;
 
 		/// <summary>Holds a reference to the current options</summary>
-		protected BaseOptions currentOptions;
+		internal BaseOptions currentOptions;
+
+		/// <summary> property to get if we are using the new renderer</summary>
+		public bool UsingNewRenderer
+		{
+			get
+			{
+				return currentOptions.IsUseNewRenderer;
+			}
+		}
 
 		public List<ObjectState> StaticObjectStates;
 		public List<ObjectState> DynamicObjectStates;
