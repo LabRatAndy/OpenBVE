@@ -79,7 +79,14 @@ namespace OpenBve
 			switch (currentState)
 			{
 			case state.map:
-				Program.Renderer.Rectangle.Draw(mapImage, origin, mapSize);
+				if (Program.Renderer.UsingNewRenderer)
+				{
+						Program.Renderer.Rectangle.DrawWithShader(mapImage, origin, mapSize);
+				}
+				else
+				{
+					Program.Renderer.Rectangle.Draw(mapImage, origin, mapSize);
+				}
 				// get current train position
 				int n = TrainManager.Trains.Length;
 				for (int i = 0; i < n; i++)
@@ -92,21 +99,45 @@ namespace OpenBve
 					zPos = mapSize.Height - mapSize.Height * (trainZ - Game.RouteInformation.RouteMinZ) /
 							(Game.RouteInformation.RouteMaxZ - Game.RouteInformation.RouteMinZ) - trainDotRadius;
 						// draw a dot at current train position
-						Program.Renderer.Rectangle.Draw(null, new Point(xPos, zPos),
+						if (Program.Renderer.UsingNewRenderer)
+						{
+							Program.Renderer.Rectangle.DrawWithShader(null, new Point(xPos, zPos),
 							new Size(trainDotDiameter, trainDotDiameter),
 							TrainManager.Trains[i].IsPlayerTrain ? playerTrainDotColour : trainDotColour);
+						}
+						else
+						{
+							Program.Renderer.Rectangle.Draw(null, new Point(xPos, zPos),
+								new Size(trainDotDiameter, trainDotDiameter),
+								TrainManager.Trains[i].IsPlayerTrain ? playerTrainDotColour : trainDotColour);
+						}
 				}
 				break;
 			case state.gradient:
-				Program.Renderer.Rectangle.Draw(gradientImage, origin, gradientSize);
+				if (Program.Renderer.UsingNewRenderer)
+				{
+					Program.Renderer.Rectangle.DrawWithShader(gradientImage, origin, gradientSize);
+				}
+				else
+				{
+					Program.Renderer.Rectangle.Draw(gradientImage, origin, gradientSize);
+				}
 				// get current train position in track
 				int trackPos	= (int)(TrainManager.PlayerTrain.FrontCarTrackPosition());
 				// convert to gradient profile offset
 				xPos = gradientSize.Width * (trackPos - Game.RouteInformation.GradientMinTrack) /
 						(Game.RouteInformation.GradientMaxTrack - Game.RouteInformation.GradientMinTrack);
-				// draw a vertical bar at the current train position
-				Program.Renderer.Rectangle.Draw(null, new Point(xPos, gradientSize.Height / 2),
-					new Size(gradientPosWidth, gradientSize.Height / 2), gradientPosBar);
+					// draw a vertical bar at the current train position
+				if (Program.Renderer.UsingNewRenderer)
+				{
+						Program.Renderer.Rectangle.DrawWithShader(null, new Point(xPos, gradientSize.Height / 2),
+						new Size(gradientPosWidth, gradientSize.Height / 2), gradientPosBar);
+				}
+				else
+				{
+					Program.Renderer.Rectangle.Draw(null, new Point(xPos, gradientSize.Height / 2),
+						new Size(gradientPosWidth, gradientSize.Height / 2), gradientPosBar);
+				}
 				break;
 			}
 		}
