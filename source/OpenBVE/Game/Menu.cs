@@ -729,7 +729,14 @@ namespace OpenBve
 
 			SingleMenu menu = Menus[CurrMenu];
 			// overlay background
-			Program.Renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(Program.Renderer.Screen.Width, Program.Renderer.Screen.Height), overlayColor);
+			if (Program.Renderer.UsingNewRenderer)
+			{
+				Program.Renderer.Rectangle.DrawWithShader(null, new PointF(0.0f, 0.0f), new SizeF(Program.Renderer.Screen.Width, Program.Renderer.Screen.Height), overlayColor);
+			}
+			else
+			{
+				Program.Renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(Program.Renderer.Screen.Width, Program.Renderer.Screen.Height), overlayColor);
+			}
 
 			// HORIZONTAL PLACEMENT: centre the menu in the main window
 			int itemLeft = (Program.Renderer.Screen.Width - menu.ItemWidth) / 2; // item left edge
@@ -739,12 +746,25 @@ namespace OpenBve
 			int menuBottomItem = menu.TopItem + visibleItems - 1;
 
 			// draw the menu background
-			Program.Renderer.Rectangle.Draw(null, new PointF(menuXmin - MenuBorderX, menuYmin - MenuBorderY), new SizeF(menuXmax - menuXmin + 2.0f * MenuBorderX, menuYmax - menuYmin + 2.0f * MenuBorderY), backgroundColor);
-
+			if (Program.Renderer.UsingNewRenderer)
+			{
+				Program.Renderer.Rectangle.DrawWithShader(null, new PointF(menuXmin - MenuBorderX, menuYmin - MenuBorderY), new SizeF(menuXmax - menuXmin + 2.0f * MenuBorderX, menuYmax - menuYmin + 2.0f * MenuBorderY), backgroundColor);
+			}
+			else
+			{
+				Program.Renderer.Rectangle.Draw(null, new PointF(menuXmin - MenuBorderX, menuYmin - MenuBorderY), new SizeF(menuXmax - menuXmin + 2.0f * MenuBorderX, menuYmax - menuYmin + 2.0f * MenuBorderY), backgroundColor);
+			}
 			// if not starting from the top of the menu, draw a dimmed ellipsis item
 			if (menu.Selection == menu.TopItem - 1 && !isCustomisingControl)
 			{
-				Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, menuYmin /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+				if (Program.Renderer.UsingNewRenderer)
+				{
+					Program.Renderer.Rectangle.DrawWithShader(null, new PointF(itemLeft - MenuItemBorderX, menuYmin), new SizeF(menu.ItemWidth + MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+				}
+				else
+				{
+					Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, menuYmin /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+				}
 			}
 			if (menu.TopItem > 0)
 				Program.Renderer.OpenGlString.Draw(MenuFont, "...", new Point(itemX, menuYmin),
@@ -762,7 +782,14 @@ namespace OpenBve
 					// draw a solid highlight rectangle under the text
 					// HACK! the highlight rectangle has to be shifted a little down to match
 					// the text body. OpenGL 'feature'?
-					Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+					if (Program.Renderer.UsingNewRenderer)
+					{
+						Program.Renderer.Rectangle.DrawWithShader(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+					}
+					else
+					{
+						Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+					}
 					// draw the text
 					Program.Renderer.OpenGlString.Draw(MenuFont, menu.Items[i].Text, new Point(itemX, itemY),
 						menu.Align, ColourHighlight, false);
@@ -779,7 +806,14 @@ namespace OpenBve
 
 			if (menu.Selection == menu.TopItem + visibleItems)
 			{
-				Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+				if (Program.Renderer.UsingNewRenderer)
+				{
+					Program.Renderer.Rectangle.DrawWithShader(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor)
+				}
+				else
+				{
+					Program.Renderer.Rectangle.Draw(null, new PointF(itemLeft - MenuItemBorderX, itemY /*-MenuItemBorderY*/), new SizeF(menu.ItemWidth + 2.0f * MenuItemBorderX, em + MenuItemBorderY * 2), highlightColor);
+				}
 			}
 			// if not at the end of the menu, draw a dimmed ellipsis item at the bottom
 			if (i < menu.Items.Length - 1)
