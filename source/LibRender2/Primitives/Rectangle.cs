@@ -109,10 +109,9 @@ namespace LibRender2.Primitives
 		public void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
 		{
 			renderer.LastBoundTexture = null;
-			Matrix4D matrix;
-			Matrix4D.CreateOrthographicOffCenter(0.0f, (float)renderer.Screen.Width, 0.0f, (float)renderer.Screen.Height, 0.1f, 600.0f, out matrix);
 			renderer.RectangleShader.Activate();
-			renderer.RectangleShader.SetRectangleProjectionMatrix(matrix);
+			//current projection matrix is calculated in overlays.cs at start of renderering all the rectangles
+			renderer.RectangleShader.SetRectangleProjectionMatrix(renderer.CurrentProjectionMatrix);
 			//create the vertex data
 			float[] vertices = new float[16]
 			{
