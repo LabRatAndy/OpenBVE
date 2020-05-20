@@ -80,7 +80,14 @@ namespace OpenBve.Graphics.Renderers
 							{
 								double w = t.Width;
 								double h = t.Height;
-								renderer.Rectangle.Draw(t, new PointF((float)(renderer.Screen.Width - w - 8.0), (float)y), new SizeF((float)w, (float)h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+								if (renderer.UsingNewRenderer)
+								{
+									renderer.Rectangle.DrawWithShader(t, new PointF((float)(renderer.Screen.Width - w - 8.0), (float)y), new SizeF((float)w, (float)h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+								}
+								else
+								{
+									renderer.Rectangle.Draw(t, new PointF((float)(renderer.Screen.Width - w - 8.0), (float)y), new SizeF((float)w, (float)h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+								}
 								y += h + 8.0;
 							}
 						}
@@ -95,7 +102,15 @@ namespace OpenBve.Graphics.Renderers
 						{
 							int w = Timetable.DefaultTimetableTexture.Width;
 							int h = Timetable.DefaultTimetableTexture.Height;
-							renderer.Rectangle.Draw(Timetable.DefaultTimetableTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.DefaultTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+							if (renderer.UsingNewRenderer)
+							{
+								renderer.Rectangle.DrawWithShader(Timetable.DefaultTimetableTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.DefaultTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+							}
+							else 
+							{
+								renderer.Rectangle.Draw(Timetable.DefaultTimetableTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.DefaultTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f)); 
+							}
+
 						}
 					}
 					else if (Timetable.CurrentTimetable == Timetable.TimetableState.Custom & Timetable.CustomObjectsUsed == 0)
@@ -105,7 +120,14 @@ namespace OpenBve.Graphics.Renderers
 						{
 							int w = Timetable.CurrentCustomTimetableDaytimeTexture.Width;
 							int h = Timetable.CurrentCustomTimetableDaytimeTexture.Height;
-							renderer.Rectangle.Draw(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+							if (renderer.UsingNewRenderer)
+							{
+								renderer.Rectangle.DrawWithShader(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+							}
+							else
+							{
+								renderer.Rectangle.Draw(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
+							}
 						}
 
 						if (Program.CurrentHost.LoadTexture(Timetable.CurrentCustomTimetableDaytimeTexture, OpenGlTextureWrapMode.ClampClamp))
@@ -123,8 +145,14 @@ namespace OpenBve.Graphics.Renderers
 							{
 								alpha = 1.0f;
 							}
-
-							renderer.Rectangle.Draw(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, alpha));
+							if (renderer.UsingNewRenderer)
+							{
+								renderer.Rectangle.DrawWithShader(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, alpha));
+							}
+							else
+							{
+								renderer.Rectangle.Draw(Timetable.CurrentCustomTimetableDaytimeTexture, new PointF(renderer.Screen.Width - w, (float)Timetable.CustomTimetablePosition), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, alpha));
+							}
 						}
 					}
 					break;
@@ -146,7 +174,14 @@ namespace OpenBve.Graphics.Renderers
 			if (Game.CurrentInterface == Game.InterfaceType.Pause)
 			{
 				// pause
-				renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, 0.5f));
+				if (renderer.UsingNewRenderer)
+				{
+					renderer.Rectangle.DrawWithShader(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, 0.5f));
+				}
+				else
+				{
+					renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, 0.5f));
+				}
 				renderer.OpenGlString.Draw(Fonts.VeryLargeFont, "PAUSE", new Point(renderer.Screen.Width / 2, renderer.Screen.Height / 2), TextAlignment.CenterMiddle, Color128.White, true);
 			}
 			else if (Game.CurrentInterface == Game.InterfaceType.Menu)
@@ -183,7 +218,14 @@ namespace OpenBve.Graphics.Renderers
 				}
 				if (FadeToBlackDueToChangeEnds > 0.0 & (renderer.Camera.CurrentMode == CameraViewMode.Interior | renderer.Camera.CurrentMode == CameraViewMode.InteriorLookAhead))
 				{
-					renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, (float)FadeToBlackDueToChangeEnds));
+					if (renderer.UsingNewRenderer)
+					{
+						renderer.Rectangle.DrawWithShader(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, (float)FadeToBlackDueToChangeEnds));
+					}
+					else
+					{
+						renderer.Rectangle.Draw(null, new PointF(0.0f, 0.0f), new SizeF(renderer.Screen.Width, renderer.Screen.Height), new Color128(0.0f, 0.0f, 0.0f, (float)FadeToBlackDueToChangeEnds));
+					}
 				}
 			}
 
