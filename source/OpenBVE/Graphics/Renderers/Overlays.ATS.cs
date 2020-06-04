@@ -164,14 +164,7 @@ namespace OpenBve.Graphics.Renderers
 						{
 							double u = Left.BackgroundTexture.Width;
 							double v = Left.BackgroundTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Left.BackgroundTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Left.BackgroundTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
+							renderer.Rectangle.Draw(Left.BackgroundTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
 						}
 					}
 					// right background
@@ -181,14 +174,7 @@ namespace OpenBve.Graphics.Renderers
 						{
 							double u = Right.BackgroundTexture.Width;
 							double v = Right.BackgroundTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Right.BackgroundTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Right.BackgroundTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
+							renderer.Rectangle.Draw(Right.BackgroundTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
 						}
 					}
 					// middle background
@@ -197,14 +183,7 @@ namespace OpenBve.Graphics.Renderers
 						if (Program.CurrentHost.LoadTexture(Middle.BackgroundTexture, OpenGlTextureWrapMode.ClampClamp))
 						{
 							double v = Middle.BackgroundTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Middle.BackgroundTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Middle.BackgroundTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
-							}
+							renderer.Rectangle.Draw(Middle.BackgroundTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(bc.R, bc.G, bc.B, bc.A));
 						}
 					}
 					{ // text
@@ -224,14 +203,7 @@ namespace OpenBve.Graphics.Renderers
 						{
 							double u = Left.OverlayTexture.Width;
 							double v = Left.OverlayTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Left.OverlayTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Left.OverlayTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
+							renderer.Rectangle.Draw(Left.OverlayTexture, new PointF((float)x, (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
 						}
 					}
 					// right overlay
@@ -241,14 +213,7 @@ namespace OpenBve.Graphics.Renderers
 						{
 							double u = Right.OverlayTexture.Width;
 							double v = Right.OverlayTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Right.OverlayTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Right.OverlayTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
+							renderer.Rectangle.Draw(Right.OverlayTexture, new PointF((float)(x + w - u), (float)y), new SizeF((float)u, (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
 						}
 					}
 					// middle overlay
@@ -257,14 +222,7 @@ namespace OpenBve.Graphics.Renderers
 						if (Program.CurrentHost.LoadTexture(Middle.OverlayTexture, OpenGlTextureWrapMode.ClampClamp))
 						{
 							double v = Middle.OverlayTexture.Height;
-							if (renderer.UsingNewRenderer)
-							{
-								renderer.Rectangle.DrawWithShader(Middle.OverlayTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
-							else
-							{
-								renderer.Rectangle.Draw(Middle.OverlayTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
-							}
+							renderer.Rectangle.Draw(Middle.OverlayTexture, new PointF((float)(x + lw), (float)y), new SizeF((float)(w - lw - rw), (float)v), new Color128(oc.R, oc.G, oc.B, oc.A));
 						}
 					}
 				}
