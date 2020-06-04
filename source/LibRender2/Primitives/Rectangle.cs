@@ -36,13 +36,29 @@ namespace LibRender2.Primitives
 		{
 			Draw(null, new PointF((float)left, (float)top), new SizeF((float)(right - left), (float)(bottom - top)));
 		}
+		/// <summary>Draws a simple 2D rectangle.</summary>
+		/// <param name="texture">The texture, or a null reference.</param>
+		/// <param name="point">The top-left coordinates in pixels.</param>
+		/// <param name="size">The size in pixels.</param>
+		/// <param name="color">The color, or a null reference.</param>
+		public void Draw(Texture texture, PointF point, SizeF size, Color128? colour = null)
+		{
+			if (renderer.currentOptions.IsUseNewRenderer)
+			{
+				DrawWithShader(texture, point, size, colour);
+			}
+			else
+			{
+				DrawwithoutShader(texture, point, size, colour);
+			}
+		}
 
 		/// <summary>Draws a simple 2D rectangle.</summary>
 		/// <param name="texture">The texture, or a null reference.</param>
 		/// <param name="point">The top-left coordinates in pixels.</param>
 		/// <param name="size">The size in pixels.</param>
 		/// <param name="color">The color, or a null reference.</param>
-		public void Draw(Texture texture, PointF point, SizeF size, Color128? color = null)
+		private void DrawwithoutShader(Texture texture, PointF point, SizeF size, Color128? color = null)
 		{
 			renderer.LastBoundTexture = null;
 			// TODO: Remove Nullable<T> from color once RenderOverlayTexture and RenderOverlaySolid are fully replaced.
@@ -106,7 +122,7 @@ namespace LibRender2.Primitives
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.PopMatrix();
 		}
-		public void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
+		private void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
 		{
 			renderer.LastBoundTexture = null;
 			renderer.RectangleShader.Activate();
@@ -163,5 +179,6 @@ namespace LibRender2.Primitives
 			GL.BindVertexArray(0);
 			renderer.RectangleShader.Deactivate();
 		}
+
 	}
 }
