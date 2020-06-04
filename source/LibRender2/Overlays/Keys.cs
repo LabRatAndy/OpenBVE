@@ -32,18 +32,9 @@ namespace LibRender2.Overlays
 				{
 					if (text != null)
 					{
-						if (renderer.currentOptions.IsUseNewRenderer)
-						{
-							renderer.Rectangle.DrawWithShader(null, new PointF(px - 1, py - 1), new SizeF(Width + 1, 17), new Color128(0.25f, 0.25f, 0.25f, 0.5f));
-							renderer.Rectangle.DrawWithShader(null, new PointF(px - 1, py - 1), new SizeF(Width - 1, 15), new Color128(0.75f, 0.75f, 0.75f, 0.5f));
-							renderer.Rectangle.DrawWithShader(null, new PointF(px, py), new SizeF(Width, 16), new Color128(0.5f, 0.5f, 0.5f, 0.5f));
-						}
-						else
-						{
-							renderer.Rectangle.Draw(null, new Point(px - 1, py - 1), new Size(Width + 1, 17), new Color128(0.25f, 0.25f, 0.25f, 0.5f));
-							renderer.Rectangle.Draw(null, new Point(px - 1, py - 1), new Size(Width - 1, 15), new Color128(0.75f, 0.75f, 0.75f, 0.5f));
-							renderer.Rectangle.Draw(null, new Point(px, py), new Size(Width, 16), new Color128(0.5f, 0.5f, 0.5f, 0.5f));
-						}
+						renderer.Rectangle.Draw(null, new Point(px - 1, py - 1), new Size(Width + 1, 17), new Color128(0.25f, 0.25f, 0.25f, 0.5f));
+						renderer.Rectangle.Draw(null, new Point(px - 1, py - 1), new Size(Width - 1, 15), new Color128(0.75f, 0.75f, 0.75f, 0.5f));
+						renderer.Rectangle.Draw(null, new Point(px, py), new Size(Width, 16), new Color128(0.5f, 0.5f, 0.5f, 0.5f));
 						renderer.OpenGlString.Draw(Font, text, new Point(px - 1 + Width / 2, py + 7), TextAlignment.CenterMiddle, Color128.White);
 					}
 
