@@ -633,15 +633,7 @@ namespace OpenBve
 					{
 						int w = t.Width;
 						int h = t.Height;
-						if (currentOptions.IsUseNewRenderer)
-						{
-							Rectangle.DrawWithShader(t, new PointF(Screen.Width - w - 8, y), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
-						}
-						else
-						{
-							GL.Color4(1.0, 1.0, 1.0, 1.0);
-							Rectangle.Draw(t, new Point(Screen.Width - w - 8, y), new Size(w, h));
-						}
+						Rectangle.Draw(t, new PointF(Screen.Width - w - 8, y), new SizeF(w, h), new Color128(1.0f, 1.0f, 1.0f, 1.0f));
 						y += h + 8;
 					}
 				}
