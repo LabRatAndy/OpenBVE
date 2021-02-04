@@ -77,6 +77,7 @@ namespace LibRender2
 		private ErrorCode lastError;
 
 		public Shader DefaultShader;
+		public Shader TextShader;
 
 		/// <summary>Whether fog is enabled in the debug options</summary>
 		public bool OptionFog = true;
@@ -176,10 +177,13 @@ namespace LibRender2
 				DefaultShader = new Shader("default", "default", true);
 				DefaultShader.Activate();
 				DefaultShader.Deactivate();
+				TextShader = new Shader("text", "text", true);
+				TextShader.Activate();
+				TextShader.Deactivate();
 			}
 			catch
 			{
-				CurrentHost.AddMessage(MessageType.Error, false, "Initialising the default shaders failed- Falling back to legacy openGL.");
+				CurrentHost.AddMessage(MessageType.Error, false, "Initialising the default or text shaders failed- Falling back to legacy openGL.");
 				CurrentOptions.IsUseNewRenderer = false;
 			}
 
