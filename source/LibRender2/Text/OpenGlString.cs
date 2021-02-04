@@ -183,15 +183,33 @@ namespace LibRender2.Texts
 		/// <remarks>This function sets the OpenGL blend function to glBlendFunc(Gl.GL_SRC_ALPHA, Gl.GL_ONE_MINUS_SRC_ALPHA).</remarks>
 		public void Draw(OpenGlFont font, string text, Point location, TextAlignment alignment, Color128 color, bool shadow)
 		{
-			if (shadow)
+			if (renderer.currentOptions.IsUseNewRenderer)
 			{
-				Draw(font, text, new Point(location.X - 1, location.Y + 1), alignment, new Color128(0.0f, 0.0f, 0.0f, 0.5f * color.A));
-				Draw(font, text, location, alignment, color);
+				if (shadow)
+				{
+					DrawWithShader(font, text, new Point(location.X - 1, location.Y + 1), alignment, new Color128(0.0f, 0.0f, 0.0f, 0.5f * color.A));
+					DrawWithShader(font, text, location, alignment, color);
+				}
+				else
+				{
+					DrawWithShader(font, text, location, alignment, color);
+				}
 			}
 			else
 			{
-				Draw(font, text, location, alignment, color);
+				if (shadow)
+				{
+					Draw(font, text, new Point(location.X - 1, location.Y + 1), alignment, new Color128(0.0f, 0.0f, 0.0f, 0.5f * color.A));
+					Draw(font, text, location, alignment, color);
+				}
+				else
+				{
+					Draw(font, text, location, alignment, color);
+				}
 			}
+		}
+		private void DrawWithShader(OpenGlFont font, string text, Point location, TextAlignment alignment, Color128 colour)
+		{
 		}
 	}
 }
