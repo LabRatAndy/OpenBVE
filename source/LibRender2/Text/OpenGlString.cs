@@ -9,6 +9,8 @@ namespace LibRender2.Texts
 	public class OpenGlString
 	{
 		private readonly BaseRenderer renderer;
+		private int VAO = 0;
+		private int VBO = 0;
 
 		internal OpenGlString(BaseRenderer renderer)
 		{
@@ -210,6 +212,74 @@ namespace LibRender2.Texts
 		}
 		private void DrawWithShader(OpenGlFont font, string text, Point location, TextAlignment alignment, Color128 colour)
 		{
+			if (font == null || text == null)
+			{
+				return;
+			}
+			renderer.LastBoundTexture = null;
+			//get top and left coords for drawing as per draw method above
+			int left;
+			if ((alignment & TextAlignment.Left) == 0)
+			{
+				int width = 0;
+				for (int i = 0; i < text.Length; i++)
+				{
+					Texture texture;
+					OpenGlFontChar data;
+					i += font.GetCharacterData(text, i, out texture, out data) - 1;
+					width += data.TypographicSize.Width;
+				}
+				if ((alignment & TextAlignment.Right) != 0)
+				{
+					left = location.X - width;
+				}
+				else
+				{
+					left = location.X - width / 2;
+				}
+			}
+			else
+			{
+				left = location.X;
+			}
+			int top;
+			if ((alignment & TextAlignment.Top) == 0)
+			{
+				int height = 0;
+				for (int i = 0; i < text.Length; i++)
+				{
+					Texture texture;
+					OpenGlFontChar data;
+					i += font.GetCharacterData(text, i, out texture, out data) - 1;
+					if (height < data.TypographicSize.Height)
+					{
+						height = data.TypographicSize.Height;
+					}
+				}
+				if ((alignment & TextAlignment.Bottom) != 0)
+				{
+					top = location.Y - height;
+				}
+				else
+				{
+					top = location.Y - height / 2;
+				}
+			}
+			else
+			{
+				top = location.Y;
+			}
+			//render text using learningopengl.com method
+			//create vao if needed 
+			if (VAO == 0)
+			{
+				GL.GenVertexArrays(1, out VAO);
+				GL.BindVertexArray(VAO);
+				GL.GenBuffers(1, out VBO);
+				GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+				GL.BindVertexArray(0);
+			}
 		}
+
 	}
 }
