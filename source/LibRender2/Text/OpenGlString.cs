@@ -7,7 +7,7 @@ using OpenTK.Graphics.OpenGL;
 
 namespace LibRender2.Texts
 {
-	public class OpenGlString
+	public class OpenGlString : IDisposable
 	{
 		private readonly BaseRenderer renderer;
 		private int VAO = 0;
@@ -326,6 +326,17 @@ namespace LibRender2.Texts
 			GL.Disable(EnableCap.Texture2D);
 			renderer.TextShader.Deactivate();
 			renderer.RestoreBlendFunc();
+		}
+		public void Dispose()
+		{
+			if (VBO != 0) GL.DeleteBuffer(VBO);
+			if (VAO != 0) GL.DeleteVertexArray(VAO);
+			GC.SuppressFinalize(this);
+		}
+		~OpenGlString()
+		{
+			if (VBO != 0) GL.DeleteBuffer(VBO);
+			if (VAO != 0) GL.DeleteVertexArray(VAO);
 		}
 
 	}
