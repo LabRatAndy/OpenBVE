@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System;
 using OpenBveApi.Colors;
 using OpenBveApi.Graphics;
 using OpenBveApi.Textures;
@@ -270,15 +271,61 @@ namespace LibRender2.Texts
 				top = location.Y;
 			}
 			//render text using learningopengl.com method
-			//create vao if needed 
+			//create vao if needed
+			float[] vertices;
 			if (VAO == 0)
 			{
+				if (VBO != 0) GL.DeleteBuffers(1, ref VBO);
 				GL.GenVertexArrays(1, out VAO);
 				GL.BindVertexArray(VAO);
 				GL.GenBuffers(1, out VBO);
 				GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+				// setup the memory needed to draw the letters and make sure it is setup to be dynamic draw as will be changed  for every letter.
+				GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (6 * 4), (IntPtr)null, BufferUsageHint.DynamicDraw);
+				GL.EnableVertexAttribArray(0);
+				GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, sizeof(float) * 4, 0);
 				GL.BindVertexArray(0);
 			}
+			//activate the text shader and set up the blending functions and pass the colour , projection uniforms to the shader
+			renderer.TextShader.Activate();
+			GL.Enable(EnableCap.Blend);
+			GL.Enable(EnableCap.Texture2D);
+			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+			//todo uniform and orthographic projection transform
+
+			//iterate the string and renderer the text
+			GL.BindVertexArray(VAO);
+			for (int n = 0; n < text.Length; n++)
+			{
+				Texture texture;
+				OpenGlFontChar data;
+				n += font.GetCharacterData(text, n, out texture, out data) - 1;
+				if (renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
+				{
+					GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+					float x = (float)left - (data.PhysicalSize.Width - data.TypographicSize.Width) / 2;
+					float y = (float)top - (data.PhysicalSize.Height - data.TypographicSize.Height) / 2;
+					vertices = new float[]
+					{
+						//triangle 1
+						x,y,data.TextureCoordinates.Left,data.TextureCoordinates.Top, // vertex 1
+						x+data.PhysicalSize.Width,y,data.TextureCoordinates.Right,data.TextureCoordinates.Top,	//vertex 2
+						x+data.PhysicalSize.Width,y+data.PhysicalSize.Height,data.TextureCoordinates.Right,data.TextureCoordinates.Bottom, // vertex 3
+						//triangle 2
+						x+data.PhysicalSize.Width,y,data.TextureCoordinates.Right,data.TextureCoordinates.Top, //vertex 2
+						x+data.PhysicalSize.Width,y+data.PhysicalSize.Height,data.TextureCoordinates.Right,data.TextureCoordinates.Bottom, //vertex 3
+						x,y+data.PhysicalSize.Height,data.TextureCoordinates.Left,data.TextureCoordinates.Bottom
+					};
+					//send the vertex data to the vbo
+					GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, sizeof(float) * 24, vertices);
+					GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+				}
+				left += data.TypographicSize.Width;
+			}
+			GL.BindVertexArray(0);
+			GL.Disable(EnableCap.Texture2D);
+			renderer.TextShader.Deactivate();
+			renderer.RestoreBlendFunc();
 		}
 
 	}
