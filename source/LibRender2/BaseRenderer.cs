@@ -223,6 +223,8 @@ namespace LibRender2
 			{
 				shader.Dispose();
 			}
+			// make sure VAO /VBO used to render text is cleaned up correctly
+			OpenGlString.Dispose();
 		}
 
 		/// <summary>
