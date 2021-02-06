@@ -147,5 +147,20 @@
 		/// The handle of "uObjectIndex" within the shader
 		/// </summary>
 		public short ObjectIndex = -1;
+
+		/// <summary>
+		/// The handle of "uTextProjectionMatrix" within the shader
+		/// </summary>
+		public short TextProjectionMatrix = -1;
+
+		/// <summary>
+		/// The handle of uFontTexture" within the shader
+		/// </summary>
+		public short FontTexture = -1;
+
+		/// <summary>
+		/// The handle of "uTextColour within the shader
+		/// </summary>
+		public short TextColour = -1;
 	}
 }
