@@ -291,9 +291,10 @@ namespace LibRender2.Texts
 			GL.Enable(EnableCap.Blend);
 			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-			//todo uniform and orthographic projection transform
 			OpenTK.Matrix4 orthographicprojection;
 			OpenTK.Matrix4.CreateOrthographic(renderer.Screen.Width, renderer.Screen.Height, 0.001f, 600.0f, out orthographicprojection);
+			renderer.TextShader.SetTextProjectionMatrix(orthographicprojection);
+			renderer.TextShader.SetTextColour(colour);
 
 			//iterate the string and renderer the text
 			GL.BindVertexArray(VAO);
@@ -305,6 +306,7 @@ namespace LibRender2.Texts
 				if (renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
 				{
 					GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+					renderer.TextShader.SetFontTexture(texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
 					float x = (float)left - (data.PhysicalSize.Width - data.TypographicSize.Width) / 2;
 					float y = (float)top - (data.PhysicalSize.Height - data.TypographicSize.Height) / 2;
 					vertices = new float[]
