@@ -292,6 +292,8 @@ namespace LibRender2.Texts
 			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 			//todo uniform and orthographic projection transform
+			OpenTK.Matrix4 orthographicprojection;
+			OpenTK.Matrix4.CreateOrthographic(renderer.Screen.Width, renderer.Screen.Height, 0.001f, 600.0f, out orthographicprojection);
 
 			//iterate the string and renderer the text
 			GL.BindVertexArray(VAO);
