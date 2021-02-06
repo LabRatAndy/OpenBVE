@@ -172,7 +172,10 @@ namespace LibRender2.Shaders
 				Texture = (short)GL.GetUniformLocation(handle, "uTexture"),
 				Brightness = (short)GL.GetUniformLocation(handle, "uBrightness"),
 				Opacity = (short)GL.GetUniformLocation(handle, "uOpacity"),
-				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex")
+				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex"),
+				TextProjectionMatrix = (short)GL.GetUniformLocation(handle, "uTextProjectionMatrix"),
+				FontTexture = (short)GL.GetUniformLocation(handle, "uFontTexture"),
+				TextColour = (short)GL.GetUniformLocation(handle, "uTextColour")
 			};
 		}
 
@@ -339,6 +342,20 @@ namespace LibRender2.Shaders
 		public void SetObjectIndex(int ObjectIndex)
 		{
 			GL.Uniform1(UniformLayout.ObjectIndex, ObjectIndex);
+		}
+
+		public void SetTextProjectionMatrix(OpenTK.Matrix4 matrix)
+		{
+			GL.UniformMatrix4(UniformLayout.TextProjectionMatrix, false, ref matrix);
+		}
+		public void SetFontTexture(int texturehandle)
+		{
+			GL.Uniform1(UniformLayout.FontTexture, texturehandle);
+		}
+		public void SetTextColour(Color128 fontColour)
+		{
+			OpenTK.Vector4 colour = new OpenTK.Vector4(fontColour.R, fontColour.G, fontColour.B,fontColour.A);
+			GL.Uniform4(handle, colour);
 		}
 
 		#endregion
