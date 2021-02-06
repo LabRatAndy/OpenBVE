@@ -306,7 +306,8 @@ namespace LibRender2.Texts
 				if (renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
 				{
 					GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
-					renderer.TextShader.SetFontTexture(texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+					GL.ActiveTexture(TextureUnit.Texture0);
+					renderer.TextShader.SetFontTexture(0);
 					float x = (float)left - (data.PhysicalSize.Width - data.TypographicSize.Width) / 2;
 					float y = (float)top - (data.PhysicalSize.Height - data.TypographicSize.Height) / 2;
 					vertices = new float[]
