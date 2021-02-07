@@ -355,7 +355,7 @@ namespace LibRender2.Shaders
 		public void SetTextColour(Color128 fontColour)
 		{
 			OpenTK.Vector4 colour = new OpenTK.Vector4(fontColour.R, fontColour.G, fontColour.B,fontColour.A);
-			GL.Uniform4(handle, colour);
+			GL.Uniform4(UniformLayout.TextColour, colour);
 		}
 
 		#endregion
