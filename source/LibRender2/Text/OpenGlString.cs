@@ -281,9 +281,10 @@ namespace LibRender2.Texts
 				GL.GenBuffers(1, out VBO);
 				GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
 				// setup the memory needed to draw the letters and make sure it is setup to be dynamic draw as will be changed  for every letter.
-				GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * (6 * 4), (IntPtr)null, BufferUsageHint.DynamicDraw);
+				GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 24, (IntPtr)null, BufferUsageHint.DynamicDraw);
 				GL.EnableVertexAttribArray(0);
 				GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, sizeof(float) * 4, 0);
+				GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 				GL.BindVertexArray(0);
 			}
 			//activate the text shader and set up the blending functions and pass the colour , projection uniforms to the shader
@@ -291,11 +292,11 @@ namespace LibRender2.Texts
 			GL.Enable(EnableCap.Blend);
 			GL.Enable(EnableCap.Texture2D);
 			GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+			GL.BlendEquation(BlendEquationMode.FuncAdd);
 			OpenTK.Matrix4 orthographicprojection;
 			OpenTK.Matrix4.CreateOrthographic(renderer.Screen.Width, renderer.Screen.Height, 0.001f, 600.0f, out orthographicprojection);
 			renderer.TextShader.SetTextProjectionMatrix(orthographicprojection);
 			renderer.TextShader.SetTextColour(colour);
-
 			//iterate the string and renderer the text
 			GL.BindVertexArray(VAO);
 			for (int n = 0; n < text.Length; n++)
@@ -322,6 +323,7 @@ namespace LibRender2.Texts
 						x,y+data.PhysicalSize.Height,data.TextureCoordinates.Left,data.TextureCoordinates.Bottom
 					};
 					//send the vertex data to the vbo
+					GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
 					GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, sizeof(float) * 24, vertices);
 					GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 				}
@@ -330,7 +332,6 @@ namespace LibRender2.Texts
 			GL.BindVertexArray(0);
 			GL.Disable(EnableCap.Texture2D);
 			renderer.TextShader.Deactivate();
-			renderer.RestoreBlendFunc();
 		}
 		public void Dispose()
 		{
