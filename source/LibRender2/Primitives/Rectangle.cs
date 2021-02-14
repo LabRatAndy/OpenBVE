@@ -120,8 +120,9 @@ namespace LibRender2.Primitives
 		}
 		private void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
 		{
-			//todo rectangle shader needes creating and setting up here pass view and projection matricies.
-
+			renderer.RectangleShader.Activate();
+			renderer.RectangleShader.SetRectangleViewMatrix(renderer.CurrentViewMatrix);
+			renderer.RectangleShader.SetRectangleProjectionMatrix(renderer.CurrentProjectionMatrix);
 			float[] vertexdata;
 			//set up vao and VBO if needed
 			if (VAO == -1)
@@ -155,14 +156,15 @@ namespace LibRender2.Primitives
 			if (texture == null || !renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
 			{
 				GL.Disable(EnableCap.Texture2D);
-				//todo disable texturing in shader
+				renderer.RectangleShader.SetRectangleHasTexture(false);
 				if (colour.HasValue)
 				{
-					//todo enable and pass colour accross to shader
+					renderer.RectangleShader.SetRectangleHasColour(true);
+					renderer.RectangleShader.SetRectangleColour((Color128)colour);
 				}
 				else
 				{
-					//todo disable colour in shader
+					renderer.RectangleShader.SetRectangleHasColour(false);
 				}
 			}
 			else
@@ -170,21 +172,23 @@ namespace LibRender2.Primitives
 				GL.Enable(EnableCap.Texture2D);
 				GL.ActiveTexture(TextureUnit.Texture0);
 				GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
-				//todo enable and pass texturing in shader
+				renderer.RectangleShader.SetRectangleHasTexture(true);
+				renderer.RectangleShader.SetRectangleTexture(0);
 				if (colour.HasValue)
 				{
-					//todo enable and pass colour to shader
+					renderer.RectangleShader.SetRectangleHasColour(true);
+					renderer.RectangleShader.SetRectangleColour((Color128)colour);
 				}
 				else
 				{
-					//todo disable colouring in shader
+					renderer.RectangleShader.SetRectangleHasColour(false);
 				}
 			}
 			//draw the rectangle
 			GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 			GL.Disable(EnableCap.Texture2D);
 			GL.BindVertexArray(0);
-			//todo deactivate shader
+			renderer.RectangleShader.Deactivate();
 		}
 	}
 }
