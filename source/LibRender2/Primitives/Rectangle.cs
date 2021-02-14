@@ -2,12 +2,15 @@
 using OpenBveApi.Colors;
 using OpenBveApi.Textures;
 using OpenTK.Graphics.OpenGL;
+using System;
 
 namespace LibRender2.Primitives
 {
 	public class Rectangle
 	{
 		private readonly BaseRenderer renderer;
+		private int VAO = -1;
+		private int VBO = -1;
 
 		internal Rectangle(BaseRenderer renderer)
 		{
@@ -40,7 +43,7 @@ namespace LibRender2.Primitives
 		/// <param name="point">The top-left coordinates in pixels.</param>
 		/// <param name="size">The size in pixels.</param>
 		/// <param name="color">The color, or a null reference.</param>
-		public void Draw(Texture texture, PointF point, SizeF size, Color128? color = null)
+		private void DrawImmediate(Texture texture, PointF point, SizeF size, Color128? color = null)
 		{
 			renderer.LastBoundTexture = null;
 			// TODO: Remove Nullable<T> from color once RenderOverlayTexture and RenderOverlaySolid are fully replaced.
@@ -103,6 +106,85 @@ namespace LibRender2.Primitives
 
 			GL.MatrixMode(MatrixMode.Projection);
 			GL.PopMatrix();
+		}
+		public void Draw(Texture texture, PointF point, SizeF size, Color128? color = null)
+		{
+			if (renderer.currentOptions.IsUseNewRenderer)
+			{
+				DrawWithShader(texture, point, size, color);
+			}
+			else
+			{
+				DrawImmediate(texture, point, size, color);
+			}
+		}
+		private void DrawWithShader(Texture texture, PointF point, SizeF size, Color128? colour = null)
+		{
+			//todo rectangle shader needes creating and setting up here pass view and projection matricies.
+
+			float[] vertexdata;
+			//set up vao and VBO if needed
+			if (VAO == -1)
+			{
+				if (VBO != -1) GL.DeleteBuffer(VBO);
+				GL.GenVertexArrays(1, out VAO);
+				GL.BindVertexArray(VAO);
+				GL.GenBuffers(1, out VBO);
+				GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+				GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * 24, (IntPtr)null, BufferUsageHint.DynamicDraw);
+				GL.EnableVertexAttribArray(0);
+				GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, false, sizeof(float) * 24, 0);
+				GL.BindVertexArray(0);
+			}
+			// setup the vertexdata
+			vertexdata = new float[]
+			{
+				// triangle 1
+				point.X,point.Y,0.0f,0.0f,
+				point.X+size.Width,point.Y,1.0f,0.0f,
+				point.X+size.Width,point.Y+size.Height,1.0f,1.0f,
+				//triangle 2
+				point.X+size.Width,point.Y+size.Height,1.0f,1.0f,
+				point.X,point.Y+size.Height,0.0f,1.0f,
+				point.X,point.Y,0.0f,0.0f
+			};
+			GL.BindVertexArray(VAO);
+			GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+			GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)0, sizeof(float) * 24, vertexdata);
+			// pass colours, texture, projection matrix etc to shader
+			if (texture == null || !renderer.currentHost.LoadTexture(texture, OpenGlTextureWrapMode.ClampClamp))
+			{
+				GL.Disable(EnableCap.Texture2D);
+				//todo disable texturing in shader
+				if (colour.HasValue)
+				{
+					//todo enable and pass colour accross to shader
+				}
+				else
+				{
+					//todo disable colour in shader
+				}
+			}
+			else
+			{
+				GL.Enable(EnableCap.Texture2D);
+				GL.ActiveTexture(TextureUnit.Texture0);
+				GL.BindTexture(TextureTarget.Texture2D, texture.OpenGlTextures[(int)OpenGlTextureWrapMode.ClampClamp].Name);
+				//todo enable and pass texturing in shader
+				if (colour.HasValue)
+				{
+					//todo enable and pass colour to shader
+				}
+				else
+				{
+					//todo disable colouring in shader
+				}
+			}
+			//draw the rectangle
+			GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
+			GL.Disable(EnableCap.Texture2D);
+			GL.BindVertexArray(0);
+			//todo deactivate shader
 		}
 	}
 }
