@@ -162,5 +162,35 @@
 		/// The handle of "uTextColour within the shader
 		/// </summary>
 		public short TextColour = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleViewMatrix" within the shader
+		/// </summary>
+		public short RectangleViewMatrix = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleProjectionMatrix" within the shader
+		/// </summary>
+		public short RectangleProjectionMatrix = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleHasColour" within the shader
+		/// </summary>
+		public short RectangleHasColour = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleColour" within the shader
+		/// </summary>
+		public short RectangleColour = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleHasTexture" within the shader
+		/// </summary>
+		public short RectangleHasTexture = -1;
+
+		/// <summary>
+		/// The handle of "uRectangleTexture" within the shader
+		/// </summary>
+		public short RectangleTexture = -1;
 	}
 }

@@ -175,7 +175,13 @@ namespace LibRender2.Shaders
 				ObjectIndex = (short)GL.GetUniformLocation(handle, "uObjectIndex"),
 				TextProjectionMatrix = (short)GL.GetUniformLocation(handle, "uTextProjectionMatrix"),
 				FontTexture = (short)GL.GetUniformLocation(handle, "uFontTexture"),
-				TextColour = (short)GL.GetUniformLocation(handle, "uTextColour")
+				TextColour = (short)GL.GetUniformLocation(handle, "uTextColour"),
+				RectangleColour = (short)GL.GetUniformLocation(handle, "uRectangleColour"),
+				RectangleHasColour = (short)GL.GetUniformLocation(handle, "uRectangleHasColour"),
+				RectangleHasTexture = (short)GL.GetUniformLocation(handle, "uRectangleHasTexture"),
+				RectangleProjectionMatrix = (short)GL.GetUniformLocation(handle, "uRectangleProjectionMatrix"),
+				RectangleTexture = (short)GL.GetUniformLocation(handle, "uRectangleTexture"),
+				RectangleViewMatrix = (short)GL.GetUniformLocation(handle, "uRectangleViewMatrix")
 			};
 		}
 
@@ -357,7 +363,37 @@ namespace LibRender2.Shaders
 			OpenTK.Vector4 colour = new OpenTK.Vector4(fontColour.R, fontColour.G, fontColour.B,fontColour.A);
 			GL.Uniform4(UniformLayout.TextColour, colour);
 		}
+		public void SetRectangleColour(Color128 rectangleColour)
+		{
+			GL.Uniform4(UniformLayout.RectangleColour, rectangleColour.R, rectangleColour.G, rectangleColour.B, rectangleColour.A);
+		}
 
+		public void SetRectangleHasColour(bool enable)
+		{
+			GL.Uniform1(UniformLayout.RectangleHasColour, enable ? 1 : 0);
+		}
+
+		public void SetRectangleTexture(int textureuint)
+		{
+			GL.Uniform1(UniformLayout.RectangleTexture, textureuint);
+		}
+
+		public void SetRectangleHasTexture(bool enable)
+		{
+			GL.Uniform1(UniformLayout.RectangleHasTexture, enable ? 1 : 0);
+		}
+
+		public void SetRectangleViewMatrix(Matrix4D view)
+		{
+			Matrix4 matrix = ConvertToMatrix4(view);
+			GL.UniformMatrix4(UniformLayout.RectangleViewMatrix, false, ref matrix);
+		}
+
+		public void SetRectangleProjectionMatrix(Matrix4D projection)
+		{
+			Matrix4 matrix = ConvertToMatrix4(projection);
+			GL.UniformMatrix4(UniformLayout.RectangleProjectionMatrix, false, ref matrix);
+		}
 		#endregion
 	}
 }
