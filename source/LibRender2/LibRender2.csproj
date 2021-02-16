@@ -86,6 +86,8 @@
     <EmbeddedResource Include="..\..\assets\Shaders\picking.frag" />
 	<EmbeddedResource Include="..\..\assets\Shaders\text.vert" />
 	<EmbeddedResource Include="..\..\assets\Shaders\text.frag" />
+	<EmbeddedResource Include="..\..\assets\Shaders\rectangle.vert" />
+	<EmbeddedResource Include="..\..\assets\Shaders\rectangle.frag" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OpenBveApi\OpenBveApi.csproj">
